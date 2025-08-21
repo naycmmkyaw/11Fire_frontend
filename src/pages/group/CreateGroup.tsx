@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import {
   Box,
-  Button,
   Typography,
   Avatar,
   TextField,
   useTheme,
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
+import { PrimaryButton, SecondaryButton } from "../../components";
 import logo from "../../assets/logo.png";
 // import { createSwarm } from '../api/swarm';
 
@@ -181,42 +181,18 @@ const CreateGroup = () => {
               mt: 2,
             }}
           >
-            <Button
+            <PrimaryButton
               onClick={() => navigate("/role")}
-              sx={{
-                width: "200px", // exact width
-                height: "44px",
-                bgcolor: theme.palette.primary.main,
-                color: "white",
-                borderRadius: 2,
-                textTransform: "none",
-                fontSize: "1rem",
-                fontWeight: 500,
-                mb: 2, // vertical spacing
-                "&:hover": { opacity: 0.9 },
-              }}
+              sx={{ mb: 2 }}
             >
               Create
-            </Button>
+            </PrimaryButton>
 
-            <Button
-              variant="outlined"
+            <SecondaryButton
               onClick={() => navigate("/group")}
-              sx={{
-                width: "200px", // exact width
-                height: "44px",
-                borderRadius: 2,
-                color: theme.palette.text.primary,
-                textTransform: "none",
-                fontSize: "1rem",
-                fontWeight: 500,
-                bgcolor: theme.palette.primary.light,
-                border: "none",
-                "&:hover": { bgcolor: "#f4b8b2" },
-              }}
             >
               Cancel
-            </Button>
+            </SecondaryButton>
           </Box>
         </Box>
       </Box>

@@ -1,6 +1,7 @@
 import React from "react";
-import { Box, Button, Typography, Avatar, useTheme } from "@mui/material";
+import { Box, Typography, Avatar, useTheme } from "@mui/material";
 import { useNavigate } from "react-router-dom";
+import { PrimaryButton } from "../../components";
 import logo from "../../assets/logo.png";
 // import { selectRole } from "../api/swarm";
 
@@ -8,19 +9,7 @@ const RoleOption = () => {
   const theme = useTheme();
   const navigate = useNavigate();
 
-  const buttonStyle = {
-    bgcolor: theme.palette.primary.main,
-    color: "white",
-    borderRadius: 2,
-    textTransform: "none",
-    fontSize: "1rem",
-    fontWeight: 500,
-    width: "200px",
-    height: "44px",
-    "&:hover": {
-      opacity: 0.9,
-    },
-  };
+
 
   return (
     <Box
@@ -89,9 +78,8 @@ const RoleOption = () => {
             </Box>
           </Typography>
 
-          <Button
-            variant="contained"
-            sx={{ ...buttonStyle, mb: 2 }}
+          <PrimaryButton
+            sx={{ mb: 2 }}
             onClick={async () => {
               try {
                 // const swarmId = localStorage.getItem("swarmId");
@@ -104,11 +92,9 @@ const RoleOption = () => {
             }}
           >
             Use Storage
-          </Button>
+          </PrimaryButton>
 
-          <Button
-            variant="contained"
-            sx={buttonStyle}
+          <PrimaryButton
             onClick={async () => {
               try {
                 // const swarmId = localStorage.getItem("swarmId");
@@ -121,7 +107,7 @@ const RoleOption = () => {
             }}
           >
             Provide Storage
-          </Button>
+          </PrimaryButton>
         </Box>
       </Box>
     </Box>
