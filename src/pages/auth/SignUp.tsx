@@ -2,17 +2,15 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
   Box,
-  Card,
-  CardContent,
   Typography,
   Button,
   Container,
   Stack,
-  Divider,
   CircularProgress,
   useTheme,
 } from '@mui/material';
 import { useAuth } from '../../context/AuthContext';
+import Logo from '../../assets/logo.png';
 
 const SignUp: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -45,118 +43,134 @@ const SignUp: React.FC = () => {
     }
   };
 
+  
   return (
     <Box
       sx={{
         minHeight: '100vh',
-        display: 'flex',
+        display: 'grid',
+        gridTemplateRows: 'auto 1fr auto',
         alignItems: 'center',
-        justifyContent: 'center',
         bgcolor: theme.palette.secondary.main,
+        px: 2,
       }}
     >
-      <Container maxWidth="sm">
-        <Card
-          sx={{
-            maxWidth: 400,
-            mx: 'auto',
-            p: 3,
-          }}
-        >
-          <CardContent>
-            {/* 11Fire Logo */}
-            <Stack alignItems="center" spacing={2} mb={4}>
-              <Box
-                sx={{
-                  fontSize: '3rem',
-                  lineHeight: 1,
-                }}
-              >
-                🔥
-              </Box>
-              <Typography
-                variant="h1"
-                sx={{
-                  fontSize: '2rem',
-                  fontWeight: 700,
-                  color: 'text.primary',
-                  letterSpacing: '-0.5px',
-                }}
-              >
-                11Fire
-              </Typography>
-            </Stack>
+       <Box component="header" sx={{ py: { xs: 3, sm: 5 } }}>
+        <Stack alignItems="center">
+            <Box
+            component="img"
+            src={Logo}
+            alt="11Fire logo"
+            sx={{
+                width: { xs: 72, sm: 80 }, 
+                height: { xs: 72, sm: 80 },
+                objectFit: "contain",
+            }}
+            />
+            <Typography
+            variant="h4"
+            sx={{
+                fontWeight: 700,
+                fontSize: { xs: "1.5rem", sm: "1.75rem" },
+            }}
+            >
+            11Fire
+            </Typography>
+        </Stack>
+        </Box>
 
-            {/* Sign Up Content */}
-            <Stack spacing={3}>
-              <Stack spacing={1} textAlign="center">
-                <Typography variant="h2" sx={{ fontSize: '1.5rem' }}>
-                  Create an Account
+        {/* Main content in the middle */}
+        <Box
+        component="main"
+        sx={{
+            // flex: 1,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+        }}
+        >
+        <Container maxWidth="xs" disableGutters>
+            <Stack spacing={4} alignItems="center" textAlign="center">
+            {/* Page heading + helper text */}
+            <Stack spacing={1}>
+                <Typography
+                variant="h5"
+                sx={{ fontWeight: 700, fontSize: { xs: "1.25rem", sm: "1.5rem" } }}
+                >
+                Create an Account
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                  Welcome! Sign up with your Microsoft Account.
+                 Welcome! Sign up with your Microsoft Account.
                 </Typography>
-              </Stack>
+            </Stack>
 
-              <Button
+            {/* Microsoft SSO button - centered */}
+            <Box sx={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
+                <Button
                 variant="contained"
-                size="large"
-                fullWidth
+                disableElevation
                 onClick={handleMicrosoftSignUp}
                 disabled={isLoading}
                 startIcon={
-                  isLoading ? (
+                    isLoading ? (
                     <CircularProgress size={20} color="inherit" />
-                  ) : (
+                    ) : (
+                    // White square with the Microsoft 4-tile logo (matches the mock)
                     <Box
-                      sx={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        bgcolor: 'white',
+                        sx={{
+                        display: "grid",
+                        placeItems: "center",
+                        bgcolor: "#EB6464",
                         borderRadius: 1,
-                        p: 0.5,
                         width: 32,
                         height: 32,
-                      }}
+                        }}
                     >
-                      <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                        <rect x="1" y="1" width="8" height="8" fill="#F25022"/>
-                        <rect x="11" y="1" width="8" height="8" fill="#7FBA00"/>
-                        <rect x="1" y="11" width="8" height="8" fill="#00A4EF"/>
-                        <rect x="11" y="11" width="8" height="8" fill="#FFB900"/>
-                      </svg>
+                        <svg width="18" height="18" viewBox="0 0 20 20" aria-hidden="true">
+                        <rect x="1" y="1" width="8" height="8" fill="#FFFFFF" />
+                        <rect x="11" y="1" width="8" height="8" fill="#FFFFFF" />
+                        <rect x="1" y="11" width="8" height="8" fill="#FFFFFF" />
+                        <rect x="11" y="11" width="8" height="8" fill="#FFFFFF" />
+                        </svg>
                     </Box>
-                  )
+                    )
                 }
                 sx={{
-                  py: 1.5,
-                  fontSize: '1rem',
-                  fontWeight: 600,
+                    bgcolor: theme.palette.primary.main,
+                    "&:hover": { bgcolor: theme.palette.primary.dark || theme.palette.primary.main },
+                    color: "common.white",
+                    textTransform: "none", // sentence case like the design
+                    fontWeight: 600,
+                    fontSize: "1rem",
+                    py: 1.5,
+                    px: 4,
+                    borderRadius: 1.5,
+                    minWidth: 280,
                 }}
-              >
-                {isLoading ? 'Creating account...' : 'Signup with Microsoft'}
-              </Button>
-
-              <Divider sx={{ my: 2 }} />
-
-              <Typography variant="body2" textAlign="center" color="text.secondary">
-                Already have an account?{' '}
-                <Link 
-                  to="/auth/signin"
-                  style={{
-                    color: '#EB6464',
-                    textDecoration: 'none',
-                    fontWeight: 500,
-                  }}
                 >
-                  Sign in
-                </Link>
-              </Typography>
+                {isLoading ? "Creating account..." : "Signup with Microsoft"}
+                </Button>
+            </Box>
             </Stack>
-          </CardContent>
-        </Card>
-      </Container>
+        </Container>
+        </Box>
+
+        {/* Footer at the bottom */}
+        <Box component="footer" sx={{ py: { xs: 4, sm: 6 }, textAlign: "center" }}>
+        <Typography variant="body2" color="text.secondary">
+            Don't have an account?{" "}
+            <Link
+            to="/auth/signup"
+            style={{
+                color: theme.palette.primary.main,
+                textDecoration: "none",
+                fontWeight: 500,
+            }}
+            >
+            Create one
+            </Link>
+        </Typography>
+        </Box>
     </Box>
   );
 };
