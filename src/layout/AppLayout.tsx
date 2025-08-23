@@ -46,7 +46,7 @@ const AppLayout = () => {
     selectedTab === tab ? "#EF4444" : "#FFFFFF";
 
   return (
-    <Box sx={{ display: "flex", height: "100vh" }}>
+    <Box sx={{ display: "flex", minHeight: "100vh" }}>
       {/* Sidebar */}
       <Box
         sx={{
@@ -56,6 +56,10 @@ const AppLayout = () => {
           flexDirection: "column",
           alignItems: "center",
           pt: 4,
+          position: "sticky",
+          top: 0,
+          height: "100vh",
+          overflowY: "auto"
         }}
       >
         <Box
@@ -168,7 +172,13 @@ const AppLayout = () => {
       </Box>
 
       {/* Main Content */}
-      <Box sx={{ flexGrow: 1, bgcolor: "#FFF7ED", p: 4 }}>
+      <Box sx={{ 
+        flexGrow: 1, 
+        bgcolor: "#FFF7ED", 
+        p: 4,
+        overflowY: "auto",
+        minHeight: "100vh"
+      }}>
         {renderTabContent(selectedTab)}
       </Box>
     </Box>
