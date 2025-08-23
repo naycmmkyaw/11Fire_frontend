@@ -21,6 +21,7 @@ const Router = () => (
     <Route path="/role" element={<RoleOption />} />
 
     <Route path="/files" element={<AppLayout />} />
+    <Route path="/provider-dashboard" element={<AppLayout />} />
   </Routes>
 );
 

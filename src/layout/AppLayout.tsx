@@ -1,49 +1,174 @@
-import React, { useState } from 'react';
-import { Box, Typography, List, ListItemButton, ListItemIcon, ListItemText } from '@mui/material';
-import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
-import AccountCircleOutlinedIcon from '@mui/icons-material/AccountCircleOutlined';
-import Logo from '../assets/logo2.png';
-import renderTabContent from './RenderTab';
+import React, { useState, useEffect } from "react";
+import {
+  Box,
+  Typography,
+  List,
+  ListItemButton,
+  ListItemIcon,
+  ListItemText,
+} from "@mui/material";
+import InsertDriveFileIcon from "@mui/icons-material/InsertDriveFile";
+import AccountCircleOutlinedIcon from "@mui/icons-material/AccountCircleOutlined";
+import DownloadIcon from "@mui/icons-material/Download";
+import { Icon } from "@iconify/react";
+import Logo from "../assets/logo2.png";
+import renderTabContent from "./RenderTab";
 
 const AppLayout = () => {
-  const [selectedTab, setSelectedTab] = useState('files');
+  const [selectedTab, setSelectedTab] = useState("files");
+  const [isProviderDashboard, setIsProviderDashboard] = useState(false);
+
+  // Check if current route is provider dashboard
+  useEffect(() => {
+    const currentPath = window.location.pathname;
+    setIsProviderDashboard(currentPath === "/provider-dashboard");
+
+    // Set default tab based on route
+    if (currentPath === "/provider-dashboard") {
+      setSelectedTab("install"); // Default to install tab for provider dashboard
+    } else {
+      setSelectedTab("files"); // Default to files tab for other routes
+    }
+  }, []);
 
   const getTabStyles = (tab: string) => ({
-    bgcolor: selectedTab === tab ? '#FFF7ED' : '#EF4444',
+    bgcolor: selectedTab === tab ? "#FFF7ED" : "#EF4444",
     pl: 4,
-    '&:hover': {
-      bgcolor: selectedTab === tab ? '#FFF7ED' : '#e53e3e'
-    }
+    "&:hover": {
+      bgcolor: selectedTab === tab ? "#FFF7ED" : "#e53e3e",
+    },
   });
 
-  const getIconColor = (tab: string) => selectedTab === tab ? '#EF4444' : '#FFFFFF';
+  const getIconColor = (tab: string) =>
+    selectedTab === tab ? "#EF4444" : "#FFFFFF";
 
-  const getTextColor = (tab: string) => selectedTab === tab ? '#EF4444' : '#FFFFFF';
+  const getTextColor = (tab: string) =>
+    selectedTab === tab ? "#EF4444" : "#FFFFFF";
 
   return (
-    <Box sx={{ display: 'flex', height: '100vh' }}>
+    <Box sx={{ display: "flex", height: "100vh" }}>
       {/* Sidebar */}
-      <Box sx={{ width: 200, bgcolor: '#EF4444', display: 'flex', flexDirection: 'column', alignItems: 'center', pt: 4 }}>
-        <Box component="img" src={Logo} alt="11Fire Logo" sx={{ width: 55, height: 80, mb: 1 }} />
-        <Typography variant="h6" fontWeight={600} color="#000" gutterBottom mb={2}>11Fire</Typography>
-        <List sx={{ width: '100%' }}>
-          <Box sx={{ bgcolor: selectedTab === 'files' ? '#FFF7ED' : '#EF4444' }}>
-            <ListItemButton selected={selectedTab === 'files'} onClick={() => setSelectedTab('files')} sx={getTabStyles('files')}>
-              <ListItemIcon sx={{ color: getIconColor('files') }}><InsertDriveFileIcon /></ListItemIcon>
-              <ListItemText primary={<Typography sx={{ color: getTextColor('files') }}>Files</Typography>} />
+      <Box
+        sx={{
+          width: 200,
+          bgcolor: "#EF4444",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          pt: 4,
+        }}
+      >
+        <Box
+          component="img"
+          src={Logo}
+          alt="11Fire Logo"
+          sx={{ width: 55, height: 80, mb: 1 }}
+        />
+        <Typography
+          variant="h6"
+          fontWeight={600}
+          color="#000"
+          gutterBottom
+          mb={2}
+        >
+          11Fire
+        </Typography>
+        <List sx={{ width: "100%" }}>
+          {isProviderDashboard && (
+            <>
+              <Box
+                sx={{
+                  bgcolor: selectedTab === "install" ? "#FFF7ED" : "#EF4444",
+                }}
+              >
+                <ListItemButton
+                  selected={selectedTab === "install"}
+                  onClick={() => setSelectedTab("install")}
+                  sx={getTabStyles("install")}
+                >
+                  <ListItemIcon sx={{ color: getIconColor("install") }}>
+                    <Icon icon="qlementine-icons:page-setup-16" width={25} height={25} />
+                  </ListItemIcon>
+                  <ListItemText
+                    primary={
+                      <Typography sx={{ color: getTextColor("install") }}>
+                        Install
+                      </Typography>
+                    }
+                  />
+                </ListItemButton>
+              </Box>
+
+              <Box
+                sx={{
+                  bgcolor: selectedTab === "status" ? "#FFF7ED" : "#EF4444",
+                }}
+              >
+                <ListItemButton
+                  selected={selectedTab === "status"}
+                  onClick={() => setSelectedTab("status")}
+                  sx={getTabStyles("status")}
+                >
+                  <ListItemIcon sx={{ color: getIconColor("status") }}>
+                    <Icon icon="mdi:monitor-dashboard" width={25} height={25} />
+                  </ListItemIcon>
+                  <ListItemText
+                    primary={
+                      <Typography sx={{ color: getTextColor("status") }}>
+                        Status
+                      </Typography>
+                    }
+                  />
+                </ListItemButton>
+              </Box>
+            </>
+          )}
+          <Box
+            sx={{ bgcolor: selectedTab === "files" ? "#FFF7ED" : "#EF4444" }}
+          >
+            <ListItemButton
+              selected={selectedTab === "files"}
+              onClick={() => setSelectedTab("files")}
+              sx={getTabStyles("files")}
+            >
+              <ListItemIcon sx={{ color: getIconColor("files") }}>
+                <InsertDriveFileIcon />
+              </ListItemIcon>
+              <ListItemText
+                primary={
+                  <Typography sx={{ color: getTextColor("files") }}>
+                    Files
+                  </Typography>
+                }
+              />
             </ListItemButton>
           </Box>
-          <Box sx={{ bgcolor: selectedTab === 'profile' ? '#FFF7ED' : '#EF4444' }}>
-            <ListItemButton selected={selectedTab === 'profile'} onClick={() => setSelectedTab('profile')} sx={getTabStyles('profile')}>
-              <ListItemIcon sx={{ color: getIconColor('profile') }}><AccountCircleOutlinedIcon /></ListItemIcon>
-              <ListItemText primary={<Typography sx={{ color: getTextColor('profile') }}>Profile</Typography>} />
+
+          <Box
+            sx={{ bgcolor: selectedTab === "profile" ? "#FFF7ED" : "#EF4444" }}
+          >
+            <ListItemButton
+              selected={selectedTab === "profile"}
+              onClick={() => setSelectedTab("profile")}
+              sx={getTabStyles("profile")}
+            >
+              <ListItemIcon sx={{ color: getIconColor("profile") }}>
+                <AccountCircleOutlinedIcon />
+              </ListItemIcon>
+              <ListItemText
+                primary={
+                  <Typography sx={{ color: getTextColor("profile") }}>
+                    Profile
+                  </Typography>
+                }
+              />
             </ListItemButton>
           </Box>
         </List>
       </Box>
 
       {/* Main Content */}
-      <Box sx={{ flexGrow: 1, bgcolor: '#FFF7ED', p: 4 }}>
+      <Box sx={{ flexGrow: 1, bgcolor: "#FFF7ED", p: 4 }}>
         {renderTabContent(selectedTab)}
       </Box>
     </Box>
