@@ -3,14 +3,13 @@ import { Link, useNavigate } from 'react-router-dom';
 import {
   Box,
   Typography,
-  Button,
   Container,
   Stack,
-  CircularProgress,
   useTheme,
 } from '@mui/material';
 import { useAuth } from '../../context/AuthContext';
 import Logo from '../../assets/logo.png';
+import AuthButton from '../../components/AuthButton';
 
 const SignIn: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -38,8 +37,7 @@ const SignIn: React.FC = () => {
       navigate('/group');
     } catch (error) {
       console.error('Sign in failed:', error);
-    } finally {
-      setIsLoading(false);
+      setIsLoading(false); // only reset on failure
     }
   };
 
@@ -105,50 +103,14 @@ const SignIn: React.FC = () => {
 
             {/* Microsoft SSO button - centered */}
             <Box sx={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
-                <Button
-                variant="contained"
-                disableElevation
+              <AuthButton
+                isLoading={isLoading}
+                provider="microsoft"
+                loadingText="Signing in..."
                 onClick={handleMicrosoftSignIn}
-                disabled={isLoading}
-                startIcon={
-                    isLoading ? (
-                    <CircularProgress size={20} color="inherit" />
-                    ) : (
-                    // White square with the Microsoft 4-tile logo (matches the mock)
-                    <Box
-                        sx={{
-                        display: "grid",
-                        placeItems: "center",
-                        bgcolor: "#EB6464",
-                        borderRadius: 1,
-                        width: 32,
-                        height: 32,
-                        }}
-                    >
-                        <svg width="18" height="18" viewBox="0 0 20 20" aria-hidden="true">
-                        <rect x="1" y="1" width="8" height="8" fill="#FFFFFF" />
-                        <rect x="11" y="1" width="8" height="8" fill="#FFFFFF" />
-                        <rect x="1" y="11" width="8" height="8" fill="#FFFFFF" />
-                        <rect x="11" y="11" width="8" height="8" fill="#FFFFFF" />
-                        </svg>
-                    </Box>
-                    )
-                }
-                sx={{
-                    bgcolor: theme.palette.primary.main,
-                    "&:hover": { bgcolor: theme.palette.primary.dark || theme.palette.primary.main },
-                    color: "common.white",
-                    textTransform: "none", // sentence case like the design
-                    fontWeight: 600,
-                    fontSize: "1rem",
-                    py: 1.5,
-                    px: 4,
-                    borderRadius: 1.5,
-                    minWidth: 280,
-                }}
-                >
-                {isLoading ? "Signing in..." : "Continue with Microsoft"}
-                </Button>
+              >
+                Continue with Microsoft
+              </AuthButton>
             </Box>
             </Stack>
         </Container>

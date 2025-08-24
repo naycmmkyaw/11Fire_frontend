@@ -3,14 +3,13 @@ import { Link, useNavigate } from 'react-router-dom';
 import {
   Box,
   Typography,
-  Button,
   Container,
   Stack,
-  CircularProgress,
   useTheme,
 } from '@mui/material';
 import { useAuth } from '../../context/AuthContext';
 import Logo from '../../assets/logo.png';
+import AuthButton from '../../components/AuthButton';
 
 const SignUp: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -38,7 +37,6 @@ const SignUp: React.FC = () => {
       navigate('/group');
     } catch (error) {
       console.error('Sign up failed:', error);
-    } finally {
       setIsLoading(false);
     }
   };
@@ -106,50 +104,14 @@ const SignUp: React.FC = () => {
 
             {/* Microsoft SSO button - centered */}
             <Box sx={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
-                <Button
-                variant="contained"
-                disableElevation
-                onClick={handleMicrosoftSignUp}
-                disabled={isLoading}
-                startIcon={
-                    isLoading ? (
-                    <CircularProgress size={20} color="inherit" />
-                    ) : (
-                    // White square with the Microsoft 4-tile logo (matches the mock)
-                    <Box
-                        sx={{
-                        display: "grid",
-                        placeItems: "center",
-                        bgcolor: "#EB6464",
-                        borderRadius: 1,
-                        width: 32,
-                        height: 32,
-                        }}
-                    >
-                        <svg width="18" height="18" viewBox="0 0 20 20" aria-hidden="true">
-                        <rect x="1" y="1" width="8" height="8" fill="#FFFFFF" />
-                        <rect x="11" y="1" width="8" height="8" fill="#FFFFFF" />
-                        <rect x="1" y="11" width="8" height="8" fill="#FFFFFF" />
-                        <rect x="11" y="11" width="8" height="8" fill="#FFFFFF" />
-                        </svg>
-                    </Box>
-                    )
-                }
-                sx={{
-                    bgcolor: theme.palette.primary.main,
-                    "&:hover": { bgcolor: theme.palette.primary.dark || theme.palette.primary.main },
-                    color: "common.white",
-                    textTransform: "none", // sentence case like the design
-                    fontWeight: 600,
-                    fontSize: "1rem",
-                    py: 1.5,
-                    px: 4,
-                    borderRadius: 1.5,
-                    minWidth: 280,
-                }}
-                >
-                {isLoading ? "Creating account..." : "Signup with Microsoft"}
-                </Button>
+            <AuthButton
+              isLoading={isLoading}
+              provider="microsoft"
+              loadingText="Signing up..."
+              onClick={handleMicrosoftSignUp}
+            >
+              Sign up with Microsoft
+            </AuthButton>
             </Box>
             </Stack>
         </Container>
@@ -158,16 +120,16 @@ const SignUp: React.FC = () => {
         {/* Footer at the bottom */}
         <Box component="footer" sx={{ py: { xs: 4, sm: 6 }, textAlign: "center" }}>
         <Typography variant="body2" color="text.secondary">
-            Don't have an account?{" "}
+            Already have an account?{" "}
             <Link
-            to="/auth/signup"
+            to="/auth/signin"
             style={{
                 color: theme.palette.primary.main,
                 textDecoration: "none",
                 fontWeight: 500,
             }}
             >
-            Create one
+            Sign in
             </Link>
         </Typography>
         </Box>
