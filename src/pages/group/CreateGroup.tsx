@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import {
   Box,
-  Button,
   Typography,
   Avatar,
   TextField,
@@ -9,35 +8,36 @@ import {
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import logo from "../../assets/logo.png";
+import ActionButton from '../../components/ActionButton';
 // import { createSwarm } from '../api/swarm';
 
 const CreateGroup = () => {
   const theme = useTheme();
   const [swarmId, setSwarmId] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+  // const [error, setError] = useState("");
   const navigate = useNavigate();
 
-  const handleCreate = async () => {
-    setError('');
-    if (!password || password.length < 8) {
-      setError('Password must be at least 8 characters long');
-      return;
-    }
-    try {
-    //   const res = await createSwarm(password);
-    //   const swarmId = res.data.swarmId;
-    //   alert(`Swarm created!
+  // const handleCreate = async () => {
+  //   setError('');
+  //   if (!password || password.length < 8) {
+  //     setError('Password must be at least 8 characters long');
+  //     return;
+  //   }
+  //   try {
+  //   //   const res = await createSwarm(password);
+  //   //   const swarmId = res.data.swarmId;
+  //   //   alert(`Swarm created!
 
-    //     Swarm ID: ${swarmId}
-    //     Password: ${password}
-    //     Make sure to copy and save both.`);
-    //   localStorage.setItem('swarmId', swarmId);
-      navigate('/user-option');
-    } catch (err) {
-      setError('Swarm creation failed');
-    }
-  };
+  //   //     Swarm ID: ${swarmId}
+  //   //     Password: ${password}
+  //   //     Make sure to copy and save both.`);
+  //   //   localStorage.setItem('swarmId', swarmId);
+  //     navigate('/user-option');
+  //   } catch (err) {
+  //     setError('Swarm creation failed');
+  //   }
+  // };
 
     return (
     <Box
@@ -181,42 +181,22 @@ const CreateGroup = () => {
               mt: 2,
             }}
           >
-            <Button
+            <ActionButton
+              variant="primary"
               onClick={() => navigate("/role")}
               sx={{
-                width: "200px", // exact width
-                height: "44px",
-                bgcolor: theme.palette.primary.main,
-                color: "white",
-                borderRadius: 2,
-                textTransform: "none",
-                fontSize: "1rem",
-                fontWeight: 500,
                 mb: 2, // vertical spacing
-                "&:hover": { opacity: 0.9 },
               }}
             >
               Create
-            </Button>
+            </ActionButton>
 
-            <Button
-              variant="outlined"
+            <ActionButton
+              variant="secondary"
               onClick={() => navigate("/group")}
-              sx={{
-                width: "200px", // exact width
-                height: "44px",
-                borderRadius: 2,
-                color: theme.palette.text.primary,
-                textTransform: "none",
-                fontSize: "1rem",
-                fontWeight: 500,
-                bgcolor: theme.palette.primary.light,
-                border: "none",
-                "&:hover": { bgcolor: "#f4b8b2" },
-              }}
             >
               Cancel
-            </Button>
+            </ActionButton>
           </Box>
         </Box>
       </Box>

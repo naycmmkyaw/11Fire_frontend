@@ -1,5 +1,11 @@
 import React from 'react';
-import { Button, type ButtonProps, Box, CircularProgress, useTheme } from '@mui/material';
+import {
+  Button, 
+  type ButtonProps, 
+  Box, 
+  CircularProgress, 
+  useTheme 
+} from '@mui/material';
 
 export interface AuthButtonProps extends Omit<ButtonProps, 'startIcon'> {
   isLoading?: boolean;
@@ -23,7 +29,7 @@ const AuthButton: React.FC<AuthButtonProps> = ({
       sx={{
         display: 'grid',
         placeItems: 'center',
-        bgcolor: '#EB6464',
+        bgcolor: theme.palette.primary.main,
         borderRadius: 1,
         width: 32,
         height: 32,

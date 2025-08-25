@@ -1,25 +1,12 @@
 import React from "react";
-import { Box, Button, Typography, Avatar, useTheme } from "@mui/material";
+import { Box, Typography, Avatar, useTheme } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import logo from "../../assets/logo.png"; 
+import ActionButton from "../../components/ActionButton";
 
 const GroupOption = () => {
   const theme = useTheme();
   const navigate = useNavigate();
-
-  const buttonStyle = {
-    bgcolor: theme.palette.primary.main,
-    color: "white",
-    borderRadius: 2,
-    textTransform: "none",
-    fontSize: "1rem",
-    fontWeight: 500,
-    width: "200px",
-    height: "44px",
-    "&:hover": {
-      opacity: 0.9,
-    },
-  };
 
   return (
     <Box
@@ -80,21 +67,20 @@ const GroupOption = () => {
             Create or Join Group
           </Typography>
 
-          <Button
-            variant="contained"
-            sx={{ ...buttonStyle, mb: 2 }}
+          <ActionButton
+            variant="primary"
+            sx={{ mb: 2 }}
             onClick={() => navigate("/group/create")}
           >
             Create Group
-          </Button>
+          </ActionButton>
 
-          <Button
-            variant="contained"
-            sx={buttonStyle}
+          <ActionButton
+            variant="primary"
             onClick={() => navigate("/group/join")}
           >
             Join
-          </Button>
+          </ActionButton>
         </Box>
       </Box>
     </Box>
