@@ -15,14 +15,12 @@ export interface Group {
   createdAt: string;
 }
 
-export interface FileItem {
-  id: string;
+export interface FileEntry {
   name: string;
-  size: number;
-  type: string;
   cid: string;
-  createdAt: string;
-  isSelected?: boolean;
+  size: string;
+  date: string;
+  isFile: boolean;
 }
 
 export interface AuthContextType {
