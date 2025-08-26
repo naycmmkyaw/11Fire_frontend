@@ -2,7 +2,7 @@ import React from "react";
 import { Box, Typography, Avatar, useTheme } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import logo from "../../assets/logo.png";
-import ActionButton from "../../components/ActionButton";
+import ActionButton from "../../components/shared/ActionButton";
 // import { selectRole } from "../api/swarm";
 
 const RoleOption = () => {
