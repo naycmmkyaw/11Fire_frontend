@@ -179,7 +179,7 @@ const AppLayout = () => {
         overflowY: "auto",
         minHeight: "100vh"
       }}>
-        {renderTabContent(selectedTab)}
+        {renderTabContent(selectedTab, setSelectedTab)}
       </Box>
     </Box>
   );
