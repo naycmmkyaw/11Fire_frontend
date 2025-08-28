@@ -8,7 +8,7 @@ import {
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import logo from "../../assets/logo.png";
-import ActionButton from "../../components/ActionButton";
+import ActionButton from "../../components/shared/ActionButton";
 // import { joinSwarm } from "../api/swarm";
 
 const JoinGroup = () => {
