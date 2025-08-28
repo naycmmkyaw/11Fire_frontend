@@ -1,49 +1,47 @@
 import React, { useState } from 'react';
 import {
   Box,
-  Button,
   Typography,
   Avatar,
   TextField,
-  useTheme,
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import logo from "../../assets/logo.png";
+import ActionButton from '../../components/shared/ActionButton';
 // import { createSwarm } from '../api/swarm';
 
 const CreateGroup = () => {
-  const theme = useTheme();
   const [swarmId, setSwarmId] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+  // const [error, setError] = useState("");
   const navigate = useNavigate();
 
-  const handleCreate = async () => {
-    setError('');
-    if (!password || password.length < 8) {
-      setError('Password must be at least 8 characters long');
-      return;
-    }
-    try {
-    //   const res = await createSwarm(password);
-    //   const swarmId = res.data.swarmId;
-    //   alert(`Swarm created!
+  // const handleCreate = async () => {
+  //   setError('');
+  //   if (!password || password.length < 8) {
+  //     setError('Password must be at least 8 characters long');
+  //     return;
+  //   }
+  //   try {
+  //   //   const res = await createSwarm(password);
+  //   //   const swarmId = res.data.swarmId;
+  //   //   alert(`Swarm created!
 
-    //     Swarm ID: ${swarmId}
-    //     Password: ${password}
-    //     Make sure to copy and save both.`);
-    //   localStorage.setItem('swarmId', swarmId);
-      navigate('/user-option');
-    } catch (err) {
-      setError('Swarm creation failed');
-    }
-  };
+  //   //     Swarm ID: ${swarmId}
+  //   //     Password: ${password}
+  //   //     Make sure to copy and save both.`);
+  //   //   localStorage.setItem('swarmId', swarmId);
+  //     navigate('/user-option');
+  //   } catch (err) {
+  //     setError('Swarm creation failed');
+  //   }
+  // };
 
     return (
     <Box
       sx={{
         height: "100vh",
-        bgcolor: theme.palette.secondary.main,
+        bgcolor: 'secondary.main',
         display: "flex",
         flexDirection: "column",
         fontFamily: "Poppins, sans-serif",
@@ -57,7 +55,7 @@ const CreateGroup = () => {
           alignItems: "center",
           px: 3,
           py: 1.5,
-          bgcolor: theme.palette.secondary.dark,
+          bgcolor: 'secondary.dark',
           borderBottom: '1px solid #d6cfc1',
         }}
       >
@@ -71,7 +69,7 @@ const CreateGroup = () => {
             11Fire
           </Typography>
         </Box>
-        <Avatar sx={{ bgcolor: theme.palette.primary.main }}>N</Avatar>
+        <Avatar sx={{ bgcolor: 'primary.main' }}>N</Avatar>
       </Box>
 
       {/* Form Section */}
@@ -97,7 +95,7 @@ const CreateGroup = () => {
             sx={{
               mb: 4,
               textAlign: "center",
-              color: theme.palette.text.primary,
+              color: 'text.primary',
             }}
           >
             Create Group
@@ -107,7 +105,7 @@ const CreateGroup = () => {
             sx={{
               fontWeight: 500,
               fontSize: "1rem",
-              color: theme.palette.text.primary,
+              color: 'text.primary',
               mb: 1,
             }}
           >
@@ -126,10 +124,10 @@ const CreateGroup = () => {
                   borderColor: '#d6cfc1',
                 },
                 "&:hover fieldset": {
-                  borderColor: theme.palette.text.primary,
+                  borderColor: 'text.primary',
                 },
                 "&.Mui-focused fieldset": {
-                  borderColor: theme.palette.text.primary, 
+                  borderColor: 'text.primary',
                   borderWidth: "1px",
                 },
               },
@@ -142,7 +140,7 @@ const CreateGroup = () => {
             sx={{
               fontWeight: 500,
               fontSize: "1rem",
-              color: theme.palette.text.primary,
+              color: 'text.primary',
               mb: 1,
             }}
           >
@@ -161,10 +159,10 @@ const CreateGroup = () => {
                   borderColor: '#d6cfc1',
                 },
                 "&:hover fieldset": {
-                  borderColor: theme.palette.text.primary,
+                  borderColor: 'text.primary',
                 },
                 "&.Mui-focused fieldset": {
-                  borderColor: theme.palette.text.primary, // ✅ Keep border visible on focus
+                  borderColor: 'text.primary', // ✅ Keep border visible on focus
                   borderWidth: "1px",
                 },
               },
@@ -181,42 +179,22 @@ const CreateGroup = () => {
               mt: 2,
             }}
           >
-            <Button
+            <ActionButton
+              variant="primary"
               onClick={() => navigate("/role")}
               sx={{
-                width: "200px", // exact width
-                height: "44px",
-                bgcolor: theme.palette.primary.main,
-                color: "white",
-                borderRadius: 2,
-                textTransform: "none",
-                fontSize: "1rem",
-                fontWeight: 500,
                 mb: 2, // vertical spacing
-                "&:hover": { opacity: 0.9 },
               }}
             >
               Create
-            </Button>
+            </ActionButton>
 
-            <Button
-              variant="outlined"
+            <ActionButton
+              variant="secondary"
               onClick={() => navigate("/group")}
-              sx={{
-                width: "200px", // exact width
-                height: "44px",
-                borderRadius: 2,
-                color: theme.palette.text.primary,
-                textTransform: "none",
-                fontSize: "1rem",
-                fontWeight: 500,
-                bgcolor: theme.palette.primary.light,
-                border: "none",
-                "&:hover": { bgcolor: "#f4b8b2" },
-              }}
             >
               Cancel
-            </Button>
+            </ActionButton>
           </Box>
         </Box>
       </Box>

@@ -12,24 +12,12 @@ import {
   DialogActions,
   Button,
   TextField,
-  IconButton,
-  Avatar,
   Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Checkbox,
   Snackbar,
-  Divider,
+  Divider,  
 } from "@mui/material";
 import DescriptionIcon from "@mui/icons-material/Description";
 import FolderIcon from "@mui/icons-material/Folder";
-import InsertDriveFileIcon from "@mui/icons-material/InsertDriveFile";
-import ContentCopyIcon from "@mui/icons-material/ContentCopy";
-import MoreVertIcon from "@mui/icons-material/MoreVert";
 import AddIcon from "@mui/icons-material/Add";
 import SearchIcon from "@mui/icons-material/Search";
 import FileDownloadIcon from "@mui/icons-material/FileDownload";
@@ -37,8 +25,11 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
+import EmptyFilesCard from "../../components/files/EmptyFilesCard";
+import FilesTable from "../../components/files/FilesTable";
+import PageHeader from "../../components/shared/PageHeader";
 // import { uploadFileToIPFS } from "../api/upload";
-import { useEffect } from "react";
+// import { useEffect } from "react";
 // import { fetchFiles } from "../api/files";
 // import { downloadFile } from "../api/download";
 // import { deleteFile } from "../api/delete";
@@ -181,24 +172,8 @@ const FilesTabContent = () => {
     setGroupMenuAnchor(event.currentTarget);
   };
   return (
-    <Box sx={{ flexGrow: 1, bgcolor: "#FFF7ED" }}>
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          mb: 2,
-        }}
-      >
-        <Typography variant="h5" fontWeight={600}>
-          FILES
-        </Typography>
-        <Avatar
-          sx={{ bgcolor: "#ef4444", width: 36, height: 36, fontSize: "1rem" }}
-        >
-          N
-        </Avatar>
-      </Box>
+    <Box>
+      <PageHeader title="FILES" avatarText="N" />
 
       <Tabs
         value={0}
@@ -337,94 +312,16 @@ const FilesTabContent = () => {
       </Box>
 
       {files.length === 0 ? (
-        <Box
-          sx={{
-            bgcolor: "#fff7ed",
-            border: "1px solid #d6cfc1",
-            borderRadius: 3,
-            height: 120,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            boxShadow: 1
-          }}
-        >
-          <Typography sx={{ color: "#3c3c3c", fontWeight: 300 }}>
-            No files yet. Tap the <strong>Add</strong>{" "}
-            button to upload your first file.
-          </Typography>
-        </Box>
+        <EmptyFilesCard />
       ) : (
-        <TableContainer
-          component={Paper}
-          sx={{ borderRadius: 2, bgcolor: "#fefaf4" }}
-        >
-          <Table>
-            <TableHead sx={{ bgcolor: "#f3ede1" }}>
-              <TableRow>
-                <TableCell padding="checkbox">
-                  <Checkbox />
-                </TableCell>
-                <TableCell>
-                  <strong>Name</strong>
-                </TableCell>
-                <TableCell>
-                  <strong>CID</strong>
-                </TableCell>
-                <TableCell>
-                  <strong>Size</strong>
-                </TableCell>
-                <TableCell>
-                  <strong>Creation Date</strong>
-                </TableCell>
-                <TableCell />
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {files.map((file, idx) => (
-                <TableRow key={idx} hover sx={{ bgcolor: "#fffaf3" }}>
-                  <TableCell padding="checkbox">
-                    <Checkbox />
-                  </TableCell>
-                  <TableCell sx={{ maxWidth: 250 }}>
-                    <Box sx={{ display: "flex", alignItems: "center" }}>
-                      {file.isFile ? (
-                        <InsertDriveFileIcon sx={{ color: "#e17d5f", mr: 1 }} />
-                      ) : (
-                        <FolderIcon sx={{ color: "#e17d5f", mr: 1 }} />
-                      )}
-                      {file.name}
-                    </Box>
-                  </TableCell>
-                  <TableCell>
-                    <Box sx={{ display: "flex", alignItems: "center" }}>
-                      {truncateCid(file.cid)}
-                      <IconButton
-                        size="small"
-                        sx={{ ml: 1 }}
-                        onClick={() => handleCopyCid(file.cid)}
-                      >
-                        <ContentCopyIcon fontSize="small" />
-                      </IconButton>
-                    </Box>
-                  </TableCell>
-                  <TableCell>{file.size}</TableCell>
-                  <TableCell>{file.date}</TableCell>
-                  <TableCell align="right">
-                    <IconButton
-                      onClick={(e) => {
-                        setFileMenuAnchor(e.currentTarget);
-                        setActiveFileIndex(idx);
-                      }}
-                    >
-                      <MoreVertIcon />
-                    </IconButton>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
+        <FilesTable
+          files={files}
+          onCopyCid={handleCopyCid}
+          onOpenFileMenu={(e, idx) => {
+            setFileMenuAnchor(e.currentTarget);
+            setActiveFileIndex(idx);
+          }}
+        />
       )}
 
       <Menu

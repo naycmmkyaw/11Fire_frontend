@@ -1,32 +1,18 @@
 import React from "react";
-import { Box, Button, Typography, Avatar, useTheme } from "@mui/material";
+import { Box, Typography, Avatar } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import logo from "../../assets/logo.png";
+import ActionButton from "../../components/shared/ActionButton";
 // import { selectRole } from "../api/swarm";
 
 const RoleOption = () => {
-  const theme = useTheme();
   const navigate = useNavigate();
-
-  const buttonStyle = {
-    bgcolor: theme.palette.primary.main,
-    color: "white",
-    borderRadius: 2,
-    textTransform: "none",
-    fontSize: "1rem",
-    fontWeight: 500,
-    width: "200px",
-    height: "44px",
-    "&:hover": {
-      opacity: 0.9,
-    },
-  };
 
   return (
     <Box
       sx={{
         height: "100vh",
-        bgcolor: theme.palette.secondary.main,
+        bgcolor: 'secondary.main',
         display: "flex",
         flexDirection: "column",
         fontFamily: "Poppins, sans-serif",
@@ -40,7 +26,7 @@ const RoleOption = () => {
           alignItems: "center",
           px: 3,
           py: 1.5,
-          bgcolor: theme.palette.secondary.dark,
+          bgcolor: 'secondary.dark',
           borderBottom: '1px solid #d6cfc1',
         }}
       >
@@ -54,7 +40,7 @@ const RoleOption = () => {
             11Fire
           </Typography>
         </Box>
-        <Avatar sx={{ bgcolor: theme.palette.primary.main }}>N</Avatar>
+        <Avatar sx={{ bgcolor: 'primary.main' }}>N</Avatar>
       </Box>
 
       {/* Main Content */}
@@ -79,7 +65,7 @@ const RoleOption = () => {
             fontWeight={600}
             sx={{
               mb: 4,
-              color: theme.palette.text.primary,
+              color: 'text.primary',
               textAlign: "center",
             }}
           >
@@ -89,39 +75,20 @@ const RoleOption = () => {
             </Box>
           </Typography>
 
-          <Button
-            variant="contained"
-            sx={{ ...buttonStyle, mb: 2 }}
-            onClick={async () => {
-              try {
-                // const swarmId = localStorage.getItem("swarmId");
-                // if (!swarmId) return alert("No Swarm ID found");
-                // await selectRole(swarmId, "user");
-                navigate("/files");
-              } catch (err) {
-                alert("Failed to select role");
-              }
-            }}
+          <ActionButton
+            variant="primary"
+            sx={{ mb: 2 }}
+            onClick={() => navigate("/files")}
           >
-            Use Storage
-          </Button>
+            Store Data
+          </ActionButton>
 
-          <Button
-            variant="contained"
-            sx={buttonStyle}
-            onClick={async () => {
-              try {
-                // const swarmId = localStorage.getItem("swarmId");
-                // if (!swarmId) return alert("No Swarm ID found");
-                // await selectRole(swarmId, "provider");
-                navigate("/provider-dashboard");
-              } catch (err) {
-                alert("Failed to select role");
-              }
-            }}
+          <ActionButton
+            variant="primary"
+            onClick={() => navigate("/provider-dashboard")}
           >
             Provide Storage
-          </Button>
+          </ActionButton>
         </Box>
       </Box>
     </Box>
