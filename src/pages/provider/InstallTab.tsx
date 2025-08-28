@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Box } from '@mui/material';
-import PageHeader from '../../components/PageHeader';
-import InstallationSection from '../../components/InstallationSection';
+import PageHeader from '../../components/shared/PageHeader';
+import InstallationSection from '../../components/installTab/InstallationSection';
 
 const InstallTab = () => {
   const [kuboTabValue, setKuboTabValue] = useState(0);

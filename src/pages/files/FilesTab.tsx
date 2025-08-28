@@ -26,9 +26,9 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
-import Header from "../../components/shared/Header";
-import EmptyFilesCard from "../../components/EmptyFilesCard";
+import EmptyFilesCard from "../../components/files/EmptyFilesCard";
 import FilesTable from "../../components/files/FilesTable";
+import PageHeader from "../../components/shared/PageHeader";
 // import { uploadFileToIPFS } from "../api/upload";
 // import { useEffect } from "react";
 // import { fetchFiles } from "../api/files";
@@ -175,7 +175,7 @@ const FilesTabContent = () => {
   };
   return (
     <Box sx={{ flexGrow: 1, bgcolor: theme.palette.secondary.main }}>
-      <Header title="FILES" avatarText="N" />
+      <PageHeader title="FILES" avatarText="N" />
 
       <Tabs
         value={0}

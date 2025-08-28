@@ -9,7 +9,7 @@ import {
 } from '@mui/material';
 import { useAuth } from '../../context/AuthContext';
 import Logo from '../../assets/logo.png';
-import AuthButton from '../../components/AuthButton';
+import AuthButton from '../../components/shared/AuthButton';
 
 const SignIn: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);

@@ -1,8 +1,8 @@
 import React from "react";
-import { Box, Typography } from "@mui/material";
-import { theme } from "../theme/theme";
+import { Box, Typography,useTheme } from "@mui/material";
 
 const EmptyFilesCard: React.FC = () => {
+  const theme = useTheme();
   return (
     <Box
       sx={{

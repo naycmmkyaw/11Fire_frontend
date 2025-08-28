@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { Box, Paper } from "@mui/material";
-import UptimeGraph from "../../components/UptimeGraph";
-import StorageCard from "../../components/StorageCard";
-import ConnectionStatusCard from "../../components/ConnectionStatusCard";
-import PageHeader from "../../components/PageHeader";
-import MetricsGrid from "../../components/MetricsGrid";
-import MetricCard from "../../components/MetricCard";
+import UptimeGraph from "../../components/statusTab/UptimeGraph";
+import StorageCard from "../../components/statusTab/StorageCard";
+import ConnectionStatusCard from "../../components/statusTab/ConnectionStatusCard";
+import PageHeader from "../../components/shared/PageHeader";
+import MetricsGrid from "../../components/statusTab/MetricsGrid";
+import MetricCard from "../../components/statusTab/MetricCard";
 
 interface StatusTabProps {
   onTabChange?: (tab: string) => void;
