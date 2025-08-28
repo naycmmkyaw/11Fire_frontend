@@ -10,9 +10,12 @@ import {
 } from "@mui/material";
 import AccountCircleOutlinedIcon from "@mui/icons-material/AccountCircleOutlined";
 import CloseIcon from "@mui/icons-material/Close";
+import ActionButton from "../../components/shared/ActionButton";
+import { useNavigate } from "react-router-dom";
 
 const ProfileTabContent = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
+  const navigate = useNavigate();
   return (
     <Box sx={{ flexGrow: 1, px: 1, py: 1 }}>
       <Typography variant="h5" fontWeight={700} gutterBottom>
@@ -60,20 +63,12 @@ const ProfileTabContent = () => {
           InputProps={{ readOnly: true }}
         />
       </Box>
-      <Button
-        variant="contained"
+      <ActionButton
+        variant="primary"
         onClick={() => setDialogOpen(true)}
-        sx={{
-          bgcolor: "primary.main",
-          color: "#fff",
-          borderRadius: 2,
-          textTransform: "none",
-          width: 200,
-          height: 40,
-        }}
       >
-        Sign Out
-      </Button>
+        Sign out
+      </ActionButton>
 
       <Dialog
         open={dialogOpen}
@@ -123,6 +118,10 @@ const ProfileTabContent = () => {
           </Button>
           <Button
             variant="contained"
+            onClick={() => {
+              // Add sign-out logic here
+              navigate("/auth/signin");
+            }}
             sx={{
               bgcolor: "primary.main",
               color: "#fff",
