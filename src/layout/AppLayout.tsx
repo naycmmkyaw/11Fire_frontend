@@ -9,14 +9,15 @@ import {
 } from "@mui/material";
 import InsertDriveFileIcon from "@mui/icons-material/InsertDriveFile";
 import AccountCircleOutlinedIcon from "@mui/icons-material/AccountCircleOutlined";
-import DownloadIcon from "@mui/icons-material/Download";
 import { Icon } from "@iconify/react";
 import Logo from "../assets/logo2.png";
 import renderTabContent from "./RenderTab";
+import useIsMobile from "../hooks/useMobile";
 
 const AppLayout = () => {
   const [selectedTab, setSelectedTab] = useState("files");
   const [isProviderDashboard, setIsProviderDashboard] = useState(false);
+  const isMobile = useIsMobile();
 
   // Check if current route is provider dashboard
   useEffect(() => {
@@ -47,21 +48,22 @@ const AppLayout = () => {
 
   return (
     <Box sx={{ display: "flex", minHeight: "100vh" }}>
-      {/* Sidebar */}
-      <Box
-        sx={{
-          width: 200,
-          bgcolor: "#EF4444",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          pt: 4,
-          position: "sticky",
-          top: 0,
-          height: "100vh",
-          overflowY: "auto"
-        }}
-      >
+      {/* Desktop Sidebar - Hidden on Mobile */}
+      {!isMobile && (
+        <Box
+          sx={{
+            width: 200,
+            bgcolor: "#EF4444",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            pt: 4,
+            position: "sticky",
+            top: 0,
+            height: "100vh",
+            overflowY: "auto"
+          }}
+        >
         <Box
           component="img"
           src={Logo}
@@ -169,17 +171,19 @@ const AppLayout = () => {
             </ListItemButton>
           </Box>
         </List>
-      </Box>
+        </Box>
+      )}
 
       {/* Main Content */}
       <Box sx={{ 
         flexGrow: 1, 
         bgcolor: "#FFF7ED", 
-        p: 4,
+        p: isMobile ? 2 : 4,
         overflowY: "auto",
-        minHeight: "100vh"
+        minHeight: "100vh",
+        width: isMobile ? "100%" : "auto"
       }}>
-        {renderTabContent(selectedTab, setSelectedTab)}
+        {renderTabContent(selectedTab, setSelectedTab, isProviderDashboard)}
       </Box>
     </Box>
   );

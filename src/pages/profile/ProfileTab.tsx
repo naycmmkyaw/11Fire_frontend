@@ -11,16 +11,34 @@ import {
 import AccountCircleOutlinedIcon from "@mui/icons-material/AccountCircleOutlined";
 import CloseIcon from "@mui/icons-material/Close";
 import ActionButton from "../../components/shared/ActionButton";
+import ResponsiveHeader from "../../components/shared/ResponsiveHeader";
 import { useNavigate } from "react-router-dom";
 
-const ProfileTabContent = () => {
+interface ProfileTabContentProps {
+  selectedTab: string;
+  setSelectedTab: (tab: string) => void;
+  isProviderDashboard: boolean;
+  onTabChange?: (tab: string) => void;
+}
+
+const ProfileTabContent: React.FC<ProfileTabContentProps> = ({
+  selectedTab,
+  setSelectedTab,
+  isProviderDashboard,
+  onTabChange
+}) => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const navigate = useNavigate();
   return (
     <Box sx={{ flexGrow: 1, px: 1, py: 1 }}>
-      <Typography variant="h5" fontWeight={700} gutterBottom>
-        PROFILE
-      </Typography>
+      <ResponsiveHeader 
+        title="PROFILE" 
+        avatarText="N" 
+        selectedTab={selectedTab}
+        setSelectedTab={setSelectedTab}
+        isProviderDashboard={isProviderDashboard}
+        onTabChange={onTabChange}
+      />
 
       <Box sx={{ display: "flex", alignItems: "center", mb: 3 }}>
         <AccountCircleOutlinedIcon

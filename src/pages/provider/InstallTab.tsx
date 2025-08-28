@@ -1,9 +1,21 @@
 import React, { useState } from 'react';
 import { Box } from '@mui/material';
-import PageHeader from '../../components/shared/PageHeader';
+import ResponsiveHeader from '../../components/shared/ResponsiveHeader';
 import InstallationSection from '../../components/installTab/InstallationSection';
 
-const InstallTab = () => {
+interface InstallTabProps {
+  selectedTab: string;
+  setSelectedTab: (tab: string) => void;
+  isProviderDashboard: boolean;
+  onTabChange?: (tab: string) => void;
+}
+
+const InstallTab: React.FC<InstallTabProps> = ({ 
+  selectedTab, 
+  setSelectedTab, 
+  isProviderDashboard, 
+  onTabChange 
+}) => {
   const [kuboTabValue, setKuboTabValue] = useState(0);
   const [fireTabValue, setFireTabValue] = useState(0);
 
@@ -63,7 +75,13 @@ const InstallTab = () => {
 
   return (
     <Box>
-      <PageHeader title="INSTALL" avatarText="N" />
+      <ResponsiveHeader 
+        title="INSTALL" 
+        avatarText="N" 
+        selectedTab={selectedTab}
+        setSelectedTab={setSelectedTab}
+        isProviderDashboard={isProviderDashboard}
+      />
 
       <InstallationSection
         title="Kubo Installation"

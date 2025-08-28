@@ -27,7 +27,7 @@ import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
 import EmptyFilesCard from "../../components/files/EmptyFilesCard";
 import FilesTable from "../../components/files/FilesTable";
-import PageHeader from "../../components/shared/PageHeader";
+import ResponsiveHeader from "../../components/shared/ResponsiveHeader";
 // import { uploadFileToIPFS } from "../api/upload";
 // import { useEffect } from "react";
 // import { fetchFiles } from "../api/files";
@@ -50,7 +50,19 @@ const formatSize = (size: number) => {
 
 const truncateCid = (cid: string) => cid.slice(0, 6) + "..." + cid.slice(-4);
 
-const FilesTabContent = () => {
+interface FilesTabContentProps {
+  selectedTab: string;
+  setSelectedTab: (tab: string) => void;
+  isProviderDashboard: boolean;
+  onTabChange?: (tab: string) => void;
+}
+
+const FilesTabContent: React.FC<FilesTabContentProps> = ({
+  selectedTab,
+  setSelectedTab,
+  isProviderDashboard,
+  onTabChange
+}) => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -173,7 +185,14 @@ const FilesTabContent = () => {
   };
   return (
     <Box>
-      <PageHeader title="FILES" avatarText="N" />
+              <ResponsiveHeader 
+          title="FILES" 
+          avatarText="N" 
+          selectedTab={selectedTab}
+          setSelectedTab={setSelectedTab}
+          isProviderDashboard={isProviderDashboard}
+          onTabChange={onTabChange}
+        />
 
       <Tabs
         value={0}

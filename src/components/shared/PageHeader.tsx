@@ -21,7 +21,7 @@ const PageHeader: React.FC<PageHeaderProps> = ({ title, avatarText }) => {
       </Typography>
       <Avatar
         sx={{
-          bgcolor: 'primary.main',
+          bgcolor: "primary.main",
           width: 32,
           height: 32,
           fontSize: "0.875rem",
