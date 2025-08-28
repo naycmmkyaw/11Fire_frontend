@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import {
   Box,
-  Button,
   Typography,
   Avatar,
   TextField,
@@ -9,6 +8,7 @@ import {
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import logo from "../../assets/logo.png";
+import ActionButton from "../../components/ActionButton";
 // import { joinSwarm } from "../api/swarm";
 
 const JoinGroup = () => {
@@ -16,23 +16,23 @@ const JoinGroup = () => {
   const navigate = useNavigate();
   const [swarmId, setSwarmId] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+  // const [error, setError] = useState("");
 
-  const handleJoin = async () => {
-    setError("");
-    if (!swarmId || !password || password.length < 8) {
-      setError("Please enter valid swarm ID and a password (min 8 characters)");
-      return;
-    }
-    try {
-    //   await joinSwarm(swarmId, password);
-    //   alert(`Joined swarm successfully!\nSwarm ID: ${swarmId}`);
-    //   localStorage.setItem("swarmId", swarmId);
-      navigate("/user-option");
-    } catch (err) {
-      setError("Join failed. Please check swarm ID and password.");
-    }
-  };
+  // const handleJoin = async () => {
+  //   setError("");
+  //   if (!swarmId || !password || password.length < 8) {
+  //     setError("Please enter valid swarm ID and a password (min 8 characters)");
+  //     return;
+  //   }
+  //   try {
+  //   //   await joinSwarm(swarmId, password);
+  //   //   alert(`Joined swarm successfully!\nSwarm ID: ${swarmId}`);
+  //   //   localStorage.setItem("swarmId", swarmId);
+  //     navigate("/user-option");
+  //   } catch (err) {
+  //     setError("Join failed. Please check swarm ID and password.");
+  //   }
+  // };
 
   return (
     <Box
@@ -176,42 +176,22 @@ const JoinGroup = () => {
               mt: 2,
             }}
           >
-            <Button
+            <ActionButton
+              variant="primary"
               onClick={() => navigate("/role")}
               sx={{
-                width: "200px", // exact width
-                height: "44px",
-                bgcolor: theme.palette.primary.main,
-                color: "white",
-                borderRadius: 2,
-                textTransform: "none",
-                fontSize: "1rem",
-                fontWeight: 500,
                 mb: 2, // vertical spacing
-                "&:hover": { opacity: 0.9 },
               }}
             >
               Join
-            </Button>
+            </ActionButton>
 
-            <Button
-              variant="outlined"
+            <ActionButton
+              variant="secondary"
               onClick={() => navigate("/group")}
-              sx={{
-                width: "200px", // exact width
-                height: "44px",
-                borderRadius: 2,
-                color: theme.palette.text.primary,
-                textTransform: "none",
-                fontSize: "1rem",
-                fontWeight: 500,
-                bgcolor: theme.palette.primary.light,
-                border: "none",
-                "&:hover": { bgcolor: "#f4b8b2" },
-              }}
             >
               Cancel
-            </Button>
+            </ActionButton>
           </Box>
         </Box>
       </Box>
