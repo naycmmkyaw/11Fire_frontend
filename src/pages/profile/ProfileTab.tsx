@@ -34,7 +34,7 @@ const ProfileTabContent = () => {
           variant="outlined"
           value="nc_mmk"
           sx={{
-            borderRadius: 2,
+            borderRadius: 1,
             bgcolor: "background.primary",
             boxShadow: 1,
             border: "1px",
@@ -52,7 +52,7 @@ const ProfileTabContent = () => {
           variant="outlined"
           value="nc_mmk@kmutt.ac.th"
           sx={{
-            borderRadius: 2,
+            borderRadius: 1,
             border: "1px ",
             bgcolor: "background.primary",
             boxShadow: 2,
