@@ -101,23 +101,10 @@ const StatusTab = ({ onTabChange }: StatusTabProps) => {
         </MetricCard>
 
         <MetricCard>
-          <Paper
-            elevation={2}
-            sx={{
-              p: 3,
-              borderRadius: 2,
-              bgcolor: "#FFFFFF",
-              border: "1px solid #e5e7eb",
-              height: "400px",
-              display: "flex",
-              flexDirection: "column",
-            }}
-          >
             <UptimeGraph 
               uptime={uptime}
               downtime={downtime}
             />
-          </Paper>
         </MetricCard>
       </MetricsGrid>
     </Box>

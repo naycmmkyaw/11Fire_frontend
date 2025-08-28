@@ -1,12 +1,11 @@
 import React from "react";
-import { Box, Typography,useTheme } from "@mui/material";
+import { Box, Typography} from "@mui/material";
 
 const EmptyFilesCard: React.FC = () => {
-  const theme = useTheme();
   return (
     <Box
       sx={{
-        bgcolor: theme.palette.secondary.main,
+        bgcolor: 'secondary.main',
         border: "1px solid #d6cfc1",
         borderRadius: 3,
         height: 120,

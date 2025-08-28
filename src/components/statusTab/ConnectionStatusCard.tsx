@@ -1,5 +1,5 @@
 import React from "react";
-import { Box, Typography, Paper, Avatar, Link } from "@mui/material";
+import { Box, Typography, Paper, Link} from "@mui/material";
 
 interface ConnectionStatusCardProps {
   isConnected: boolean;
@@ -18,7 +18,7 @@ const ConnectionStatusCard: React.FC<ConnectionStatusCardProps> = ({
           p: 3,
           mb: 4,
           borderRadius: 2,
-          bgcolor: "#FFFFFF",
+          bgcolor: 'secondary.main',
         }}
       >
         <Typography
@@ -51,7 +51,7 @@ const ConnectionStatusCard: React.FC<ConnectionStatusCardProps> = ({
         mb: 4,
         borderRadius: 2,
         height: "200px",
-        bgcolor: "#FFFFFF",
+        bgcolor: "secondary.main",
         border: "1px solid #e5e7eb",
       }}
     >
@@ -67,14 +67,14 @@ const ConnectionStatusCard: React.FC<ConnectionStatusCardProps> = ({
           component="button"
           onClick={onSetupClick}
           sx={{
-            color: "#EB6464",
+            color: "primary.main",
             textDecoration: "underline",
             cursor: "pointer",
             border: "none",
             background: "none",
             padding: 0,
             font: "inherit",
-            "&:hover": { color: "#D54545" },
+            "&:hover": { color: "primary.dark" },
           }}
         >
           setup?

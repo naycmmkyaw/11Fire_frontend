@@ -1,5 +1,5 @@
 import React from "react";
-import { Box, Typography, Avatar,useTheme } from "@mui/material";
+import { Box, Typography, Avatar } from "@mui/material";
 
 interface PageHeaderProps {
   title: string;
@@ -7,7 +7,6 @@ interface PageHeaderProps {
 }
 
 const PageHeader: React.FC<PageHeaderProps> = ({ title, avatarText }) => {
-  const theme = useTheme();
   return (
     <Box
       sx={{
@@ -22,7 +21,7 @@ const PageHeader: React.FC<PageHeaderProps> = ({ title, avatarText }) => {
       </Typography>
       <Avatar
         sx={{
-          bgcolor: theme.palette.primary.main,
+          bgcolor: 'primary.main',
           width: 32,
           height: 32,
           fontSize: "0.875rem",

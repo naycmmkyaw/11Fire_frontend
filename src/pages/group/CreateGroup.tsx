@@ -4,7 +4,6 @@ import {
   Typography,
   Avatar,
   TextField,
-  useTheme,
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import logo from "../../assets/logo.png";
@@ -12,7 +11,6 @@ import ActionButton from '../../components/shared/ActionButton';
 // import { createSwarm } from '../api/swarm';
 
 const CreateGroup = () => {
-  const theme = useTheme();
   const [swarmId, setSwarmId] = useState("");
   const [password, setPassword] = useState("");
   // const [error, setError] = useState("");
@@ -43,7 +41,7 @@ const CreateGroup = () => {
     <Box
       sx={{
         height: "100vh",
-        bgcolor: theme.palette.secondary.main,
+        bgcolor: 'secondary.main',
         display: "flex",
         flexDirection: "column",
         fontFamily: "Poppins, sans-serif",
@@ -57,7 +55,7 @@ const CreateGroup = () => {
           alignItems: "center",
           px: 3,
           py: 1.5,
-          bgcolor: theme.palette.secondary.dark,
+          bgcolor: 'secondary.dark',
           borderBottom: '1px solid #d6cfc1',
         }}
       >
@@ -71,7 +69,7 @@ const CreateGroup = () => {
             11Fire
           </Typography>
         </Box>
-        <Avatar sx={{ bgcolor: theme.palette.primary.main }}>N</Avatar>
+        <Avatar sx={{ bgcolor: 'primary.main' }}>N</Avatar>
       </Box>
 
       {/* Form Section */}
@@ -97,7 +95,7 @@ const CreateGroup = () => {
             sx={{
               mb: 4,
               textAlign: "center",
-              color: theme.palette.text.primary,
+              color: 'text.primary',
             }}
           >
             Create Group
@@ -107,7 +105,7 @@ const CreateGroup = () => {
             sx={{
               fontWeight: 500,
               fontSize: "1rem",
-              color: theme.palette.text.primary,
+              color: 'text.primary',
               mb: 1,
             }}
           >
@@ -126,10 +124,10 @@ const CreateGroup = () => {
                   borderColor: '#d6cfc1',
                 },
                 "&:hover fieldset": {
-                  borderColor: theme.palette.text.primary,
+                  borderColor: 'text.primary',
                 },
                 "&.Mui-focused fieldset": {
-                  borderColor: theme.palette.text.primary, 
+                  borderColor: 'text.primary',
                   borderWidth: "1px",
                 },
               },
@@ -142,7 +140,7 @@ const CreateGroup = () => {
             sx={{
               fontWeight: 500,
               fontSize: "1rem",
-              color: theme.palette.text.primary,
+              color: 'text.primary',
               mb: 1,
             }}
           >
@@ -161,10 +159,10 @@ const CreateGroup = () => {
                   borderColor: '#d6cfc1',
                 },
                 "&:hover fieldset": {
-                  borderColor: theme.palette.text.primary,
+                  borderColor: 'text.primary',
                 },
                 "&.Mui-focused fieldset": {
-                  borderColor: theme.palette.text.primary, // ✅ Keep border visible on focus
+                  borderColor: 'text.primary', // ✅ Keep border visible on focus
                   borderWidth: "1px",
                 },
               },

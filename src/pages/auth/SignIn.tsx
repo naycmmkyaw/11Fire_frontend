@@ -5,7 +5,6 @@ import {
   Typography,
   Container,
   Stack,
-  useTheme,
 } from '@mui/material';
 import { useAuth } from '../../context/AuthContext';
 import Logo from '../../assets/logo.png';
@@ -15,7 +14,6 @@ const SignIn: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
-  const theme = useTheme();
 
   const handleMicrosoftSignIn = async () => {
     setIsLoading(true);
@@ -48,7 +46,7 @@ const SignIn: React.FC = () => {
         display: 'grid',
         gridTemplateRows: 'auto 1fr auto',
         alignItems: 'center',
-        bgcolor: theme.palette.secondary.main,
+        bgcolor: 'secondary.main',
         px: 2,
       }}
     >
@@ -123,7 +121,7 @@ const SignIn: React.FC = () => {
             <Link
             to="/auth/signup"
             style={{
-                color: theme.palette.primary.main,
+                color: 'primary.main',
                 textDecoration: "none",
                 fontWeight: 500,
             }}

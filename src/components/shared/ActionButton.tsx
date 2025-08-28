@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button, type ButtonProps, useTheme } from '@mui/material';
+import { Button, type ButtonProps } from '@mui/material';
 
 interface ActionButtonProps extends Omit<ButtonProps, 'variant'> {
   variant?: 'primary' | 'secondary';
@@ -15,7 +15,6 @@ const ActionButton: React.FC<ActionButtonProps> = ({
   sx,
   ...props
 }) => {
-  const theme = useTheme();
 
   const getButtonStyles = () => {
     const baseStyles = {
@@ -31,10 +30,10 @@ const ActionButton: React.FC<ActionButtonProps> = ({
     if (variant === 'primary') {
       return {
         ...baseStyles,
-        bgcolor: theme.palette.primary.main,
+        bgcolor: 'primary.main',
         color: 'white',
         '&:hover': { 
-          bgcolor: theme.palette.primary.main,
+          bgcolor: 'primary.main',
           opacity: 0.9 
         },
       };
@@ -43,8 +42,8 @@ const ActionButton: React.FC<ActionButtonProps> = ({
     // Secondary variant
     return {
       ...baseStyles,
-      bgcolor: theme.palette.primary.light,
-      color: theme.palette.text.primary,
+      bgcolor: 'primary.light',
+      color: 'text.primary',
       '&:hover': { 
         border: 'none',
       },

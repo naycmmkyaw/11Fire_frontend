@@ -1,11 +1,10 @@
 import React from "react";
-import { Box, Typography, Avatar, useTheme } from "@mui/material";
+import { Box, Typography, Avatar } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import logo from "../../assets/logo.png"; 
 import ActionButton from "../../components/shared/ActionButton";
 
 const GroupOption = () => {
-  const theme = useTheme();
   const navigate = useNavigate();
 
   return (
@@ -13,7 +12,7 @@ const GroupOption = () => {
       sx={{
         height: "100vh",
         display: "flex",
-        bgcolor: theme.palette.secondary.main,
+        bgcolor: 'secondary.main',
         flexDirection: "column",
       }}
     >
@@ -25,7 +24,7 @@ const GroupOption = () => {
           alignItems: "center",
           px: 3,
           py: 1.5,
-          bgcolor: theme.palette.secondary.dark,
+          bgcolor: 'secondary.dark',
           borderBottom: '1px solid #d6cfc1',
         }}
       >
@@ -39,7 +38,7 @@ const GroupOption = () => {
             11Fire
           </Typography>
         </Box>
-        <Avatar sx={{ bgcolor: theme.palette.primary.main }}>N</Avatar>
+        <Avatar sx={{ bgcolor: 'primary.main' }}>N</Avatar>
       </Box>
 
       {/* Center Content */}
@@ -62,7 +61,7 @@ const GroupOption = () => {
           <Typography
             variant="h5"
             fontWeight={600}
-            sx={{ mb: 4, color: theme.palette.text.primary }}
+            sx={{ mb: 4, color: 'text.primary' }}
           >
             Create or Join Group
           </Typography>

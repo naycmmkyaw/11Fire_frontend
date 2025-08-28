@@ -1,19 +1,18 @@
 import React from "react";
-import { Box, Typography, Avatar, useTheme } from "@mui/material";
+import { Box, Typography, Avatar } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import logo from "../../assets/logo.png";
 import ActionButton from "../../components/shared/ActionButton";
 // import { selectRole } from "../api/swarm";
 
 const RoleOption = () => {
-  const theme = useTheme();
   const navigate = useNavigate();
 
   return (
     <Box
       sx={{
         height: "100vh",
-        bgcolor: theme.palette.secondary.main,
+        bgcolor: 'secondary.main',
         display: "flex",
         flexDirection: "column",
         fontFamily: "Poppins, sans-serif",
@@ -27,7 +26,7 @@ const RoleOption = () => {
           alignItems: "center",
           px: 3,
           py: 1.5,
-          bgcolor: theme.palette.secondary.dark,
+          bgcolor: 'secondary.dark',
           borderBottom: '1px solid #d6cfc1',
         }}
       >
@@ -41,7 +40,7 @@ const RoleOption = () => {
             11Fire
           </Typography>
         </Box>
-        <Avatar sx={{ bgcolor: theme.palette.primary.main }}>N</Avatar>
+        <Avatar sx={{ bgcolor: 'primary.main' }}>N</Avatar>
       </Box>
 
       {/* Main Content */}
@@ -66,7 +65,7 @@ const RoleOption = () => {
             fontWeight={600}
             sx={{
               mb: 4,
-              color: theme.palette.text.primary,
+              color: 'text.primary',
               textAlign: "center",
             }}
           >

@@ -14,8 +14,7 @@ import {
   TextField,
   Paper,
   Snackbar,
-  Divider,
-  useTheme
+  Divider,  
 } from "@mui/material";
 import DescriptionIcon from "@mui/icons-material/Description";
 import FolderIcon from "@mui/icons-material/Folder";
@@ -52,7 +51,6 @@ const formatSize = (size: number) => {
 const truncateCid = (cid: string) => cid.slice(0, 6) + "..." + cid.slice(-4);
 
 const FilesTabContent = () => {
-  const theme = useTheme();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -174,7 +172,7 @@ const FilesTabContent = () => {
     setGroupMenuAnchor(event.currentTarget);
   };
   return (
-    <Box sx={{ flexGrow: 1, bgcolor: theme.palette.secondary.main }}>
+    <Box>
       <PageHeader title="FILES" avatarText="N" />
 
       <Tabs

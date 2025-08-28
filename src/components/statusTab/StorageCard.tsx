@@ -77,7 +77,7 @@ const StorageCard: React.FC<StorageCardProps> = ({
       sx={{
         p: 3,
         borderRadius: 2,
-        bgcolor: "#FFFFFF",
+        bgcolor: "secondary.main",
         border: "1px solid #e5e7eb",
         height: "400px",
         display: "flex",
@@ -106,7 +106,7 @@ const StorageCard: React.FC<StorageCardProps> = ({
       <Box sx={{ position: 'absolute', top: 16, right: 16 }}>
         <IconButton
           onClick={handleSettingsClick}
-          sx={{ color: "#EB6464" }}
+          sx={{ color: "primary.main" }}
         >
           <SettingsIcon sx={{ fontSize: 28 }} />
         </IconButton>
@@ -127,7 +127,7 @@ const StorageCard: React.FC<StorageCardProps> = ({
         }}
       >
         <MenuItem onClick={handleSetStorageClick}>
-          <EditIcon sx={{ mr: 1, fontSize: 20, color: "#EB6464" }} />
+          <EditIcon sx={{ mr: 1, fontSize: 20, color: "primary.main" }} />
           Set storage
         </MenuItem>
       </Menu>

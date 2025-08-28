@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Typography } from '@mui/material';
+import { Paper,Box, Typography } from '@mui/material';
 
 interface UptimeGraphProps {
   uptime: number; // percentage (0-100)
@@ -85,7 +85,19 @@ const UptimeGraph: React.FC<UptimeGraphProps> = ({
   };
 
   return (
-    <Box sx={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column' }}>
+    <Paper
+      elevation={2}
+      sx={{
+        p: 3,
+        borderRadius: 2,
+        bgcolor: "secondary.main",
+        border: "1px solid #e5e7eb",
+        height: "400px",
+        display: "flex",
+        flexDirection: "column",
+        position: "relative",
+      }}
+    >
       {/* Title */}
       <Typography 
         variant="h6" 
@@ -169,7 +181,7 @@ const UptimeGraph: React.FC<UptimeGraphProps> = ({
           })}
         </svg>
       </Box>
-    </Box>
+    </Paper>
   );
 };
 

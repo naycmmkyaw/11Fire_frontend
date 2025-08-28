@@ -4,7 +4,6 @@ import {
   type ButtonProps, 
   Box, 
   CircularProgress, 
-  useTheme 
 } from '@mui/material';
 
 export interface AuthButtonProps extends Omit<ButtonProps, 'startIcon'> {
@@ -22,14 +21,12 @@ const AuthButton: React.FC<AuthButtonProps> = ({
   sx,
   ...props
 }) => {
-  const theme = useTheme();
-
   const getMicrosoftIcon = () => (
     <Box
       sx={{
         display: 'grid',
         placeItems: 'center',
-        bgcolor: theme.palette.primary.main,
+        bgcolor: 'primary.main',
         borderRadius: 1,
         width: 32,
         height: 32,
@@ -64,8 +61,8 @@ const AuthButton: React.FC<AuthButtonProps> = ({
       disabled={disabled || isLoading}
       startIcon={getProviderIcon()}
       sx={{
-        bgcolor: theme.palette.primary.main,
-        '&:hover': {bgcolor: theme.palette.primary.dark || theme.palette.primary.main},
+        bgcolor: 'primary.main',
+        '&:hover': {bgcolor: 'primary.dark'},
         color: 'common.white',
         textTransform: 'none',
         fontWeight: 600,
