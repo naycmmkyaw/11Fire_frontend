@@ -2,12 +2,11 @@ import React, { useState } from "react";
 import {
   Box,
   Typography,
-  Avatar,
   TextField,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
-import logo from "../../assets/logo.png";
 import ActionButton from "../../components/shared/ActionButton";
+import GroupHeader from "./GroupHeader";
 // import { joinSwarm } from "../api/swarm";
 
 const JoinGroup = () => {
@@ -43,29 +42,7 @@ const JoinGroup = () => {
       }}
     >
       {/* Header */}
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          px: 3,
-          py: 1.5,
-          bgcolor: 'secondary.dark',
-          borderBottom: '1px solid #d6cfc1',
-        }}
-      >
-        <Box display="flex" alignItems="center">
-          <img
-            src={logo}
-            alt="11Fire Logo"
-            style={{ width: 31, height: 50, marginRight: 8 }}
-          />
-          <Typography variant="h5" fontWeight={800} color="text.primary">
-            11Fire
-          </Typography>
-        </Box>
-        <Avatar sx={{ bgcolor: 'primary.main' }}>N</Avatar>
-      </Box>
+      <GroupHeader />
 
       {/* Form Section */}
       <Box
