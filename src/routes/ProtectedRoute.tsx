@@ -1,7 +1,6 @@
 import React from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
-import AuthPage from '../pages/AuthPage';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -12,7 +11,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
 
   // Show loading state while checking authentication
   if (isLoading) {
-    return <AuthPage isInitialLoading={true} />;
+    return null;
   }
 
   // Redirect to sign-in if no user is authenticated

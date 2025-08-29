@@ -16,8 +16,9 @@ interface AuthPageProps {
 const AuthPage: React.FC<AuthPageProps> = ({ isInitialLoading = false }) => {
   const [isLoading, setIsLoading] = useState(false);
   const location = useLocation();
+  const baseUrl = import.meta.env.VITE_BACKEND_API_URL;
 
-  const isSignIn = location.pathname === '/auth/signin';
+  const isSignIn = location.pathname === '/auth/signin' || location.pathname === '/';
   const showLoading = isInitialLoading || isLoading;
 
   const handleMicrosoftAuth = async () => {
@@ -27,7 +28,7 @@ const AuthPage: React.FC<AuthPageProps> = ({ isInitialLoading = false }) => {
     
     try {
       // Redirect to backend Microsoft OAuth endpoint
-      window.location.href = `${import.meta.env.VITE_BACKEND_API_URL}/auth/login`;
+      window.location.href = `${baseUrl}/auth/login`;
     } catch (error) {
       console.error('Failed to initiate OAuth:', error);
       setIsLoading(false);

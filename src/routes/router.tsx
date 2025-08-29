@@ -10,8 +10,9 @@ import ProtectedRoute from './ProtectedRoute';
 
 const Router = () => (
   <Routes>
-    <Route path="/" element={<ConditionalRedirect />} />
+    <Route path="/" element={<AuthPage />} />
     <Route path="/auth/*" element={<AuthPage />} />
+    <Route path="/redirect" element={<ConditionalRedirect />} />
 
     {/* Protected routes - require authentication */}
     <Route 
