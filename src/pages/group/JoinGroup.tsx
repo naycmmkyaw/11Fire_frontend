@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Box,
   Typography,
@@ -7,6 +7,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import ActionButton from "../../components/shared/ActionButton";
 import GroupHeader from "./GroupHeader";
+import Axios from "../../services/axiosInstance";
 
 const JoinGroup = () => {
   const navigate = useNavigate();
@@ -14,6 +15,76 @@ const JoinGroup = () => {
   const [password, setPassword] = useState("");
   const [nameError, setNameError] = useState("");
   const [passwordError, setPasswordError] = useState("");
+  const [isCheckingName, setIsCheckingName] = useState(false);
+  const [isCheckingPassword, setIsCheckingPassword] = useState(false);
+
+  const checkGroupName = async (groupName: string) => {
+    if (!groupName.trim()) return;
+    
+    setIsCheckingName(true);
+    setNameError("");
+    
+    try {
+      await Axios.post('/swarms/name-check', { name: groupName.trim() });
+      setNameError("Group not found");
+    } catch (error: any) {
+      if (error.response?.status === 400 && error.response?.data?.error === 'Group name already exists') {
+        setNameError("");
+      } else {
+        setNameError("Failed to check group name");
+      }
+    } finally {
+      setIsCheckingName(false);
+    }
+  };
+
+  const checkGroupPassword = async (groupName: string, groupPassword: string) => {
+    if (!groupName.trim() || !groupPassword) return;
+    
+    setIsCheckingPassword(true);
+    setPasswordError("");
+    
+    try {
+      await Axios.post('/swarms/password-check', { 
+        name: groupName.trim(), 
+        password: groupPassword 
+      });
+    } catch (error: any) {
+      if (error.response?.data?.error) {
+        setPasswordError(error.response.data.error);
+      } else {
+        setPasswordError("Failed to check password");
+      }
+    } finally {
+      setIsCheckingPassword(false);
+    }
+  };
+
+  // Debounced name checking - triggers 500ms after user stops typing
+  useEffect(() => {
+    if (name.trim()) {
+      const timeoutId = setTimeout(() => {
+        checkGroupName(name.trim());
+      }, 500);
+
+      return () => clearTimeout(timeoutId);
+    } else {
+      setNameError("");
+    }
+  }, [name]);
+
+  // Debounced password checking - triggers 500ms after user stops typing
+  useEffect(() => {
+    if (password && name.trim() && !nameError) {
+      const timeoutId = setTimeout(() => {
+        checkGroupPassword(name.trim(), password);
+      }, 500);
+
+      return () => clearTimeout(timeoutId);
+    } else if (!password) {
+      setPasswordError("");
+    }
+  }, [password, name, nameError]);
 
   const handleJoin = () => {
     setNameError("");
@@ -30,14 +101,9 @@ const JoinGroup = () => {
       setPasswordError('Password is required');
       hasError = true;
     }
-    if (password && password.length < 8) {
-      setPasswordError('Password must be at least 8 characters long');
-      hasError = true;
-    }
 
-    if (hasError) return;
+    if (hasError || isCheckingName || isCheckingPassword || nameError || passwordError) return;
 
-    // Navigate with state
     navigate('/role', { 
       state: { 
         action: 'join',
@@ -65,10 +131,8 @@ const JoinGroup = () => {
         fontFamily: "Poppins, sans-serif",
       }}
     >
-      {/* Header */}
       <GroupHeader />
 
-      {/* Form Section */}
       <Box
         sx={{
           flex: 1,
@@ -213,6 +277,7 @@ const JoinGroup = () => {
             <ActionButton
               variant="primary"
               onClick={handleJoin}
+              disabled={!!nameError || !!passwordError}
               sx={{
                 mb: 2,
               }}
