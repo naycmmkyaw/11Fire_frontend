@@ -1,9 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Typography,
   TextField,
-  CircularProgress,
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import ActionButton from '../../components/shared/ActionButton';
@@ -38,11 +37,18 @@ const CreateGroup = () => {
     }
   };
 
-  const handleNameBlur = async () => {
+  // Debounced name checking - triggers 500ms after user stops typing
+  useEffect(() => {
     if (name.trim()) {
-      await checkGroupName(name.trim());
+      const timeoutId = setTimeout(() => {
+        checkGroupName(name.trim());
+      }, 500);
+
+      return () => clearTimeout(timeoutId);
+    } else {
+      setNameError("");
     }
-  };
+  }, [name]);
 
   const handleCreate = () => {
     setNameError('');
@@ -137,41 +143,32 @@ const CreateGroup = () => {
           >
             Set Group Name
           </Typography>
-          <Box sx={{ position: 'relative' }}>
-            <TextField
-              fullWidth
-              placeholder="Enter name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              onFocus={handleNameFocus}
-              onBlur={handleNameBlur}
-              variant="outlined"
-              error={!!nameError}
-              disabled={isCheckingName}
-              sx={{
-                "& .MuiOutlinedInput-root": {
-                  borderRadius: 2,
-                  "& fieldset": {
-                    borderColor: nameError ? 'error.main' : '#d6cfc1',
-                  },
-                  "&:hover fieldset": {
-                    borderColor: nameError ? 'error.main' : 'text.primary',
-                  },
-                  "&.Mui-focused fieldset": {
-                    borderColor: nameError ? 'error.main' : 'text.primary',
-                    borderWidth: "1px",
-                  },
-                  "&.Mui-disabled": {
-                    "& fieldset": {
-                      borderColor: '#d6cfc1',
-                    },
-                  },
+          <TextField
+            fullWidth
+            placeholder="Enter name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            onFocus={handleNameFocus}
+            variant="outlined"
+            error={!!nameError}
+            sx={{
+              "& .MuiOutlinedInput-root": {
+                borderRadius: 2,
+                "& fieldset": {
+                  borderColor: nameError ? 'error.main' : '#d6cfc1',
                 },
-                input: { py: 1.5 },
-                mb: 0.5,
-              }}
-            />
-          </Box>
+                "&:hover fieldset": {
+                  borderColor: nameError ? 'error.main' : 'text.primary',
+                },
+                "&.Mui-focused fieldset": {
+                  borderColor: nameError ? 'error.main' : 'text.primary',
+                  borderWidth: "1px",
+                },
+              },
+              input: { py: 1.5 },
+              mb: 0.5,
+            }}
+          />
           {nameError && (
             <Typography
               sx={{
@@ -252,7 +249,7 @@ const CreateGroup = () => {
             <ActionButton
               variant="primary"
               onClick={handleCreate}
-              disabled={!!nameError}
+              disabled={!!nameError || !!passwordError}
               sx={{
                 mb: 2,
               }}
