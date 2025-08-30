@@ -1,10 +1,9 @@
-import React from 'react';
 import { BrowserRouter } from 'react-router-dom';
 import { ThemeProvider } from '@mui/material/styles';
 import { CssBaseline } from '@mui/material';
-import { AuthProvider } from './context/AuthContext';
+import { AuthProvider } from './context/AuthProvider';
 import { theme } from './theme/theme';
-import AppRouter from './layout/router';
+import Router from './routes/router';
 
 function App() {
   return (
@@ -12,7 +11,7 @@ function App() {
       <CssBaseline />
       <AuthProvider>
         <BrowserRouter>
-          <AppRouter />
+          <Router />
         </BrowserRouter>
       </AuthProvider>
     </ThemeProvider>

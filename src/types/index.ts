@@ -1,8 +1,8 @@
 export interface User {
-  id: string;
-  email: string;
-  name: string;
-  avatar?: string;
+  id: string;                    // Maps to backend._id
+  email: string;                 // Maps to backend.email
+  name: string;                  // Maps to backend.username
+  avatar?: string;              // Generated on frontend (not in backend)
 }
 
 export interface Group {

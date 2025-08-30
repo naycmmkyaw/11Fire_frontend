@@ -2,42 +2,57 @@ import React, { useState } from 'react';
 import {
   Box,
   Typography,
-  Avatar,
   TextField,
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import logo from "../../assets/logo.png";
 import ActionButton from '../../components/shared/ActionButton';
-// import { createSwarm } from '../api/swarm';
+import GroupHeader from './GroupHeader';
 
 const CreateGroup = () => {
-  const [swarmId, setSwarmId] = useState("");
+  const [name, setName] = useState("");
   const [password, setPassword] = useState("");
-  // const [error, setError] = useState("");
+  const [nameError, setNameError] = useState("");
+  const [passwordError, setPasswordError] = useState("");
   const navigate = useNavigate();
 
-  // const handleCreate = async () => {
-  //   setError('');
-  //   if (!password || password.length < 8) {
-  //     setError('Password must be at least 8 characters long');
-  //     return;
-  //   }
-  //   try {
-  //   //   const res = await createSwarm(password);
-  //   //   const swarmId = res.data.swarmId;
-  //   //   alert(`Swarm created!
+  const handleCreate = () => {
+    let hasError = false;
 
-  //   //     Swarm ID: ${swarmId}
-  //   //     Password: ${password}
-  //   //     Make sure to copy and save both.`);
-  //   //   localStorage.setItem('swarmId', swarmId);
-  //     navigate('/user-option');
-  //   } catch (err) {
-  //     setError('Swarm creation failed');
-  //   }
-  // };
+    if (!name.trim()) {
+      setNameError('Group name is required');
+      hasError = true;
+    }
+    
+    if (!password) {
+      setPasswordError('Password is required');
+      hasError = true;
+    }
+    if (password && password.length < 8) {
+      setPasswordError('Password must be at least 8 characters long');
+      hasError = true;
+    }
 
-    return (
+    if (hasError) return;
+
+    // Navigate with state
+    navigate('/role', { 
+      state: { 
+        action: 'create',
+        groupName: name.trim(),
+        password: password 
+      } 
+    });
+  };
+
+  const handleNameFocus = () => {
+    setNameError('');
+  };
+
+  const handlePasswordFocus = () => {
+    setPasswordError('');
+  };
+
+  return (
     <Box
       sx={{
         height: "100vh",
@@ -48,29 +63,7 @@ const CreateGroup = () => {
       }}
     >
       {/* Header */}
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          px: 3,
-          py: 1.5,
-          bgcolor: 'secondary.dark',
-          borderBottom: '1px solid #d6cfc1',
-        }}
-      >
-        <Box display="flex" alignItems="center">
-          <img
-            src={logo}
-            alt="11Fire Logo"
-            style={{ width: 31, height: 50, marginRight: 8 }}
-          />
-          <Typography variant="h5" fontWeight={800} color="text.primary">
-            11Fire
-          </Typography>
-        </Box>
-        <Avatar sx={{ bgcolor: 'primary.main' }}>N</Avatar>
-      </Box>
+      <GroupHeader />
 
       {/* Form Section */}
       <Box
@@ -113,28 +106,45 @@ const CreateGroup = () => {
           </Typography>
           <TextField
             fullWidth
-            placeholder="Enter name" // or "Enter passcode"
-            value={swarmId} // or password
-            onChange={(e) => setSwarmId(e.target.value)} // or setPassword
+            placeholder="Enter name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            onFocus={handleNameFocus}
             variant="outlined"
+            error={!!nameError}
             sx={{
               "& .MuiOutlinedInput-root": {
                 borderRadius: 2,
                 "& fieldset": {
-                  borderColor: '#d6cfc1',
+                  borderColor: nameError ? 'error.main' : '#d6cfc1',
                 },
                 "&:hover fieldset": {
-                  borderColor: 'text.primary',
+                  borderColor: nameError ? 'error.main' : 'text.primary',
                 },
                 "&.Mui-focused fieldset": {
-                  borderColor: 'text.primary',
+                  borderColor: nameError ? 'error.main' : 'text.primary',
                   borderWidth: "1px",
                 },
               },
               input: { py: 1.5 },
-              mb: 2,
+              mb: 0.5,
             }}
           />
+          {nameError && (
+            <Typography
+              sx={{
+                color: 'error.main',
+                fontSize: '0.75rem',
+                mb: 2,
+                mt: 0.5,
+              }}
+            >
+              {nameError}
+            </Typography>
+          )}
+          {!nameError && (
+            <Box sx={{ mb: 2 }} />
+          )}
 
           <Typography
             sx={{
@@ -149,27 +159,45 @@ const CreateGroup = () => {
           <TextField
             fullWidth
             placeholder="Enter passcode"
-            value={password} // or password
-            onChange={(e) => setPassword(e.target.value)} // or setPassword
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            onFocus={handlePasswordFocus}
             variant="outlined"
+            type="password"
+            error={!!passwordError}
             sx={{
               "& .MuiOutlinedInput-root": {
                 borderRadius: 2,
                 "& fieldset": {
-                  borderColor: '#d6cfc1',
+                  borderColor: passwordError ? 'error.main' : '#d6cfc1',
                 },
                 "&:hover fieldset": {
-                  borderColor: 'text.primary',
+                  borderColor: passwordError ? 'error.main' : 'text.primary',
                 },
                 "&.Mui-focused fieldset": {
-                  borderColor: 'text.primary', // ✅ Keep border visible on focus
+                  borderColor: passwordError ? 'error.main' : 'text.primary',
                   borderWidth: "1px",
                 },
               },
               input: { py: 1.5 },
-              mb: 2,
+              mb: 0.5,
             }}
           />
+          {passwordError && (
+            <Typography
+              sx={{
+                color: 'error.main',
+                fontSize: '0.75rem',
+                mb: 2,
+                mt: 0.5,
+              }}
+            >
+              {passwordError}
+            </Typography>
+          )}
+          {!passwordError && (
+            <Box sx={{ mb: 2 }} />
+          )}
 
           <Box
             sx={{
@@ -181,9 +209,9 @@ const CreateGroup = () => {
           >
             <ActionButton
               variant="primary"
-              onClick={() => navigate("/role")}
+              onClick={handleCreate}
               sx={{
-                mb: 2, // vertical spacing
+                mb: 2,
               }}
             >
               Create
