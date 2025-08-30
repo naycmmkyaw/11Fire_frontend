@@ -47,10 +47,9 @@ const RoleOption = () => {
       
       // Handle backend error response
       if (error.response?.data?.error) {
-        const errorData = error.response.data;
-        setError(errorData.error);
+        setError(error.response.data.error);
       } else {
-        setError(`Failed to ${state.action} swarm. Please try again.`);
+        setError(`Failed to ${state.action} group. Please try again.`);
       }
     } finally {
       setIsLoading(false);
@@ -80,10 +79,9 @@ const RoleOption = () => {
       
       // Handle backend error response
       if (error.response?.data?.error) {
-        const errorData = error.response.data;
-        setError(errorData.error);
+        setError(error.response.data.error);
       } else {
-        setError(`Failed to ${state.action} swarm. Please try again.`);
+        setError(`Failed to ${state.action} group. Please try again.`);
       }
     } finally {
       setIsLoading(false);
