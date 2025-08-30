@@ -1,54 +1,22 @@
-import React, { useState } from "react";
-import {
-  Box,
-  Typography,
-  Menu,
-  MenuItem,
-  ListItemIcon,
-  ListItemText,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Button,
-  TextField,
-  Paper,
-  Snackbar,
-  Divider,  
-} from "@mui/material";
-import DescriptionIcon from "@mui/icons-material/Description";
-import FolderIcon from "@mui/icons-material/Folder";
-import AddIcon from "@mui/icons-material/Add";
-import SearchIcon from "@mui/icons-material/Search";
-import FileDownloadIcon from "@mui/icons-material/FileDownload";
-import EditIcon from "@mui/icons-material/Edit";
-import DeleteIcon from "@mui/icons-material/Delete";
-import Tabs from "@mui/material/Tabs";
-import Tab from "@mui/material/Tab";
+import React, { useState, useEffect } from "react";
+import { Box, Snackbar } from "@mui/material";
 import EmptyFilesCard from "../../components/files/EmptyFilesCard";
 import FilesTable from "../../components/files/FilesTable";
 import ResponsiveHeader from "../../components/shared/ResponsiveHeader";
+import FileTabs from "../../components/files/FileTabs";
+import SearchBar from "../../components/files/SearchBar";
+import GroupDropdown from "../../components/files/GroupDropdown";
+import AddButton from "../../components/files/AddButton";
+import UploadMenu from "../../components/files/UploadMenu";
+import FileActionsMenu from "../../components/files/FileActionsMenu";
+import UploadDialog from "../../components/files/UploadDialog";
+import useIsMobile from "../../hooks/useMobile";
+import type { FileEntry } from "../../types";
 // import { uploadFileToIPFS } from "../api/upload";
 // import { useEffect } from "react";
 // import { fetchFiles } from "../api/files";
 // import { downloadFile } from "../api/download";
 // import { deleteFile } from "../api/delete";
-
-interface FileEntry {
-  name: string;
-  cid: string;
-  size: string;
-  date: string;
-  isFile: boolean;
-}
-
-const formatSize = (size: number) => {
-  if (size >= 1024 * 1024) return (size / (1024 * 1024)).toFixed(1) + " MB";
-  if (size >= 1024) return (size / 1024).toFixed(1) + " KB";
-  return size + " B";
-};
-
-const truncateCid = (cid: string) => cid.slice(0, 6) + "..." + cid.slice(-4);
 
 interface FilesTabContentProps {
   selectedTab: string;
@@ -57,12 +25,26 @@ interface FilesTabContentProps {
   onTabChange?: (tab: string) => void;
 }
 
+// Utility functions
+const formatSize = (size: number): string => {
+  if (size >= 1024 * 1024) return `${(size / (1024 * 1024)).toFixed(1)} MB`;
+  if (size >= 1024) return `${(size / 1024).toFixed(1)} KB`;
+  return `${size} B`;
+};
+
+const truncateCid = (cid: string): string => 
+  `${cid.slice(0, 6)}...${cid.slice(-4)}`;
+
+// Main component
 const FilesTabContent: React.FC<FilesTabContentProps> = ({
   selectedTab,
   setSelectedTab,
   isProviderDashboard,
   onTabChange
 }) => {
+  const isMobile = useIsMobile();
+  
+  // State
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -71,14 +53,11 @@ const FilesTabContent: React.FC<FilesTabContentProps> = ({
   const [isFileUpload, setIsFileUpload] = useState(true);
   const [files, setFiles] = useState<FileEntry[]>([]);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
-  const [fileMenuAnchor, setFileMenuAnchor] = useState<null | HTMLElement>(
-    null
-  );
+  const [fileMenuAnchor, setFileMenuAnchor] = useState<null | HTMLElement>(null);
   const [activeFileIndex, setActiveFileIndex] = useState<number | null>(null);
   const [isRenameMode, setIsRenameMode] = useState(false);
-  const [groupMenuAnchor, setGroupMenuAnchor] = useState<null | HTMLElement>(
-    null
-  );
+  const [groupMenuAnchor, setGroupMenuAnchor] = useState<null | HTMLElement>(null);
+  const [selectedFiles, setSelectedFiles] = useState<Set<number>>(new Set());
 
   // useEffect(() => {
   //   fetchFiles().then((data) => {
@@ -93,8 +72,59 @@ const FilesTabContent: React.FC<FilesTabContentProps> = ({
   //   });
   // }, []);
 
+  // Ensure activeFileIndex is valid after files array changes
+  useEffect(() => {
+    if (activeFileIndex !== null && activeFileIndex >= files.length) {
+      setActiveFileIndex(null);
+      setFileMenuAnchor(null);
+    }
+  }, [files, activeFileIndex]);
+
+  // Close menu if activeFileIndex becomes invalid
+  useEffect(() => {
+    if (activeFileIndex === null && fileMenuAnchor !== null) {
+      setFileMenuAnchor(null);
+    }
+  }, [activeFileIndex, fileMenuAnchor]);
+
+  // Clear invalid selections when files array changes
+  useEffect(() => {
+    const validIndices = new Set<number>();
+    for (let i = 0; i < files.length; i++) {
+      if (selectedFiles.has(i)) {
+        validIndices.add(i);
+      }
+    }
+    if (validIndices.size !== selectedFiles.size) {
+      setSelectedFiles(validIndices);
+    }
+  }, [files, selectedFiles]);
+
+  // Event handlers
   const handleAddClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);
+  };
+
+  const handleSelectAll = (checked: boolean) => {
+    if (checked) {
+      const allIndices = new Set<number>();
+      for (let i = 0; i < files.length; i++) {
+        allIndices.add(i);
+      }
+      setSelectedFiles(allIndices);
+    } else {
+      setSelectedFiles(new Set());
+    }
+  };
+
+  const handleSelectFile = (index: number, checked: boolean) => {
+    const newSelected = new Set(selectedFiles);
+    if (checked) {
+      newSelected.add(index);
+    } else {
+      newSelected.delete(index);
+    }
+    setSelectedFiles(newSelected);
   };
 
   const handleClose = () => setAnchorEl(null);
@@ -103,6 +133,8 @@ const FilesTabContent: React.FC<FilesTabContentProps> = ({
     setAnchorEl(null);
     setIsFileUpload(true);
     setIsRenameMode(false);
+    setSelectedFile(null); // Clear any previous selectedFile
+    setActiveFileIndex(null); // Clear any previous activeFileIndex
     const input = document.createElement("input");
     input.type = "file";
     input.onchange = (e: Event) => {
@@ -122,6 +154,8 @@ const FilesTabContent: React.FC<FilesTabContentProps> = ({
     setAnchorEl(null);
     setIsFileUpload(false);
     setIsRenameMode(false);
+    setSelectedFile(null); // Clear any previous selectedFile
+    setActiveFileIndex(null); // Clear any previous activeFileIndex
     const input = document.createElement("input");
     input.type = "file";
     input.webkitdirectory = true;
@@ -150,9 +184,11 @@ const FilesTabContent: React.FC<FilesTabContentProps> = ({
         name: fileName,
       };
       setFiles(updatedFiles);
-    } else if (selectedFile) {
+    } else if (selectedFile && !isRenameMode) {
       try {
-        const cid = await uploadFileToIPFS(selectedFile);
+        // const cid = await uploadFileToIPFS(selectedFile);
+        // For now, create a mock CID since the function is commented out
+        const cid = "mock_cid_" + Date.now();
         const newFile: FileEntry = {
           name: fileName,
           cid,
@@ -170,6 +206,7 @@ const FilesTabContent: React.FC<FilesTabContentProps> = ({
     setDialogOpen(false);
     setIsRenameMode(false);
     setActiveFileIndex(null);
+    setSelectedFile(null);
   };
 
   const handleCopyCid = (cid: string) => {
@@ -177,346 +214,161 @@ const FilesTabContent: React.FC<FilesTabContentProps> = ({
     setSnackbarOpen(true);
   };
 
-  const handleSnackbarClose = () => {
-    setSnackbarOpen(false);
-  };
+  const handleSnackbarClose = () => setSnackbarOpen(false);
+
   const handleGroupButtonClick = (event: React.MouseEvent<HTMLElement>) => {
     setGroupMenuAnchor(event.currentTarget);
   };
+
+  const handleFileMenuOpen = (event: React.MouseEvent<HTMLElement>, index: number) => {
+    setFileMenuAnchor(event.currentTarget);
+    setActiveFileIndex(index);
+  };
+
+  const handleFileMenuClose = () => {
+    setFileMenuAnchor(null);
+    setActiveFileIndex(null);
+  };
+
+  const handleRename = () => {
+    if (activeFileIndex !== null) {
+      setIsRenameMode(true);
+      setSelectedFile(null); // Clear selectedFile when entering rename mode
+      setFileName(files[activeFileIndex].name);
+      setDialogOpen(true);
+      // Close the menu but preserve activeFileIndex for the rename operation
+      setFileMenuAnchor(null);
+      // Don't call handleFileMenuClose() here as it would reset activeFileIndex
+    } else {
+      handleFileMenuClose();
+    }
+  };
+
+  const handleDownload = () => {
+    if (activeFileIndex !== null) {
+      const file = files[activeFileIndex];
+      // downloadFile(file.cid, file.name);
+      // For now, just log the download action since the function is commented out
+      console.log("Download file:", file.name, file.cid);
+      
+      // Close the dropdown menu after download action
+      setFileMenuAnchor(null);
+      setActiveFileIndex(null);
+    }
+  };
+
+  const handleDelete = () => {
+    if (activeFileIndex !== null) {
+      // deleteFile(files[activeFileIndex].cid)
+      //   .then(() => {
+      //     const updated = [...files];
+      //     updated.splice(activeFileIndex, 1);
+      //     setFiles(updated);
+      //   })
+      //   .catch((err) => alert("Failed to delete file"));
+      // For now, just remove from local state since the function is commented out
+      const updated = [...files];
+      updated.splice(activeFileIndex, 1);
+      setFiles(updated);
+      
+      // Close the dropdown menu after deletion
+      setFileMenuAnchor(null);
+      setActiveFileIndex(null);
+    }
+  };
+
+  const handleDialogClose = () => {
+    setDialogOpen(false);
+    setIsRenameMode(false);
+    setActiveFileIndex(null);
+    setSelectedFile(null);
+    setFileName("");
+    setFileSize("");
+  };
+
   return (
     <Box>
-              <ResponsiveHeader 
-          title="FILES" 
-          avatarText="N" 
-          selectedTab={selectedTab}
-          setSelectedTab={setSelectedTab}
-          isProviderDashboard={isProviderDashboard}
-          onTabChange={onTabChange}
-        />
+      <ResponsiveHeader 
+        title={isMobile ? "Files" : "FILES"} 
+        avatarText="N" 
+        selectedTab={selectedTab}
+        setSelectedTab={setSelectedTab}
+        isProviderDashboard={isProviderDashboard}
+        onTabChange={onTabChange}
+      />
 
-      <Tabs
-        value={0}
-        textColor="inherit"
-        indicatorColor="primary"
-        sx={{ mb: 2 }}
-      >
-        <Tab
-          label={
-            <Typography
-              sx={{
-                fontWeight: 500,
-                color: "#ef4444",
-                textTransform: "none",
-                fontSize: "1.2rem",
-              }}
-            >
-              My files
-            </Typography>
-          }
-        />
-        <Tab
-          label={
-            <Typography
-              sx={{
-                fontWeight: 500,
-                color: "#000",
-                textTransform: "none",
-                fontSize: "1.2rem",
-              }}
-            >
-              Shared with me
-            </Typography>
-          }
-        />
-      </Tabs>
+      <FileTabs isMobile={isMobile} />
 
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          mb: 3,
-        }}
-      >
-        <Paper
-          elevation={0}
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            bgcolor: "#f1e9dd",
-            borderRadius: 2,
-            width: 500,
-            height: 36,
-            px: 2,
-          }}
-        >
-          <SearchIcon sx={{ color: "#5f5a54", mr: 1 }} />
-          <TextField
-            placeholder="Search"
-            variant="standard"
-            InputProps={{
-              disableUnderline: true,
-              sx: { fontSize: "0.9rem", color: "#6B7280" },
-            }}
-            fullWidth
-          />
-        </Paper>
-
+      <Box sx={{
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
+        mb: 3,
+      }}>
         <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-          <Button
-            onClick={handleGroupButtonClick}
-            sx={{
-              borderRadius: 2,
-              bgcolor: "#fff7ed",
-              border: "1px solid #b5b5b5",
-              px: 3,
-              height: 36,
-              fontWeight: 500,
-              fontSize: "1rem",
-              color: "#333",
-              textTransform: "none",
-            }}
-          >
-            Nay Che’s group
-          </Button>
-          <Menu
-            anchorEl={groupMenuAnchor}
-            open={Boolean(groupMenuAnchor)}
-            onClose={() => setGroupMenuAnchor(null)}
-            PaperProps={{
-              sx: {
-                bgcolor: "#fff5e9",
-                borderRadius: 3,
-                px: 2,
-                py: 1.5,
-                minWidth: 200,
-                boxShadow: 3,
-              },
-            }}
-          >
-            <Typography
-              sx={{ fontWeight: 700, color: "#ef4444", px: 1.5, pb: 1, fontSize: "1.2rem" }}
-            >
-              Nay Che’s group
-            </Typography>
-            <Typography sx={{ px: 1.5, pb: 1, color: "#333" }}>
-              Su Lei’s group
-            </Typography>
-            <Divider sx={{ my: 1 }} />
-            <MenuItem>
-              <AddIcon fontSize="small" sx={{ color: "#ef4444", mr: 1 }} />
-              Create new
-            </MenuItem>
-            <MenuItem>
-              <AddIcon fontSize="small" sx={{ color: "#ef4444", mr: 1 }} />
-              Join group
-            </MenuItem>
-          </Menu>
-          <Button
-            variant="contained"
-            startIcon={<AddIcon />}
-            onClick={handleAddClick}
-            sx={{
-              bgcolor: "#ef4444",
-              color: "#fff",
-              borderRadius: 2,
-              textTransform: "none",
-              px: 3,
-              height: 36,
-            }}
-          >
-            Add
-          </Button>
+          {isMobile && (
+            <GroupDropdown
+              anchorEl={groupMenuAnchor}
+              onOpen={handleGroupButtonClick}
+              onClose={() => setGroupMenuAnchor(null)}
+              isMobile={isMobile}
+            />
+          )}
+          {!isMobile && <SearchBar />}
+        </Box>
+        
+        <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+          {!isMobile && (
+            <GroupDropdown
+              anchorEl={groupMenuAnchor}
+              onOpen={handleGroupButtonClick}
+              onClose={() => setGroupMenuAnchor(null)}
+              isMobile={isMobile}
+            />
+          )}
+          <AddButton onClick={handleAddClick} />
         </Box>
       </Box>
 
       {files.length === 0 ? (
-        <EmptyFilesCard />
+        <EmptyFilesCard isMobile={isMobile} />
       ) : (
         <FilesTable
           files={files}
           onCopyCid={handleCopyCid}
-          onOpenFileMenu={(e, idx) => {
-            setFileMenuAnchor(e.currentTarget);
-            setActiveFileIndex(idx);
-          }}
+          onOpenFileMenu={handleFileMenuOpen}
+          isMobile={isMobile}
+          selectedFiles={selectedFiles}
+          onSelectAll={handleSelectAll}
+          onSelectFile={handleSelectFile}
         />
       )}
 
-      <Menu
+      {/* Menus and Dialogs */}
+      <UploadMenu
         anchorEl={anchorEl}
-        open={Boolean(anchorEl)}
         onClose={handleClose}
-        PaperProps={{
-          sx: {
-            bgcolor: "#fff7ed",
-            boxShadow: 3,
-            borderRadius: 3,
-            px: 1,
-            py: 0.5,
-          },
-        }}
-      >
-        <MenuItem
-          onClick={handleFileUploadClick}
-          sx={{ borderRadius: "12px", "&:hover": { bgcolor: "#f3ede1" } }}
-        >
-          <ListItemIcon>
-            <DescriptionIcon fontSize="small" sx={{ color: "#e17d5f" }} />
-          </ListItemIcon>
-          <ListItemText primary="Upload File" />
-        </MenuItem>
-        <MenuItem
-          onClick={handleFolderUploadClick}
-          sx={{ borderRadius: "12px", "&:hover": { bgcolor: "#f3ede1" } }}
-        >
-          <ListItemIcon>
-            <FolderIcon fontSize="small" sx={{ color: "#e17d5f" }} />
-          </ListItemIcon>
-          <ListItemText primary="Upload Folder" />
-        </MenuItem>
-      </Menu>
+        onFileUpload={handleFileUploadClick}
+        onFolderUpload={handleFolderUploadClick}
+      />
 
-      <Menu
+      <FileActionsMenu
         anchorEl={fileMenuAnchor}
-        open={Boolean(fileMenuAnchor)}
-        onClose={() => {
-          setFileMenuAnchor(null);
-          setActiveFileIndex(null);
-        }}
-        PaperProps={{
-          sx: {
-            bgcolor: "#fff7ed",
-            boxShadow: 3,
-            borderRadius: 3,
-            px: 1,
-            py: 0.5,
-          },
-        }}
-      >
-        <MenuItem
-          onClick={() => {
-            if (activeFileIndex !== null) {
-              setIsRenameMode(true);
-              setFileName(files[activeFileIndex].name);
-              setDialogOpen(true);
-            }
-            setFileMenuAnchor(null);
-          }}
-          sx={{ borderRadius: "12px", "&:hover": { bgcolor: "#f3ede1" } }}
-        >
-          <ListItemIcon>
-            <EditIcon fontSize="small" sx={{ color: "#e17d5f" }} />
-          </ListItemIcon>
-          <ListItemText primary="Rename" />
-        </MenuItem>
-        <MenuItem
-          onClick={() => {
-            if (activeFileIndex !== null) {
-              const file = files[activeFileIndex];
-              downloadFile(file.cid, file.name);
-            }
-          }}
-          sx={{ borderRadius: "12px", "&:hover": { bgcolor: "#f3ede1" } }}
-        >
-          <ListItemIcon>
-            <FileDownloadIcon fontSize="small" sx={{ color: "#e17d5f" }} />
-          </ListItemIcon>
-          <ListItemText primary="Download" />
-        </MenuItem>
-        <MenuItem
-          onClick={() => {
-            if (activeFileIndex !== null) {
-              const file = files[activeFileIndex];
-              deleteFile(file.cid)
-                .then(() => {
-                  const updated = [...files];
-                  updated.splice(activeFileIndex, 1);
-                  setFiles(updated);
-                })
-                .catch((err) => alert("Failed to delete file"));
-            }
-          }}
-          sx={{ borderRadius: "12px", "&:hover": { bgcolor: "#f3ede1" } }}
-        >
-          <ListItemIcon>
-            <DeleteIcon fontSize="small" sx={{ color: "#e17d5f" }} />
-          </ListItemIcon>
-          <ListItemText primary="Delete" />
-        </MenuItem>
-      </Menu>
+        onClose={handleFileMenuClose}
+        onRename={handleRename}
+        onDownload={handleDownload}
+        onDelete={handleDelete}
+      />
 
-      <Dialog
+      <UploadDialog
         open={dialogOpen}
-        onClose={() => {
-          setDialogOpen(false);
-          setIsRenameMode(false);
-        }}
-        PaperProps={{
-          sx: {
-            borderRadius: 3,
-            px: 4,
-            pt: 3,
-            pb: 2,
-            bgcolor: "#fff7ed",
-            minWidth: 400,
-          },
-        }}
-      >
-        <DialogTitle sx={{ fontWeight: 600, fontSize: "1.4rem", mb: 1 }}>
-          {isRenameMode
-            ? "Rename"
-            : isFileUpload
-            ? "File Upload"
-            : "Folder Upload"}
-        </DialogTitle>
-        <DialogContent>
-          <Typography sx={{ mb: 1, fontSize: "1rem" }}>
-            Confirm file name
-          </Typography>
-          <TextField
-            fullWidth
-            variant="outlined"
-            label="Name"
-            value={fileName}
-            onChange={(e) => setFileName(e.target.value)}
-            sx={{ bgcolor: "#fff7ed", borderRadius: 2 }}
-          />
-        </DialogContent>
-        <DialogActions
-          sx={{
-            px: 3,
-            pb: 2,
-            pt: 1,
-            display: "flex",
-            justifyContent: "flex-end",
-            gap: 2,
-          }}
-        >
-          <Button
-            variant="outlined"
-            onClick={() => {
-              setDialogOpen(false);
-              setIsRenameMode(false);
-            }}
-            sx={{ borderRadius: 2, color: "#3c3c3c", borderColor: "#ccc" }}
-          >
-            Cancel
-          </Button>
-          <Button
-            variant="contained"
-            onClick={handleUpload}
-            sx={{
-              borderRadius: 2,
-              bgcolor: "color.primary",
-              color: "#000",
-              "&:hover": { bgcolor: "#f8a07a" },
-            }}
-          >
-            {isRenameMode ? "Rename" : "Upload"}
-          </Button>
-        </DialogActions>
-      </Dialog>
+        onClose={handleDialogClose}
+        fileName={fileName}
+        setFileName={setFileName}
+        isRenameMode={isRenameMode}
+        isFileUpload={isFileUpload}
+        onSubmit={handleUpload}
+      />
 
       <Snackbar
         open={snackbarOpen}
