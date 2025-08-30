@@ -1,0 +1,41 @@
+import React from "react";
+import { Box } from "@mui/material";
+import useIsMobile from "../../hooks/useMobile";
+import MobileHeader from "./MobileHeader";
+import PageHeader from "./PageHeader";
+
+interface ResponsiveHeaderProps {
+  title: string;
+  avatarText: string;
+  selectedTab: string;
+  setSelectedTab: (tab: string) => void;
+  isProviderDashboard: boolean;
+  onTabChange?: (tab: string) => void;
+}
+
+const ResponsiveHeader: React.FC<ResponsiveHeaderProps> = ({
+  title,
+  avatarText,
+  selectedTab,
+  setSelectedTab,
+  isProviderDashboard,
+  onTabChange,
+}) => {
+  const isMobile = useIsMobile();
+
+  if (isMobile) {
+    return (
+      <MobileHeader
+        title={title}
+        selectedTab={selectedTab}
+        setSelectedTab={setSelectedTab}
+        isProviderDashboard={isProviderDashboard}
+        onTabChange={onTabChange}
+      />
+    );
+  }
+
+  return <PageHeader title={title} avatarText={avatarText} />;
+};
+
+export default ResponsiveHeader;

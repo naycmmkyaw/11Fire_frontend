@@ -3,15 +3,23 @@ import { Box, Paper } from "@mui/material";
 import UptimeGraph from "../../components/statusTab/UptimeGraph";
 import StorageCard from "../../components/statusTab/StorageCard";
 import ConnectionStatusCard from "../../components/statusTab/ConnectionStatusCard";
-import PageHeader from "../../components/shared/PageHeader";
+import ResponsiveHeader from "../../components/shared/ResponsiveHeader";
 import MetricsGrid from "../../components/statusTab/MetricsGrid";
 import MetricCard from "../../components/statusTab/MetricCard";
 
 interface StatusTabProps {
+  selectedTab: string;
+  setSelectedTab: (tab: string) => void;
+  isProviderDashboard: boolean;
   onTabChange?: (tab: string) => void;
 }
 
-const StatusTab = ({ onTabChange }: StatusTabProps) => {
+const StatusTab: React.FC<StatusTabProps> = ({ 
+  selectedTab, 
+  setSelectedTab, 
+  isProviderDashboard, 
+  onTabChange 
+}) => {
   // State to track connection status
   const [isConnected, setIsConnected] = useState(true);
 
@@ -83,7 +91,14 @@ const StatusTab = ({ onTabChange }: StatusTabProps) => {
 
   return (
     <Box sx={{ p: 0 }}>
-      <PageHeader title="STATUS" avatarText="N" />
+      <ResponsiveHeader 
+        title="STATUS" 
+        avatarText="N" 
+        selectedTab={selectedTab}
+        setSelectedTab={setSelectedTab}
+        isProviderDashboard={isProviderDashboard}
+        onTabChange={onTabChange}
+      />
 
       <ConnectionStatusCard 
         isConnected={isConnected}

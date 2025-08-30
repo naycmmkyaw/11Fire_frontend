@@ -1,5 +1,6 @@
 import React from "react";
 import { Box, Typography, Paper, Link} from "@mui/material";
+import useIsMobile from "../../hooks/useMobile";
 
 interface ConnectionStatusCardProps {
   isConnected: boolean;
@@ -10,6 +11,7 @@ const ConnectionStatusCard: React.FC<ConnectionStatusCardProps> = ({
   isConnected,
   onSetupClick,
 }) => {
+  const isMobile = useIsMobile();
   if (isConnected) {
     return (
       <Paper
@@ -28,10 +30,21 @@ const ConnectionStatusCard: React.FC<ConnectionStatusCardProps> = ({
           Connected to Peers
         </Typography>
         <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
-          <Typography variant="body1" sx={{ color: "#000000" }}>
-            <strong>Peer ID:</strong>{" "}
-            12D3KooWQJtfU4jS8u8nsUvVxRMeTeRY5qBtBHRtxMqsKFYDkJkp
-          </Typography>
+          <Box sx={{ display: "flex", flexDirection: isMobile ? "column" : "row", gap: 0.5, alignItems: isMobile ? "flex-start" : "center" }}>
+            <Typography variant="body1" sx={{ color: "#000000", fontWeight: 600, whiteSpace: "nowrap" }}>
+              Peer ID:
+            </Typography>
+            <Typography 
+              variant="body1" 
+              sx={{ 
+                color: "#000000",
+                wordBreak: "break-all",
+                fontSize: isMobile ? "0.875rem" : "1rem"
+              }}
+            >
+              12D3KooWQJtfU4jS8u8nsUvVxRMeTeRY5qBtBHRtxMqsKFYDkJkp
+            </Typography>
+          </Box>
           <Typography variant="body1" sx={{ color: "#000000" }}>
             <strong>Version:</strong> go-ipfs v0.34.1
           </Typography>

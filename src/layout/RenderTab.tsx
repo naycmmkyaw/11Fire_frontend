@@ -8,16 +8,41 @@ interface RenderTabProps {
   onTabChange?: (tab: string) => void;
 }
 
-const renderTabContent = (selectedTab: string, onTabChange?: (tab: string) => void) => {
+const renderTabContent = (
+  selectedTab: string, 
+  setSelectedTab: (tab: string) => void,
+  isProviderDashboard: boolean,
+  onTabChange?: (tab: string) => void
+) => {
   switch (selectedTab) {
     case 'files':
-      return <FilesTabContent />;
+      return <FilesTabContent 
+        selectedTab={selectedTab}
+        setSelectedTab={setSelectedTab}
+        isProviderDashboard={isProviderDashboard}
+        onTabChange={onTabChange}
+      />;
     case 'profile':
-      return <ProfileTabContent />;
+      return <ProfileTabContent 
+        selectedTab={selectedTab}
+        setSelectedTab={setSelectedTab}
+        isProviderDashboard={isProviderDashboard}
+        onTabChange={onTabChange}
+      />;
     case 'install':
-      return <InstallTabContent />;
+      return <InstallTabContent 
+        selectedTab={selectedTab}
+        setSelectedTab={setSelectedTab}
+        isProviderDashboard={isProviderDashboard}
+        onTabChange={onTabChange}
+      />;
     case 'status':
-      return <StatusTabContent onTabChange={onTabChange} />;
+      return <StatusTabContent 
+        selectedTab={selectedTab}
+        setSelectedTab={setSelectedTab}
+        isProviderDashboard={isProviderDashboard}
+        onTabChange={onTabChange}
+      />;
     default:
       return null;
   }
