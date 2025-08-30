@@ -13,6 +13,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import ActionButton from "../../components/shared/ActionButton";
 import ResponsiveHeader from "../../components/shared/ResponsiveHeader";
 import { useNavigate } from "react-router-dom";
+import useIsMobile from "../../hooks/useMobile";
 
 interface ProfileTabContentProps {
   selectedTab: string;
@@ -29,6 +30,8 @@ const ProfileTabContent: React.FC<ProfileTabContentProps> = ({
 }) => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
+  
   return (
     <Box sx={{ flexGrow: 1, px: 1, py: 1 }}>
       <ResponsiveHeader 
@@ -40,7 +43,12 @@ const ProfileTabContent: React.FC<ProfileTabContentProps> = ({
         onTabChange={onTabChange}
       />
 
-      <Box sx={{ display: "flex", alignItems: "center", mb: 3 }}>
+      <Box sx={{ 
+        display: "flex", 
+        alignItems: "center", 
+        mb: 3,
+        justifyContent: isMobile ? "center" : "flex-start"
+      }}>
         <AccountCircleOutlinedIcon
           sx={{ fontSize: 125, color: "text.primary" }}
         />
@@ -81,12 +89,18 @@ const ProfileTabContent: React.FC<ProfileTabContentProps> = ({
           InputProps={{ readOnly: true }}
         />
       </Box>
-      <ActionButton
-        variant="primary"
-        onClick={() => setDialogOpen(true)}
-      >
-        Sign out
-      </ActionButton>
+      <Box sx={{ 
+        display: "flex",
+        justifyContent: isMobile ? "center" : "flex-start",
+        mb: 4, mt:8
+      }}>
+        <ActionButton
+          variant="primary"
+          onClick={() => setDialogOpen(true)}
+        >
+          Sign out
+        </ActionButton>
+      </Box>
 
       <Dialog
         open={dialogOpen}
