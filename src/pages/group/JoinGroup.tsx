@@ -7,29 +7,53 @@ import {
 import { useNavigate } from "react-router-dom";
 import ActionButton from "../../components/shared/ActionButton";
 import GroupHeader from "./GroupHeader";
-// import { joinSwarm } from "../api/swarm";
 
 const JoinGroup = () => {
   const navigate = useNavigate();
-  const [swarmId, setSwarmId] = useState("");
+  const [name, setName] = useState("");
   const [password, setPassword] = useState("");
-  // const [error, setError] = useState("");
+  const [nameError, setNameError] = useState("");
+  const [passwordError, setPasswordError] = useState("");
 
-  // const handleJoin = async () => {
-  //   setError("");
-  //   if (!swarmId || !password || password.length < 8) {
-  //     setError("Please enter valid swarm ID and a password (min 8 characters)");
-  //     return;
-  //   }
-  //   try {
-  //   //   await joinSwarm(swarmId, password);
-  //   //   alert(`Joined swarm successfully!\nSwarm ID: ${swarmId}`);
-  //   //   localStorage.setItem("swarmId", swarmId);
-  //     navigate("/user-option");
-  //   } catch (err) {
-  //     setError("Join failed. Please check swarm ID and password.");
-  //   }
-  // };
+  const handleJoin = () => {
+    setNameError("");
+    setPasswordError("");
+    
+    let hasError = false;
+
+    if (!name.trim()) {
+      setNameError("Group name is required");
+      hasError = true;
+    }
+    
+    if (!password) {
+      setPasswordError('Password is required');
+      hasError = true;
+    }
+    if (password && password.length < 8) {
+      setPasswordError('Password must be at least 8 characters long');
+      hasError = true;
+    }
+
+    if (hasError) return;
+
+    // Navigate with state
+    navigate('/role', { 
+      state: { 
+        action: 'join',
+        groupName: name.trim(),
+        password: password 
+      } 
+    });
+  };
+
+  const handleNameFocus = () => {
+    setNameError('');
+  };
+
+  const handlePasswordFocus = () => {
+    setPasswordError('');
+  };
 
   return (
     <Box
@@ -85,28 +109,45 @@ const JoinGroup = () => {
           </Typography>
           <TextField
             fullWidth
-            placeholder="Enter name" // or "Enter passcode"
-            value={swarmId} // or password
-            onChange={(e) => setSwarmId(e.target.value)} // or setPassword
+            placeholder="Enter name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            onFocus={handleNameFocus}
             variant="outlined"
+            error={!!nameError}
             sx={{
               "& .MuiOutlinedInput-root": {
                 borderRadius: 2,
                 "& fieldset": {
-                  borderColor: '#d6cfc1',
+                  borderColor: nameError ? 'error.main' : '#d6cfc1',
                 },
                 "&:hover fieldset": {
-                  borderColor: 'text.primary',
+                  borderColor: nameError ? 'error.main' : 'text.primary',
                 },
                 "&.Mui-focused fieldset": {
-                  borderColor: 'text.primary',
+                  borderColor: nameError ? 'error.main' : 'text.primary',
                   borderWidth: "1px",
                 },
               },
               input: { py: 1.5 },
-              mb: 2,
+              mb: 0.5,
             }}
           />
+          {nameError && (
+            <Typography
+              sx={{
+                color: 'error.main',
+                fontSize: '0.75rem',
+                mb: 2,
+                mt: 0.5,
+              }}
+            >
+              {nameError}
+            </Typography>
+          )}
+          {!nameError && (
+            <Box sx={{ mb: 2 }} />
+          )}
 
           <Typography
             sx={{
@@ -121,27 +162,45 @@ const JoinGroup = () => {
           <TextField
             fullWidth
             placeholder="Enter passcode"
-            value={password} // or password
-            onChange={(e) => setPassword(e.target.value)} // or setPassword
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            onFocus={handlePasswordFocus}
             variant="outlined"
+            type="password"
+            error={!!passwordError}
             sx={{
               "& .MuiOutlinedInput-root": {
                 borderRadius: 2,
                 "& fieldset": {
-                  borderColor: '#d6cfc1',
+                  borderColor: passwordError ? 'error.main' : '#d6cfc1',
                 },
                 "&:hover fieldset": {
-                  borderColor: 'text.primary',
+                  borderColor: passwordError ? 'error.main' : 'text.primary',
                 },
                 "&.Mui-focused fieldset": {
-                  borderColor: 'text.primary', // ✅ Keep border visible on focus
+                  borderColor: passwordError ? 'error.main' : 'text.primary',
                   borderWidth: "1px",
                 },
               },
               input: { py: 1.5 },
-              mb: 2,
+              mb: 0.5,
             }}
           />
+          {passwordError && (
+            <Typography
+              sx={{
+                color: 'error.main',
+                fontSize: '0.75rem',
+                mb: 2,
+                mt: 0.5,
+              }}
+            >
+              {passwordError}
+            </Typography>
+          )}
+          {!passwordError && (
+            <Box sx={{ mb: 2 }} />
+          )}
 
           <Box
             sx={{
@@ -153,9 +212,9 @@ const JoinGroup = () => {
           >
             <ActionButton
               variant="primary"
-              onClick={() => navigate("/role")}
+              onClick={handleJoin}
               sx={{
-                mb: 2, // vertical spacing
+                mb: 2,
               }}
             >
               Join
