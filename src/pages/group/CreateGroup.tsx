@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Typography,
@@ -7,15 +7,53 @@ import {
 import { useNavigate } from 'react-router-dom';
 import ActionButton from '../../components/shared/ActionButton';
 import GroupHeader from './GroupHeader';
+import Axios from '../../services/axiosInstance';
 
 const CreateGroup = () => {
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
   const [nameError, setNameError] = useState("");
   const [passwordError, setPasswordError] = useState("");
+  const [isCheckingName, setIsCheckingName] = useState(false);
   const navigate = useNavigate();
 
+  const checkGroupName = async (groupName: string) => {
+    if (!groupName.trim()) return;
+    
+    setIsCheckingName(true);
+    setNameError("");
+    
+    try {
+      await Axios.post('/swarms/name-check', { name: groupName.trim() });
+      // If successful, name is available
+    } catch (error: any) {
+      if (error.response?.data?.error) {
+        setNameError(error.response.data.error);
+      } else {
+        setNameError("Failed to check group name");
+      }
+    } finally {
+      setIsCheckingName(false);
+    }
+  };
+
+  // Debounced name checking - triggers 500ms after user stops typing
+  useEffect(() => {
+    if (name.trim()) {
+      const timeoutId = setTimeout(() => {
+        checkGroupName(name.trim());
+      }, 500);
+
+      return () => clearTimeout(timeoutId);
+    } else {
+      setNameError("");
+    }
+  }, [name]);
+
   const handleCreate = () => {
+    setNameError('');
+    setPasswordError('');
+    
     let hasError = false;
 
     if (!name.trim()) {
@@ -32,7 +70,8 @@ const CreateGroup = () => {
       hasError = true;
     }
 
-    if (hasError) return;
+    // Don't proceed if there are errors or still checking name
+    if (hasError || isCheckingName || nameError) return;
 
     // Navigate with state
     navigate('/role', { 
@@ -210,6 +249,7 @@ const CreateGroup = () => {
             <ActionButton
               variant="primary"
               onClick={handleCreate}
+              disabled={!!nameError || !!passwordError}
               sx={{
                 mb: 2,
               }}
