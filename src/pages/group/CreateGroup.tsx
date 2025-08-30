@@ -3,19 +3,51 @@ import {
   Box,
   Typography,
   TextField,
+  CircularProgress,
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import ActionButton from '../../components/shared/ActionButton';
 import GroupHeader from './GroupHeader';
+import Axios from '../../services/axiosInstance';
 
 const CreateGroup = () => {
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
   const [nameError, setNameError] = useState("");
   const [passwordError, setPasswordError] = useState("");
+  const [isCheckingName, setIsCheckingName] = useState(false);
   const navigate = useNavigate();
 
+  const checkGroupName = async (groupName: string) => {
+    if (!groupName.trim()) return;
+    
+    setIsCheckingName(true);
+    setNameError("");
+    
+    try {
+      await Axios.post('/swarms/name-check', { name: groupName.trim() });
+      // If successful, name is available
+    } catch (error: any) {
+      if (error.response?.data?.error) {
+        setNameError(error.response.data.error);
+      } else {
+        setNameError("Failed to check group name");
+      }
+    } finally {
+      setIsCheckingName(false);
+    }
+  };
+
+  const handleNameBlur = async () => {
+    if (name.trim()) {
+      await checkGroupName(name.trim());
+    }
+  };
+
   const handleCreate = () => {
+    setNameError('');
+    setPasswordError('');
+    
     let hasError = false;
 
     if (!name.trim()) {
@@ -32,7 +64,8 @@ const CreateGroup = () => {
       hasError = true;
     }
 
-    if (hasError) return;
+    // Don't proceed if there are errors or still checking name
+    if (hasError || isCheckingName || nameError) return;
 
     // Navigate with state
     navigate('/role', { 
@@ -104,32 +137,41 @@ const CreateGroup = () => {
           >
             Set Group Name
           </Typography>
-          <TextField
-            fullWidth
-            placeholder="Enter name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            onFocus={handleNameFocus}
-            variant="outlined"
-            error={!!nameError}
-            sx={{
-              "& .MuiOutlinedInput-root": {
-                borderRadius: 2,
-                "& fieldset": {
-                  borderColor: nameError ? 'error.main' : '#d6cfc1',
+          <Box sx={{ position: 'relative' }}>
+            <TextField
+              fullWidth
+              placeholder="Enter name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              onFocus={handleNameFocus}
+              onBlur={handleNameBlur}
+              variant="outlined"
+              error={!!nameError}
+              disabled={isCheckingName}
+              sx={{
+                "& .MuiOutlinedInput-root": {
+                  borderRadius: 2,
+                  "& fieldset": {
+                    borderColor: nameError ? 'error.main' : '#d6cfc1',
+                  },
+                  "&:hover fieldset": {
+                    borderColor: nameError ? 'error.main' : 'text.primary',
+                  },
+                  "&.Mui-focused fieldset": {
+                    borderColor: nameError ? 'error.main' : 'text.primary',
+                    borderWidth: "1px",
+                  },
+                  "&.Mui-disabled": {
+                    "& fieldset": {
+                      borderColor: '#d6cfc1',
+                    },
+                  },
                 },
-                "&:hover fieldset": {
-                  borderColor: nameError ? 'error.main' : 'text.primary',
-                },
-                "&.Mui-focused fieldset": {
-                  borderColor: nameError ? 'error.main' : 'text.primary',
-                  borderWidth: "1px",
-                },
-              },
-              input: { py: 1.5 },
-              mb: 0.5,
-            }}
-          />
+                input: { py: 1.5 },
+                mb: 0.5,
+              }}
+            />
+          </Box>
           {nameError && (
             <Typography
               sx={{
@@ -210,6 +252,7 @@ const CreateGroup = () => {
             <ActionButton
               variant="primary"
               onClick={handleCreate}
+              disabled={!!nameError}
               sx={{
                 mb: 2,
               }}
