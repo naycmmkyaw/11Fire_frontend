@@ -16,6 +16,8 @@ interface UploadDialogProps {
   setFileName: (name: string) => void;
   isRenameMode: boolean;
   isFileUpload: boolean;
+  isUploading?: boolean;
+  uploadError?: string | null;
   onSubmit: () => void;
 }
 
@@ -25,7 +27,7 @@ const UploadDialog: React.FC<UploadDialogProps> = ({
   fileName, 
   setFileName, 
   isRenameMode, 
-  isFileUpload, 
+  isFileUpload,
   onSubmit 
 }) => (
   <Dialog

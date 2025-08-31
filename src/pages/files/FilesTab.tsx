@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Box, Snackbar } from "@mui/material";
+import { Alert, Box, Snackbar } from "@mui/material";
 import EmptyFilesCard from "../../components/files/EmptyFilesCard";
 import FilesTable from "../../components/files/FilesTable";
 import ResponsiveHeader from "../../components/shared/ResponsiveHeader";
@@ -12,6 +12,9 @@ import FileActionsMenu from "../../components/files/FileActionsMenu";
 import UploadDialog from "../../components/files/UploadDialog";
 import useIsMobile from "../../hooks/useMobile";
 import type { FileEntry } from "../../types";
+import { uploadFile } from "../../services/uploadService";
+import { listMyGroups, type GroupMembership } from "../../services/getGroupList";
+import { fetchFilesForGroup } from "../../services/getFiles";
 // import { uploadFileToIPFS } from "../api/upload";
 // import { useEffect } from "react";
 // import { fetchFiles } from "../api/files";
@@ -58,19 +61,57 @@ const FilesTabContent: React.FC<FilesTabContentProps> = ({
   const [isRenameMode, setIsRenameMode] = useState(false);
   const [groupMenuAnchor, setGroupMenuAnchor] = useState<null | HTMLElement>(null);
   const [selectedFiles, setSelectedFiles] = useState<Set<number>>(new Set());
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  // New state for groups
+  const [groups, setGroups] = useState<GroupMembership[]>([]);
+  const [selectedGroup, setSelectedGroup] = useState<GroupMembership | null>(null);
+  const [isLoadingGroups, setIsLoadingGroups] = useState(true);
 
-  // useEffect(() => {
-  //   fetchFiles().then((data) => {
-  //     const formatted = data.map((f: any) => ({
-  //       name: f.name,
-  //       cid: f.cid,
-  //       size: formatSize(f.size),
-  //       date: new Date(f.date).toLocaleDateString(),
-  //       isFile: f.isFile,
-  //     }));
-  //     setFiles(formatted);
-  //   });
-  // }, []);
+    // Fetch groups on component mount
+  useEffect(() => {
+    const fetchGroups = async () => {
+      try {
+        setIsLoadingGroups(true);
+        const groupsList = await listMyGroups();
+        setGroups(groupsList);
+        
+        // Auto-select first group if available
+        if (groupsList.length > 0) {
+          setSelectedGroup(groupsList[0]);
+        }
+      } catch (error) {
+        console.error('Failed to fetch groups:', error);
+        // Could show a snackbar error here
+      } finally {
+        setIsLoadingGroups(false);
+      }
+    };
+
+    fetchGroups();
+  }, []);
+
+  const handleGroupSelect = async (group: GroupMembership) => {
+    setSelectedGroup(group);
+    console.log('Selected group:', group);
+    try {
+      const groupFiles = await fetchFilesForGroup(group.swarmId);
+      setFiles(groupFiles);
+    } catch (error) {
+      console.error('Failed to fetch files for selected group:', error);
+      setFiles([]); // Optionally clear files on error
+    }
+  };
+
+  const handleCreateGroup = () => {
+    // TODO: Navigate to group creation page or open modal
+    console.log('Create new group');
+  };
+
+  const handleJoinGroup = () => {
+    // TODO: Navigate to join group page or open modal
+    console.log('Join group');
+  };
 
   // Ensure activeFileIndex is valid after files array changes
   useEffect(() => {
@@ -184,29 +225,47 @@ const FilesTabContent: React.FC<FilesTabContentProps> = ({
         name: fileName,
       };
       setFiles(updatedFiles);
-    } else if (selectedFile && !isRenameMode) {
-      try {
-        // const cid = await uploadFileToIPFS(selectedFile);
-        // For now, create a mock CID since the function is commented out
-        const cid = "mock_cid_" + Date.now();
-        const newFile: FileEntry = {
-          name: fileName,
-          cid,
-          size: fileSize,
-          date: new Date().toLocaleDateString(),
-          isFile: isFileUpload,
-        };
-        setFiles([...files, newFile]);
-      } catch (err) {
-        alert("Upload failed.");
-        console.error(err);
-      }
+      setDialogOpen(false);
+      setIsRenameMode(false);
+      setActiveFileIndex(null);
+      setSelectedFile(null);
+      return;
     }
 
-    setDialogOpen(false);
-    setIsRenameMode(false);
-    setActiveFileIndex(null);
-    setSelectedFile(null);
+    if (!selectedFile || isRenameMode) return;
+
+    setIsUploading(true);
+    setUploadError(null);
+
+    try {
+      const response = await uploadFile(selectedFile);
+      // Check for duplicate by CID
+      const isDuplicate = files.some(file => file.cid === response.cid);
+      if (isDuplicate) {
+        setUploadError("This file already exists in the group.");
+        setDialogOpen(false);
+        return;
+      }
+      
+      const newFile: FileEntry = {
+        name: fileName,
+        cid: response.cid,
+        size: fileSize,
+        date: new Date().toLocaleDateString(),
+        isFile: isFileUpload,
+      };
+      
+      setFiles([...files, newFile]);
+      setDialogOpen(false);
+    } catch (error: any) {
+      console.error('Upload failed:', error);
+      const errorMessage = error.response?.data?.error || 'Upload failed. Please try again.';
+      setUploadError(errorMessage);
+    } finally {
+      setIsUploading(false);
+      setSelectedFile(null);
+      setActiveFileIndex(null);
+    }
   };
 
   const handleCopyCid = (cid: string) => {
@@ -214,7 +273,10 @@ const FilesTabContent: React.FC<FilesTabContentProps> = ({
     setSnackbarOpen(true);
   };
 
-  const handleSnackbarClose = () => setSnackbarOpen(false);
+  const handleSnackbarClose = () => {
+    setSnackbarOpen(false);
+    setUploadError(null);
+  };
 
   const handleGroupButtonClick = (event: React.MouseEvent<HTMLElement>) => {
     setGroupMenuAnchor(event.currentTarget);
@@ -278,12 +340,14 @@ const FilesTabContent: React.FC<FilesTabContentProps> = ({
   };
 
   const handleDialogClose = () => {
+    if (isUploading) return; // Prevent closing during upload
     setDialogOpen(false);
     setIsRenameMode(false);
     setActiveFileIndex(null);
     setSelectedFile(null);
     setFileName("");
     setFileSize("");
+    setUploadError(null);
   };
 
   return (
@@ -312,6 +376,12 @@ const FilesTabContent: React.FC<FilesTabContentProps> = ({
               onOpen={handleGroupButtonClick}
               onClose={() => setGroupMenuAnchor(null)}
               isMobile={isMobile}
+              groups={groups}
+              selectedGroup={selectedGroup}
+              onGroupSelect={handleGroupSelect}
+              onCreateGroup={handleCreateGroup}
+              onJoinGroup={handleJoinGroup}
+              isLoading={isLoadingGroups}
             />
           )}
           {!isMobile && <SearchBar />}
@@ -324,6 +394,12 @@ const FilesTabContent: React.FC<FilesTabContentProps> = ({
               onOpen={handleGroupButtonClick}
               onClose={() => setGroupMenuAnchor(null)}
               isMobile={isMobile}
+              groups={groups}
+              selectedGroup={selectedGroup}
+              onGroupSelect={handleGroupSelect}
+              onCreateGroup={handleCreateGroup}
+              onJoinGroup={handleJoinGroup}
+              isLoading={isLoadingGroups}
             />
           )}
           <AddButton onClick={handleAddClick} />
@@ -368,15 +444,28 @@ const FilesTabContent: React.FC<FilesTabContentProps> = ({
         isRenameMode={isRenameMode}
         isFileUpload={isFileUpload}
         onSubmit={handleUpload}
+        isUploading={isUploading}
+        uploadError={uploadError}
       />
 
       <Snackbar
         open={snackbarOpen}
-        autoHideDuration={2000}
+        autoHideDuration={3000}
         onClose={handleSnackbarClose}
-        message="Copied to Clipboard"
+        message="Copied to clipboard"
         anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
       />
+
+      <Snackbar
+        open={!!uploadError}
+        autoHideDuration={6000}
+        onClose={handleSnackbarClose}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      >
+        <Alert onClose={handleSnackbarClose} severity="error" sx={{ width: '100%' }}>
+          {uploadError}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 };
