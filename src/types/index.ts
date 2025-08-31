@@ -37,3 +37,22 @@ export interface GroupContextType {
   addGroup: (group: Group) => void;
   removeGroup: (groupId: string) => void;
 }
+
+export interface PeerInfo {
+  ok: boolean;
+  swarmId: string;
+  swarmName: string;
+  selfPeerId: string;
+  totalPeers: number;
+}
+
+export interface QuotaUsage {
+  ok: boolean;
+  swarmId: string;
+  swarmName: string;
+  quotaBytes: number | null;
+  quotaGB: number | null;
+  usedBytes: number;
+  usedGB: number;
+  percentUsed: number | null;
+}

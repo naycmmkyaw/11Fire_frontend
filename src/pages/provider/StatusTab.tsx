@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Box, Paper } from "@mui/material";
+import { Box } from "@mui/material";
 import UptimeGraph from "../../components/statusTab/UptimeGraph";
 import StorageCard from "../../components/statusTab/StorageCard";
 import ConnectionStatusCard from "../../components/statusTab/ConnectionStatusCard";

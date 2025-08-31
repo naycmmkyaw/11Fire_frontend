@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Box,
   Typography,
@@ -18,6 +18,7 @@ import {
 import SettingsIcon from "@mui/icons-material/Settings";
 import EditIcon from "@mui/icons-material/Edit";
 import CloseIcon from "@mui/icons-material/Close";
+import { providerNodeService } from "../../services/providerNodeService";
 
 interface StorageCardProps {
   totalStorage: string;
@@ -42,6 +43,27 @@ const StorageCard: React.FC<StorageCardProps> = ({
 
   // State for loading dialog
   const [isLoadingDialogOpen, setIsLoadingDialogOpen] = useState(false);
+  
+  // State for quota data
+  const [quotaData, setQuotaData] = useState<Awaited<ReturnType<typeof providerNodeService.getActiveQuotaUsage>> | null>(null);
+  const [isLoadingQuota, setIsLoadingQuota] = useState(false);
+
+  // Fetch quota data on component mount
+  useEffect(() => {
+    fetchQuotaData();
+  }, []);
+
+  const fetchQuotaData = async () => {
+    try {
+      setIsLoadingQuota(true);
+      const data = await providerNodeService.getActiveQuotaUsage();
+      setQuotaData(data);
+    } catch (err) {
+      console.error('Failed to fetch quota data:', err);
+    } finally {
+      setIsLoadingQuota(false);
+    }
+  };
 
   const handleSettingsClick = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -60,15 +82,31 @@ const StorageCard: React.FC<StorageCardProps> = ({
     setIsStorageModalOpen(false);
   };
 
-  const handleSetStorage = () => {
+  const handleSetStorage = async () => {
     setIsStorageModalOpen(false);
     setIsLoadingDialogOpen(true);
 
-    // Simulate storage setting process
-    setTimeout(() => {
-      setIsLoadingDialogOpen(false);
+    try {
+      // Extract numeric value from storageAmount (e.g., "10 GB" -> 10)
+      const quotaGB = parseFloat(storageAmount.split(' ')[0]);
+      
+      if (isNaN(quotaGB)) {
+        throw new Error('Invalid storage amount');
+      }
+
+      // Call the backend API to set quota
+      await providerNodeService.setActiveSwarmQuota(quotaGB);
+      
+      // Refresh quota data
+      await fetchQuotaData();
+      
+      // Update parent component
       onStorageUpdate(storageAmount);
-    }, 3000);
+    } catch (err) {
+      console.error('Failed to set storage quota:', err);
+    } finally {
+      setIsLoadingDialogOpen(false);
+    }
   };
 
   return (
@@ -110,6 +148,17 @@ const StorageCard: React.FC<StorageCardProps> = ({
         >
           <SettingsIcon sx={{ fontSize: 28 }} />
         </IconButton>
+        {isLoadingQuota && (
+          <CircularProgress 
+            size={16} 
+            sx={{ 
+              position: 'absolute', 
+              top: -8, 
+              right: -8, 
+              color: '#EB6464' 
+            }} 
+          />
+        )}
       </Box>
 
       {/* Settings Dropdown Menu */}
@@ -175,7 +224,7 @@ const StorageCard: React.FC<StorageCardProps> = ({
               strokeLinecap="round"
               strokeDasharray={`${2 * Math.PI * 70}`}
               strokeDashoffset={`${
-                2 * Math.PI * 70 * (1 - usedStorage / 100)
+                2 * Math.PI * 70 * (1 - (quotaData && quotaData.percentUsed !== null ? quotaData.percentUsed : usedStorage) / 100)
               }`}
               transform="rotate(-90 80 80)"
               style={{
@@ -198,7 +247,7 @@ const StorageCard: React.FC<StorageCardProps> = ({
               variant="h4"
               sx={{ fontWeight: 700, color: "#000000" }}
             >
-              {usedStorage}%
+              {quotaData && quotaData.percentUsed !== null ? `${quotaData.percentUsed}%` : `${usedStorage}%`}
             </Typography>
             <Typography
               variant="body2"
@@ -227,7 +276,7 @@ const StorageCard: React.FC<StorageCardProps> = ({
             variant="body2"
             sx={{ color: "#000000", fontWeight: 600 }}
           >
-            {totalStorage}
+            {quotaData && quotaData.quotaGB ? `${quotaData.quotaGB} GB` : totalStorage}
           </Typography>
         </Box>
         <Box>
@@ -238,7 +287,7 @@ const StorageCard: React.FC<StorageCardProps> = ({
             variant="body2"
             sx={{ color: "#000000", fontWeight: 600 }}
           >
-            {remainingStorage}
+            {quotaData && quotaData.quotaGB ? `${(quotaData.quotaGB - quotaData.usedGB).toFixed(1)} GB` : remainingStorage}
           </Typography>
         </Box>
       </Box>
