@@ -1,13 +1,15 @@
 import React from "react";
-import { 
-  Dialog, 
-  DialogTitle, 
-  DialogContent, 
-  DialogActions, 
-  Button, 
-  TextField, 
-  Typography 
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+  TextField,
+  Typography,
+  IconButton,
 } from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
 
 interface UploadDialogProps {
   open: boolean;
@@ -21,29 +23,45 @@ interface UploadDialogProps {
   onSubmit: () => void;
 }
 
-const UploadDialog: React.FC<UploadDialogProps> = ({ 
-  open, 
-  onClose, 
-  fileName, 
-  setFileName, 
-  isRenameMode, 
+const UploadDialog: React.FC<UploadDialogProps> = ({
+  open,
+  onClose,
+  fileName,
+  setFileName,
+  isRenameMode,
   isFileUpload,
-  onSubmit 
+  onSubmit,
 }) => (
   <Dialog
     open={open}
     onClose={onClose}
-    PaperProps={{
-      sx: {
-        borderRadius: 3,
-        px: 4,
-        pt: 3,
-        pb: 2,
-        bgcolor: "#fff7ed",
-        minWidth: 400,
+    slotProps={{
+      paper: {
+        sx: {
+          borderRadius: 3,
+          px: 4,
+          pt: 3,
+          pb: 2,
+          bgcolor: "secondary.dark",
+          minWidth: 400,
+          position: "relative",
+        },
       },
     }}
   >
+    <IconButton
+      aria-label="close"
+      onClick={onClose}
+      sx={{
+        position: "absolute",
+        right: 12,
+        top: 12,
+        color: "#888",
+      }}
+      size="large"
+    >
+      <CloseIcon />
+    </IconButton>
     <DialogTitle sx={{ fontWeight: 600, fontSize: "1.4rem", mb: 1 }}>
       {isRenameMode ? "Rename" : `${isFileUpload ? "File" : "Folder"} Upload`}
     </DialogTitle>
@@ -57,7 +75,7 @@ const UploadDialog: React.FC<UploadDialogProps> = ({
         label="Name"
         value={fileName}
         onChange={(e) => setFileName(e.target.value)}
-        sx={{ bgcolor: "#fff7ed", borderRadius: 2 }}
+        sx={{ bgcolor: "secondary.main", borderRadius: 2 }}
       />
     </DialogContent>
     <DialogActions sx={{ px: 3, pb: 2, pt: 1, gap: 2 }}>
@@ -73,7 +91,7 @@ const UploadDialog: React.FC<UploadDialogProps> = ({
         onClick={onSubmit}
         sx={{
           borderRadius: 2,
-          bgcolor: "#ef4444",
+          bgcolor: "primary.main",
           color: "#fff",
           "&:hover": { bgcolor: "#dc2626" },
         }}
