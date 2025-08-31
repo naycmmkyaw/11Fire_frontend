@@ -15,6 +15,7 @@ import type { FileEntry } from "../../types";
 import { uploadFile } from "../../services/uploadService";
 import { listMyGroups, type GroupMembership } from "../../services/getGroupList";
 import { fetchFilesForGroup } from "../../services/getFiles";
+import GroupDialog from "../../components/files/GroupDialog";
 // import { uploadFileToIPFS } from "../api/upload";
 // import { useEffect } from "react";
 // import { fetchFiles } from "../api/files";
@@ -34,9 +35,6 @@ const formatSize = (size: number): string => {
   if (size >= 1024) return `${(size / 1024).toFixed(1)} KB`;
   return `${size} B`;
 };
-
-const truncateCid = (cid: string): string => 
-  `${cid.slice(0, 6)}...${cid.slice(-4)}`;
 
 // Main component
 const FilesTabContent: React.FC<FilesTabContentProps> = ({
@@ -67,6 +65,11 @@ const FilesTabContent: React.FC<FilesTabContentProps> = ({
   const [groups, setGroups] = useState<GroupMembership[]>([]);
   const [selectedGroup, setSelectedGroup] = useState<GroupMembership | null>(null);
   const [isLoadingGroups, setIsLoadingGroups] = useState(true);
+  const [groupDialogOpen, setGroupDialogOpen] = useState(false);
+  const [isJoinMode, setIsJoinMode] = useState(false);
+  const [groupName, setGroupName] = useState("");
+  const [passcode, setPasscode] = useState("");
+  const [radioValue, setRadioValue] = useState("");
 
     // Fetch groups on component mount
   useEffect(() => {
@@ -103,14 +106,15 @@ const FilesTabContent: React.FC<FilesTabContentProps> = ({
     }
   };
 
-  const handleCreateGroup = () => {
-    // TODO: Navigate to group creation page or open modal
-    console.log('Create new group');
+  const handleOpenGroupDialog = (joinMode: boolean) => {
+    setIsJoinMode(joinMode);
+    setGroupDialogOpen(true);
+    setGroupName("");
   };
 
-  const handleJoinGroup = () => {
-    // TODO: Navigate to join group page or open modal
-    console.log('Join group');
+  const handleCloseGroupDialog = () => {
+    setGroupDialogOpen(false);
+    setGroupName("");
   };
 
   // Ensure activeFileIndex is valid after files array changes
@@ -379,8 +383,8 @@ const FilesTabContent: React.FC<FilesTabContentProps> = ({
               groups={groups}
               selectedGroup={selectedGroup}
               onGroupSelect={handleGroupSelect}
-              onCreateGroup={handleCreateGroup}
-              onJoinGroup={handleJoinGroup}
+              onCreateGroup={() => handleOpenGroupDialog(false)}
+              onJoinGroup={() => handleOpenGroupDialog(true)}
               isLoading={isLoadingGroups}
             />
           )}
@@ -397,8 +401,8 @@ const FilesTabContent: React.FC<FilesTabContentProps> = ({
               groups={groups}
               selectedGroup={selectedGroup}
               onGroupSelect={handleGroupSelect}
-              onCreateGroup={handleCreateGroup}
-              onJoinGroup={handleJoinGroup}
+              onCreateGroup={() => handleOpenGroupDialog(false)}
+              onJoinGroup={() => handleOpenGroupDialog(true)}
               isLoading={isLoadingGroups}
             />
           )}
@@ -446,6 +450,18 @@ const FilesTabContent: React.FC<FilesTabContentProps> = ({
         onSubmit={handleUpload}
         isUploading={isUploading}
         uploadError={uploadError}
+      />
+      <GroupDialog
+      open={groupDialogOpen}
+      onClose={handleCloseGroupDialog}
+      groupName={groupName}
+      setGroupName={setGroupName}
+      passcode={passcode}
+      setPasscode={setPasscode}
+      radioValue={radioValue}
+      setRadioValue={setRadioValue}
+      isJoinMode={isJoinMode}
+      onSubmit={() => {/* handle create/join logic here */}}
       />
 
       <Snackbar
