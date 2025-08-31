@@ -117,7 +117,7 @@ const StorageCard: React.FC<StorageCardProps> = ({
         borderRadius: 2,
         bgcolor: "secondary.main",
         border: "1px solid #e5e7eb",
-        height: "400px",
+        height: "600px",
         display: "flex",
         flexDirection: "column",
         position: "relative",

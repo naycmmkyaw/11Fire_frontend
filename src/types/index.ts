@@ -56,3 +56,24 @@ export interface QuotaUsage {
   usedGB: number;
   percentUsed: number | null;
 }
+
+export interface UptimeData {
+  ok: boolean;
+  swarmId: string;
+  swarmName: string;
+  uptimePercent: number;
+  downtime: string;
+}
+
+export interface UptimeLineData {
+  ok: boolean;
+  swarmId: string;
+  swarmName: string;
+  bucketHours: number;
+  hours: number;
+  now: string;
+  points: Array<{
+    time: string;
+    online: number;
+  }>;
+}
