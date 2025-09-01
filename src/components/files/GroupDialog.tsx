@@ -12,6 +12,7 @@ import {
   RadioGroup,
   FormControlLabel,
   Box,
+  Alert,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 
@@ -26,6 +27,7 @@ interface GroupDialogProps {
   onSubmit: () => void;
   radioValue: string;
   setRadioValue: (value: string) => void;
+  groupDialogError?: string | null;
 }
 
 const GroupDialog: React.FC<GroupDialogProps> = ({
@@ -39,6 +41,7 @@ const GroupDialog: React.FC<GroupDialogProps> = ({
   onSubmit,
   radioValue,
   setRadioValue,
+  groupDialogError
 }) => (
   <Dialog
     open={open}
@@ -88,6 +91,7 @@ const GroupDialog: React.FC<GroupDialogProps> = ({
         fullWidth
         variant="outlined"
         label="Passcode"
+        type="password"
         value={passcode}
         onChange={(e) => setPasscode(e.target.value)}
         sx={{ bgcolor: "secondary.main", borderRadius: 2, mb: 2 }}
@@ -111,6 +115,11 @@ const GroupDialog: React.FC<GroupDialogProps> = ({
           />
         </RadioGroup>
       </Box>
+      {groupDialogError && (
+        <Alert severity="error" sx={{ mt: 2 }}>
+          {groupDialogError}
+        </Alert>
+      )}
     </DialogContent>
     <DialogActions sx={{ px: 3, pb: 2, pt: 1, gap: 2 }}>
       <Button
