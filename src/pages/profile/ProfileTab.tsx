@@ -7,6 +7,7 @@ import {
   DialogActions,
   Dialog,
   IconButton,
+  Avatar
 } from "@mui/material";
 import AccountCircleOutlinedIcon from "@mui/icons-material/AccountCircleOutlined";
 import CloseIcon from "@mui/icons-material/Close";
@@ -50,9 +51,23 @@ const ProfileTabContent: React.FC<ProfileTabContentProps> = ({
         mb: 3,
         justifyContent: isMobile ? "center" : "flex-start"
       }}>
-        <AccountCircleOutlinedIcon
-          sx={{ fontSize: 125, color: "text.primary" }}
-        />
+        {user?.avatar ? (
+          <Avatar
+            src={user.avatar}
+            alt={user.name || "User"}
+            sx={{ 
+              width: 125, 
+              height: 125,
+              fontSize: "2rem",
+            }}
+          >
+            {user.name?.[0]?.toUpperCase()}
+          </Avatar>
+        ) : (
+          <AccountCircleOutlinedIcon
+            sx={{ fontSize: 125, color: "primary.main" }}
+          />
+        )}
       </Box>
 
       <Box sx={{ mb: 3 }}>
