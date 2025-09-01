@@ -12,7 +12,7 @@ import FileActionsMenu from "../../components/files/FileActionsMenu";
 import UploadDialog from "../../components/files/UploadDialog";
 import useIsMobile from "../../hooks/useMobile";
 import type { FileEntry } from "../../types";
-import { uploadFile, deleteFile } from "../../services/filesService";
+import { uploadFile, deleteFile, renameFile } from "../../services/filesService";
 import { listMyGroups, type GroupMembership } from "../../services/getGroupList";
 import { fetchFilesForGroup } from "../../services/getFiles";
 import GroupDialog from "../../components/files/GroupDialog";
@@ -59,6 +59,7 @@ const FilesTabContent: React.FC<FilesTabContentProps> = ({
   const [selectedFiles, setSelectedFiles] = useState<Set<number>>(new Set());
   const [isUploading, setIsUploading] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isRenaming, setIsRenaming] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [fileToDelete, setFileToDelete] = useState<{ index: number; name: string } | null>(null);
@@ -282,19 +283,36 @@ const FilesTabContent: React.FC<FilesTabContentProps> = ({
 
   const handleUpload = async () => {
     if (isRenameMode && activeFileIndex !== null) {
-      const updatedFiles = [...files];
-      updatedFiles[activeFileIndex] = {
-        ...updatedFiles[activeFileIndex],
-        name: fileName,
-      };
-      setFiles(updatedFiles);
-      setDialogOpen(false);
-      setIsRenameMode(false);
-      setActiveFileIndex(null);
-      setSelectedFile(null);
+      const file = files[activeFileIndex];
+      setIsRenaming(true);
+      setDialogOpen(false); // Close the rename dialog when starting rename  
+      try {
+        const response = await renameFile(file.cid, fileName);
+        
+        // Update the file in local state after successful rename
+        const updatedFiles = [...files];
+        updatedFiles[activeFileIndex] = {
+          ...updatedFiles[activeFileIndex],
+          name: response.name, // Use the cleaned name from backend
+        };
+        setFiles(updatedFiles);
+        
+        setSnackbarOpen(true); // Show success message
+      } catch (error: any) {
+        console.error('Rename failed:', error);
+        const errorMessage = error.response?.data?.error || 'Failed to rename file. Please try again.';
+        setUploadError(errorMessage);
+      } finally {
+        setIsRenaming(false);
+        setIsRenameMode(false);
+        setActiveFileIndex(null);
+        setSelectedFile(null);
+        setFileName("");
+        setFileSize("");
+      }
       return;
     }
-
+    // Regular upload logic
     if (!selectedFile || isRenameMode) return;
 
     setIsUploading(true);
@@ -356,17 +374,13 @@ const FilesTabContent: React.FC<FilesTabContentProps> = ({
     setActiveFileIndex(null);
   };
 
-  const handleRename = () => {
+  const handleRename = async () => {
     if (activeFileIndex !== null) {
+      const file = files[activeFileIndex];
+      setFileName(file.name); // Pre-populate with current file name
       setIsRenameMode(true);
-      setSelectedFile(null); // Clear selectedFile when entering rename mode
-      setFileName(files[activeFileIndex].name);
       setDialogOpen(true);
-      // Close the menu but preserve activeFileIndex for the rename operation
-      setFileMenuAnchor(null);
-      // Don't call handleFileMenuClose() here as it would reset activeFileIndex
-    } else {
-      handleFileMenuClose();
+      setFileMenuAnchor(null); // Close the menu
     }
   };
 
@@ -424,7 +438,7 @@ const FilesTabContent: React.FC<FilesTabContentProps> = ({
   };
 
   const handleDialogClose = () => {
-    if (isUploading) return; // Prevent closing during upload
+    if (isUploading || isRenaming) return; // Prevent closing during upload
     setDialogOpen(false);
     setIsRenameMode(false);
     setActiveFileIndex(null);
@@ -528,7 +542,7 @@ const FilesTabContent: React.FC<FilesTabContentProps> = ({
         isRenameMode={isRenameMode}
         isFileUpload={isFileUpload}
         onSubmit={handleUpload}
-        isUploading={isUploading}
+        isUploading={isUploading || isRenaming}
         uploadError={uploadError}
       />
       <LoadingDialog
@@ -536,6 +550,13 @@ const FilesTabContent: React.FC<FilesTabContentProps> = ({
         onClose={() => {}} // Prevent closing during upload
         title="Uploading File"
         loadingText={`Uploading "${fileName}" to the group...`}
+      />
+          {/* Rename Loading Dialog */}
+      <LoadingDialog
+        open={isRenaming}
+        onClose={() => {}}
+        title="Renaming File"
+        loadingText={`Renaming file to "${fileName}"...`}
       />
 
       <DeleteConfirmDialog

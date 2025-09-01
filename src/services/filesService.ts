@@ -9,6 +9,12 @@ export interface UploadResponse {
   size: number;
 }
 
+export interface RenameResponse {
+  ok: boolean;
+  cid: string;
+  name: string;
+}
+
 export const uploadFile = async (file: File): Promise<UploadResponse> => {
   const formData = new FormData();
   formData.append('file', file);
@@ -30,6 +36,19 @@ export const deleteFile = async (cid: string): Promise<void> => {
     }
   } catch (error) {
     console.error('Failed to delete file:', error);
+    throw error;
+  }
+};
+
+export const renameFile = async (cid: string, name: string): Promise<RenameResponse> => {
+  try {
+    const response = await Axios.patch(`/files/rename/${cid}`, { name });
+    if (!response.data.ok) {
+      throw new Error('Rename failed');
+    }
+    return response.data;
+  } catch (error) {
+    console.error('Failed to rename file:', error);
     throw error;
   }
 };
