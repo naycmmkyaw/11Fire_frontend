@@ -12,18 +12,12 @@ import FileActionsMenu from "../../components/files/FileActionsMenu";
 import UploadDialog from "../../components/files/UploadDialog";
 import useIsMobile from "../../hooks/useMobile";
 import type { FileEntry } from "../../types";
-import { uploadFile } from "../../services/uploadService";
+import { uploadFile } from "../../services/filesService";
 import { listMyGroups, type GroupMembership } from "../../services/getGroupList";
 import { fetchFilesForGroup } from "../../services/getFiles";
 import GroupDialog from "../../components/files/GroupDialog";
 import Axios from "../../services/axiosInstance";
 import LoadingDialog from "../../components/files/LoadingDialog";
-
-// import { uploadFileToIPFS } from "../api/upload";
-// import { useEffect } from "react";
-// import { fetchFiles } from "../api/files";
-// import { downloadFile } from "../api/download";
-// import { deleteFile } from "../api/delete";
 
 interface FilesTabContentProps {
   selectedTab: string;
