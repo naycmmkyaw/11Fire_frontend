@@ -12,7 +12,7 @@ import FileActionsMenu from "../../components/files/FileActionsMenu";
 import UploadDialog from "../../components/files/UploadDialog";
 import useIsMobile from "../../hooks/useMobile";
 import type { FileEntry } from "../../types";
-import { uploadFile, deleteFile, renameFile } from "../../services/filesService";
+import { uploadFile, deleteFile, renameFile, downloadFile } from "../../services/filesService";
 import { listMyGroups, type GroupMembership } from "../../services/getGroupList";
 import { fetchFilesForGroup } from "../../services/getFiles";
 import GroupDialog from "../../components/files/GroupDialog";
@@ -60,6 +60,7 @@ const FilesTabContent: React.FC<FilesTabContentProps> = ({
   const [isUploading, setIsUploading] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isRenaming, setIsRenaming] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [fileToDelete, setFileToDelete] = useState<{ index: number; name: string } | null>(null);
@@ -384,16 +385,23 @@ const FilesTabContent: React.FC<FilesTabContentProps> = ({
     }
   };
 
-  const handleDownload = () => {
+  const handleDownload = async () => {
     if (activeFileIndex !== null) {
       const file = files[activeFileIndex];
-      // downloadFile(file.cid, file.name);
-      // For now, just log the download action since the function is commented out
-      console.log("Download file:", file.name, file.cid);
+      setIsDownloading(true);
+      setFileMenuAnchor(null); // Close menu immediately
       
-      // Close the dropdown menu after download action
-      setFileMenuAnchor(null);
-      setActiveFileIndex(null);
+      try {
+        await downloadFile(file.cid, file.name);
+        // Download success is handled by the browser
+      } catch (error: any) {
+        console.error('Download failed:', error);
+        const errorMessage = error.response?.data?.error || 'Failed to download file. Please try again.';
+        setUploadError(errorMessage);
+      } finally {
+        setIsDownloading(false);
+        setActiveFileIndex(null);
+      }
     }
   };
 
@@ -545,13 +553,14 @@ const FilesTabContent: React.FC<FilesTabContentProps> = ({
         isUploading={isUploading || isRenaming}
         uploadError={uploadError}
       />
+      {/* Upload Loading Dialog */}
       <LoadingDialog
         open={isUploading}
         onClose={() => {}} // Prevent closing during upload
         title="Uploading File"
         loadingText={`Uploading "${fileName}" to the group...`}
       />
-          {/* Rename Loading Dialog */}
+      {/* Rename Loading Dialog */}
       <LoadingDialog
         open={isRenaming}
         onClose={() => {}}
@@ -571,6 +580,13 @@ const FilesTabContent: React.FC<FilesTabContentProps> = ({
         onClose={() => {}}
         title="Deleting File"
         loadingText="Deleting file, please wait..."
+      />
+
+      <LoadingDialog
+        open={isDownloading}
+        onClose={() => {}}
+        title="Downloading File"
+        loadingText={`Downloading file, please wait...`}
       />
       <GroupDialog
       open={groupDialogOpen}

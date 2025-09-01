@@ -52,3 +52,25 @@ export const renameFile = async (cid: string, name: string): Promise<RenameRespo
     throw error;
   }
 };
+
+export const downloadFile = async (cid: string, fileName: string): Promise<void> => {
+  try {
+    const response = await Axios.get(`/files/download/${cid}`, {
+      responseType: 'blob',
+    });
+
+    // Create blob link to download
+    const blob = new Blob([response.data]);
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = fileName;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    window.URL.revokeObjectURL(url);
+  } catch (error) {
+    console.error('Failed to download file:', error);
+    throw error;
+  }
+};
