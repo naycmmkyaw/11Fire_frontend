@@ -24,7 +24,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             id: String(backendUser._id),                    // MongoDB ObjectId as string
             email: backendUser.email,                       // Direct mapping
             name: backendUser.username,                     // Backend uses 'username'
-            avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(backendUser.username || backendUser.email)}&background=1976d2&color=fff`,
+            avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(backendUser.username || backendUser.email)}&background=ef4444&color=fff`,
           };
 
           setUser(mappedUser);
