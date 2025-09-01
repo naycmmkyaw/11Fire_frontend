@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import { Alert, Box, Snackbar } from "@mui/material";
 import EmptyFilesCard from "../../components/files/EmptyFilesCard";
 import FilesTable from "../../components/files/FilesTable";
@@ -42,6 +43,7 @@ const FilesTabContent: React.FC<FilesTabContentProps> = ({
   onTabChange
 }) => {
   const isMobile = useIsMobile();
+  const location = useLocation();
   
   // State
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -75,9 +77,16 @@ const FilesTabContent: React.FC<FilesTabContentProps> = ({
   const [radioValue, setRadioValue] = useState("");
   const [groupDialogError, setGroupDialogError] = useState<string | null>(null);
 
-    // Fetch groups on component mount
+  // Check for navigation state on component mount
   useEffect(() => {
-    fetchGroups();
+    const state = location.state as { swarmName?: string };
+    if (state?.swarmName) {
+      fetchGroups(state.swarmName);
+      // Clear the state to prevent re-triggering
+      window.history.replaceState({}, document.title);
+    } else {
+      fetchGroups();
+    }
   }, []);
 
   const fetchGroups = async (swarmName?: string | undefined) => {
