@@ -21,3 +21,15 @@ export const uploadFile = async (file: File): Promise<UploadResponse> => {
 
   return response.data;
 };
+
+export const deleteFile = async (cid: string): Promise<void> => {
+  try {
+    const response = await Axios.delete(`/files/delete/${cid}`);
+    if (!response.data.ok) {
+      throw new Error('Delete failed');
+    }
+  } catch (error) {
+    console.error('Failed to delete file:', error);
+    throw error;
+  }
+};

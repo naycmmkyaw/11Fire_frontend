@@ -12,12 +12,13 @@ import FileActionsMenu from "../../components/files/FileActionsMenu";
 import UploadDialog from "../../components/files/UploadDialog";
 import useIsMobile from "../../hooks/useMobile";
 import type { FileEntry } from "../../types";
-import { uploadFile } from "../../services/filesService";
+import { uploadFile, deleteFile } from "../../services/filesService";
 import { listMyGroups, type GroupMembership } from "../../services/getGroupList";
 import { fetchFilesForGroup } from "../../services/getFiles";
 import GroupDialog from "../../components/files/GroupDialog";
 import Axios from "../../services/axiosInstance";
 import LoadingDialog from "../../components/files/LoadingDialog";
+import DeleteConfirmDialog from "../../components/files/DeleteConfirmDialog";
 
 interface FilesTabContentProps {
   selectedTab: string;
@@ -57,7 +58,10 @@ const FilesTabContent: React.FC<FilesTabContentProps> = ({
   const [groupMenuAnchor, setGroupMenuAnchor] = useState<null | HTMLElement>(null);
   const [selectedFiles, setSelectedFiles] = useState<Set<number>>(new Set());
   const [isUploading, setIsUploading] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [fileToDelete, setFileToDelete] = useState<{ index: number; name: string } | null>(null);
   // New state for groups
   const [groups, setGroups] = useState<GroupMembership[]>([]);
   const [selectedGroup, setSelectedGroup] = useState<GroupMembership | null>(null);
@@ -381,22 +385,42 @@ const FilesTabContent: React.FC<FilesTabContentProps> = ({
 
   const handleDelete = () => {
     if (activeFileIndex !== null) {
-      // deleteFile(files[activeFileIndex].cid)
-      //   .then(() => {
-      //     const updated = [...files];
-      //     updated.splice(activeFileIndex, 1);
-      //     setFiles(updated);
-      //   })
-      //   .catch((err) => alert("Failed to delete file"));
-      // For now, just remove from local state since the function is commented out
-      const updated = [...files];
-      updated.splice(activeFileIndex, 1);
-      setFiles(updated);
-      
-      // Close the dropdown menu after deletion
-      setFileMenuAnchor(null);
-      setActiveFileIndex(null);
+      const file = files[activeFileIndex];
+      setFileToDelete({ index: activeFileIndex, name: file.name });
+      setDeleteDialogOpen(true);
+      setFileMenuAnchor(null); // Close menu immediately
     }
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!fileToDelete) return;
+    
+    const file = files[fileToDelete.index];
+    setIsDeleting(true);
+    setDeleteDialogOpen(false); // Close confirmation dialog
+    
+    try {
+      await deleteFile(file.cid);
+      
+      // Remove from local state after successful deletion
+      const updated = [...files];
+      updated.splice(fileToDelete.index, 1);
+      setFiles(updated);
+    } catch (error: any) {
+      console.error('Delete failed:', error);
+      const errorMessage = error.response?.data?.error || 'Failed to delete file. Please try again.';
+      setUploadError(errorMessage);
+    } finally {
+      setIsDeleting(false);
+      setActiveFileIndex(null);
+      setFileToDelete(null);
+    }
+  };
+
+  const handleDeleteCancel = () => {
+    setDeleteDialogOpen(false);
+    setFileToDelete(null);
+    setActiveFileIndex(null);
   };
 
   const handleDialogClose = () => {
@@ -512,6 +536,20 @@ const FilesTabContent: React.FC<FilesTabContentProps> = ({
         onClose={() => {}} // Prevent closing during upload
         title="Uploading File"
         loadingText={`Uploading "${fileName}" to the group...`}
+      />
+
+      <DeleteConfirmDialog
+        open={deleteDialogOpen}
+        onClose={handleDeleteCancel}
+        onConfirm={handleDeleteConfirm}
+        fileName={fileToDelete?.name || ""}
+      />
+
+      <LoadingDialog
+        open={isDeleting}
+        onClose={() => {}}
+        title="Deleting File"
+        loadingText="Deleting file, please wait..."
       />
       <GroupDialog
       open={groupDialogOpen}
