@@ -16,6 +16,9 @@ import { uploadFile } from "../../services/uploadService";
 import { listMyGroups, type GroupMembership } from "../../services/getGroupList";
 import { fetchFilesForGroup } from "../../services/getFiles";
 import GroupDialog from "../../components/files/GroupDialog";
+import Axios from "../../services/axiosInstance";
+import LoadingDialog from "../../components/files/LoadingDialog";
+
 // import { uploadFileToIPFS } from "../api/upload";
 // import { useEffect } from "react";
 // import { fetchFiles } from "../api/files";
@@ -70,29 +73,41 @@ const FilesTabContent: React.FC<FilesTabContentProps> = ({
   const [groupName, setGroupName] = useState("");
   const [passcode, setPasscode] = useState("");
   const [radioValue, setRadioValue] = useState("");
+  const [groupDialogError, setGroupDialogError] = useState<string | null>(null);
 
     // Fetch groups on component mount
   useEffect(() => {
-    const fetchGroups = async () => {
-      try {
-        setIsLoadingGroups(true);
-        const groupsList = await listMyGroups();
-        setGroups(groupsList);
-        
-        // Auto-select first group if available
-        if (groupsList.length > 0) {
-          setSelectedGroup(groupsList[0]);
-        }
-      } catch (error) {
-        console.error('Failed to fetch groups:', error);
-        // Could show a snackbar error here
-      } finally {
-        setIsLoadingGroups(false);
-      }
-    };
-
     fetchGroups();
   }, []);
+
+  const fetchGroups = async (swarmName?: string | undefined) => {
+    try {
+      setIsLoadingGroups(true);
+      const groupsList = await listMyGroups();
+      setGroups(groupsList);
+      // If activeSwarm is provided, set that group as selected
+      if (swarmName) {
+        const activeGroup = groupsList.find(g => g.swarmName === swarmName);
+        setSelectedGroup(activeGroup || groupsList[0]);
+        if (activeGroup) {
+          const groupFiles = await fetchFilesForGroup(activeGroup.swarmId);
+          setFiles(groupFiles);
+        }
+      } else {
+        setSelectedGroup(groupsList[0]);
+        // Optionally fetch files for the first group
+        if (groupsList[0]) {
+          const groupFiles = await fetchFilesForGroup(groupsList[0].swarmId);
+          setFiles(groupFiles);
+        }
+      }
+    } catch (error) {
+      console.error('Failed to fetch groups:', error);
+      // Could show a snackbar error here
+    } finally {
+      setIsLoadingGroups(false);
+    }
+  };
 
   const handleGroupSelect = async (group: GroupMembership) => {
     setSelectedGroup(group);
@@ -116,6 +131,52 @@ const FilesTabContent: React.FC<FilesTabContentProps> = ({
     setGroupDialogOpen(false);
     setGroupName("");
   };
+
+  const handleGroupDialogSubmit = async () => {
+  setGroupDialogError(null);
+  if (!groupName.trim() || !passcode || !radioValue) {
+    setGroupDialogError("All fields are required.");
+    return;
+  }
+  if (!["user", "provider"].includes(radioValue)) {
+    setGroupDialogError("Choose a valid role.");
+    return;
+  }
+  if (!isJoinMode && passcode.length < 8) {
+    setGroupDialogError("Password must be at least 8 characters.");
+    return;
+  }
+
+  try {
+    let swarmName: string | undefined;
+    if (isJoinMode) {
+      const res = await Axios.post("/swarms/join", {
+        name: groupName.trim(),
+        password: passcode,
+        role: radioValue,
+      });
+      swarmName = res.data?.name;
+    } else {
+      const res =await Axios.post("/swarms/create", {
+        name: groupName.trim(),
+        password: passcode,
+        role: radioValue,
+      });
+      swarmName = res.data?.name;
+    }
+    
+    // Refresh group list after successful create/join
+    await fetchGroups(swarmName);
+    setGroupDialogOpen(false);
+    setGroupName("");
+    setPasscode("");
+    setRadioValue("");
+  } catch (error: any) {
+    setGroupDialogError(
+      error.response?.data?.error || "Failed to process group action"
+    );
+  }
+};
 
   // Ensure activeFileIndex is valid after files array changes
   useEffect(() => {
@@ -240,6 +301,7 @@ const FilesTabContent: React.FC<FilesTabContentProps> = ({
 
     setIsUploading(true);
     setUploadError(null);
+    setDialogOpen(false); // Close the upload dialog when starting upload
 
     try {
       const response = await uploadFile(selectedFile);
@@ -247,7 +309,6 @@ const FilesTabContent: React.FC<FilesTabContentProps> = ({
       const isDuplicate = files.some(file => file.cid === response.cid);
       if (isDuplicate) {
         setUploadError("This file already exists in the group.");
-        setDialogOpen(false);
         return;
       }
       
@@ -260,7 +321,6 @@ const FilesTabContent: React.FC<FilesTabContentProps> = ({
       };
       
       setFiles([...files, newFile]);
-      setDialogOpen(false);
     } catch (error: any) {
       console.error('Upload failed:', error);
       const errorMessage = error.response?.data?.error || 'Upload failed. Please try again.';
@@ -269,6 +329,8 @@ const FilesTabContent: React.FC<FilesTabContentProps> = ({
       setIsUploading(false);
       setSelectedFile(null);
       setActiveFileIndex(null);
+      setFileName("");
+      setFileSize("");
     }
   };
 
@@ -451,6 +513,12 @@ const FilesTabContent: React.FC<FilesTabContentProps> = ({
         isUploading={isUploading}
         uploadError={uploadError}
       />
+      <LoadingDialog
+        open={isUploading}
+        onClose={() => {}} // Prevent closing during upload
+        title="Uploading File"
+        loadingText={`Uploading "${fileName}" to the group...`}
+      />
       <GroupDialog
       open={groupDialogOpen}
       onClose={handleCloseGroupDialog}
@@ -461,7 +529,8 @@ const FilesTabContent: React.FC<FilesTabContentProps> = ({
       radioValue={radioValue}
       setRadioValue={setRadioValue}
       isJoinMode={isJoinMode}
-      onSubmit={() => {/* handle create/join logic here */}}
+      onSubmit={handleGroupDialogSubmit}
+      groupDialogError={groupDialogError}
       />
 
       <Snackbar
