@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
-import { Box, Typography, Button } from '@mui/material';
+import { Box, Typography, Button, Alert, Snackbar } from '@mui/material';
 import ResponsiveHeader from '../../components/shared/ResponsiveHeader';
 import InstallationSection from '../../components/installTab/InstallationSection';
 import DownloadIcon from '@mui/icons-material/Download';
+import { providerNodeService } from '../../services/providerNodeService';
+import { useAuth } from '../../hooks/useAuth';
 
 interface InstallTabProps {
   selectedTab: string;
@@ -16,9 +18,63 @@ const InstallTab: React.FC<InstallTabProps> = ({
   isProviderDashboard
 }) => {
   const [kuboTabValue, setKuboTabValue] = useState(0);
+  const [isDownloading, setIsDownloading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const { user } = useAuth();
 
   const handleKuboTabChange = (event: React.SyntheticEvent, newValue: number) => {
     setKuboTabValue(newValue);
+  };
+
+  const downloadProviderToken = async () => {
+    try {
+      setIsDownloading(true);
+      setError(null);
+      
+      // Check if user is authenticated
+      if (!user) {
+        setError('You must be logged in to download the provider token. Please sign in first.');
+        return;
+      }
+      
+      // Call the API to get the provider claim token
+      const response = await providerNodeService.mintProviderClaimToken();
+      
+      // Create the file content with the token
+      const fileContent = response.token;
+      
+      // Create a blob and download the file
+      const blob = new Blob([fileContent], { type: 'text/plain' });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'provider.token';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      
+    } catch (error: unknown) {
+      console.error('Failed to download provider token:', error);
+      
+      // Provide user-friendly error messages
+      const axiosError = error as { response?: { status?: number } };
+      if (axiosError.response?.status === 401) {
+        setError('Authentication failed. Please sign in again to download the provider token.');
+      } else if (axiosError.response?.status === 403) {
+        setError('You do not have permission to download the provider token.');
+      } else if (axiosError.response?.status && axiosError.response.status >= 500) {
+        setError('Server error. Please try again later.');
+      } else {
+        setError('Failed to download provider token. Please try again.');
+      }
+    } finally {
+      setIsDownloading(false);
+    }
+  };
+
+  const handleCloseError = () => {
+    setError(null);
   };
 
   // Installation data for Kubo
@@ -114,22 +170,6 @@ const InstallTab: React.FC<InstallTabProps> = ({
             mb: 4,
             textAlign: 'center'
           }}>
-            <Box sx={{
-              width: 64,
-              height: 64,
-              borderRadius: '50%',
-              bgcolor: '#F3F4F6',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              mb: 3,
-              border: '2px solid #E5E7EB'
-            }}>
-              <DownloadIcon sx={{ 
-                fontSize: 32, 
-                color: '#EF4444' 
-              }} />
-            </Box>
             
             <Typography 
               variant="h6" 
@@ -156,36 +196,77 @@ const InstallTab: React.FC<InstallTabProps> = ({
             </Typography>
           </Box>
           
-          {/* Download Button */}
-          <Button
-            variant="contained"
-            startIcon={<DownloadIcon sx={{ fontSize: 20 }} />}
-            onClick={() => window.open('https://example.com/11fire-binary', '_blank')}
-            sx={{
-              bgcolor: '#EF4444',
-              color: 'white',
-              px: 6,
-              py: 2.5,
-              borderRadius: 2,
-              textTransform: 'none',
-              fontWeight: 600,
-              fontSize: '1.125rem',
-              minWidth: '240px',
-              height: '56px',
-              boxShadow: '0 4px 6px -1px rgba(239, 68, 68, 0.2), 0 2px 4px -1px rgba(239, 68, 68, 0.1)',
-              transition: 'all 0.2s ease-in-out',
-              '&:hover': {
-                bgcolor: '#DC2626',
-                boxShadow: '0 10px 15px -3px rgba(239, 68, 68, 0.3), 0 4px 6px -2px rgba(239, 68, 68, 0.2)',
-                transform: 'translateY(-1px)'
-              },
-              '&:active': {
-                transform: 'translateY(0)'
-              }
-            }}
-          >
-            Download 11Fire Binary
-          </Button>
+          {/* Download Buttons */}
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, alignItems: 'center' }}>
+            {/* Download Token Button */}
+            <Button
+              variant="contained"
+              startIcon={<DownloadIcon sx={{ fontSize: 20 }} />}
+              onClick={downloadProviderToken}
+              disabled={isDownloading || !user}
+              sx={{
+                bgcolor: '#EF4444',
+                color: 'white',
+                px: 6,
+                py: 2.5,
+                borderRadius: 2,
+                textTransform: 'none',
+                fontWeight: 600,
+                fontSize: '1.125rem',
+                minWidth: '240px',
+                height: '56px',
+                boxShadow: '0 4px 6px -1px rgba(239, 68, 68, 0.2), 0 2px 4px -1px rgba(239, 68, 68, 0.1)',
+                transition: 'all 0.2s ease-in-out',
+                '&:hover': {
+                  bgcolor: '#DC2626',
+                  boxShadow: '0 10px 15px -3px rgba(239, 68, 68, 0.3), 0 4px 6px -2px rgba(239, 68, 68, 0.2)',
+                  transform: 'translateY(-1px)'
+                },
+                '&:active': {
+                  transform: 'translateY(0)'
+                },
+                '&:disabled': {
+                  bgcolor: '#9CA3AF',
+                  color: '#6B7280',
+                  boxShadow: 'none',
+                  transform: 'none'
+                }
+              }}
+            >
+              {isDownloading ? 'Downloading...' : !user ? 'Please Sign In' : 'Download 11Fire Token'}
+            </Button>
+
+            {/* Download Binary Button */}
+            <Button
+              variant="contained"
+              startIcon={<DownloadIcon sx={{ fontSize: 20 }} />}
+              onClick={() => window.open('https://example.com/11fire-binary', '_blank')}
+              sx={{
+                bgcolor: '#EF4444',
+                color: 'white',
+                px: 6,
+                py: 2.5,
+                borderRadius: 2,
+                textTransform: 'none',
+                fontWeight: 600,
+                fontSize: '1.125rem',
+                minWidth: '240px',
+                height: '56px',
+                boxShadow: '0 4px 6px -1px rgba(239, 68, 68, 0.2), 0 2px 4px -1px rgba(239, 68, 68, 0.1)',
+                transition: 'all 0.2s ease-in-out',
+                '&:hover': {
+                  bgcolor: '#DC2626',
+                  boxShadow: '0 10px 15px -3px rgba(239, 68, 68, 0.3), 0 4px 6px -2px rgba(239, 68, 68, 0.2)',
+                  transform: 'translateY(-1px)'
+                },
+                '&:active': {
+                  transform: 'translateY(0)'
+                }
+              }}
+            >
+              Download 11Fire Binary
+            </Button>
+          </Box>
           
           {/* Additional Info */}
           <Box sx={{ 
@@ -206,6 +287,18 @@ const InstallTab: React.FC<InstallTabProps> = ({
           </Box>
         </Box>
       </Box>
+
+      {/* Error Snackbar */}
+      <Snackbar
+        open={!!error}
+        autoHideDuration={6000}
+        onClose={handleCloseError}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert onClose={handleCloseError} severity="error" sx={{ width: '100%' }}>
+          {error}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 };

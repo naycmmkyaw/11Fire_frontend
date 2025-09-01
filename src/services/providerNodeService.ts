@@ -27,5 +27,10 @@ export const providerNodeService = {
   getActiveUptimeLine24h: async (): Promise<UptimeLineData> => {
     const response = await Axios.get('/provider-node/active/uptime-line-24h');
     return response.data;
+  },
+
+  mintProviderClaimToken: async () => {
+    const response = await Axios.post('/auth/provider-claim-token');
+    return response.data;
   }
 };
