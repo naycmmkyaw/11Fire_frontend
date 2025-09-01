@@ -460,7 +460,6 @@ const FilesTabContent: React.FC<FilesTabContentProps> = ({
     <Box>
       <ResponsiveHeader 
         title={isMobile ? "Files" : "FILES"} 
-        avatarText="N" 
         selectedTab={selectedTab}
         setSelectedTab={setSelectedTab}
         isProviderDashboard={isProviderDashboard}

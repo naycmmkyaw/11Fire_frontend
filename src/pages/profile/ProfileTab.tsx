@@ -35,8 +35,7 @@ const ProfileTabContent: React.FC<ProfileTabContentProps> = ({
   return (
     <Box sx={{ flexGrow: 1, px: 1, py: 1 }}>
       <ResponsiveHeader 
-        title="PROFILE" 
-        avatarText="N" 
+        title="PROFILE"
         selectedTab={selectedTab}
         setSelectedTab={setSelectedTab}
         isProviderDashboard={isProviderDashboard}

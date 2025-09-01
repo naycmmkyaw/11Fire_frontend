@@ -5,7 +5,6 @@ import PageHeader from "./PageHeader";
 
 interface ResponsiveHeaderProps {
   title: string;
-  avatarText: string;
   selectedTab: string;
   setSelectedTab: (tab: string) => void;
   isProviderDashboard: boolean;
