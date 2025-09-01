@@ -58,6 +58,7 @@ const StorageCard: React.FC<StorageCardProps> = ({
       setIsLoadingQuota(true);
       const data = await providerNodeService.getActiveQuotaUsage();
       setQuotaData(data);
+      console.log(data);
     } catch (err) {
       console.error('Failed to fetch quota data:', err);
     } finally {
