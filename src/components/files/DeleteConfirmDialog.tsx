@@ -5,32 +5,23 @@ import {
   DialogContent,
   DialogActions,
   Button,
-  TextField,
   Typography,
   IconButton,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 
-interface UploadDialogProps {
+interface DeleteConfirmDialogProps {
   open: boolean;
   onClose: () => void;
+  onConfirm: () => void;
   fileName: string;
-  setFileName: (name: string) => void;
-  isRenameMode: boolean;
-  isFileUpload: boolean;
-  isUploading?: boolean;
-  uploadError?: string | null;
-  onSubmit: () => void;
 }
 
-const UploadDialog: React.FC<UploadDialogProps> = ({
+const DeleteConfirmDialog: React.FC<DeleteConfirmDialogProps> = ({
   open,
   onClose,
+  onConfirm,
   fileName,
-  setFileName,
-  isRenameMode,
-  isFileUpload,
-  onSubmit,
 }) => (
   <Dialog
     open={open}
@@ -62,22 +53,29 @@ const UploadDialog: React.FC<UploadDialogProps> = ({
     >
       <CloseIcon />
     </IconButton>
+    
     <DialogTitle sx={{ fontWeight: 600, fontSize: "1.4rem", mb: 1 }}>
-      {isRenameMode ? "Rename" : `${isFileUpload ? "File" : "Folder"} Upload`}
+      Delete File
     </DialogTitle>
+    
     <DialogContent>
-      <Typography sx={{ mb: 1, fontSize: "1rem" }}>
-        Confirm file name
+      <Typography sx={{ mb: 2, fontSize: "1rem" }}>
+        Are you sure you want to delete this file?
       </Typography>
-      <TextField
-        fullWidth
-        variant="outlined"
-        label="Name"
-        value={fileName}
-        onChange={(e) => setFileName(e.target.value)}
-        sx={{ bgcolor: "secondary.main", borderRadius: 2 }}
-      />
+      <Typography sx={{ 
+        fontWeight: 500, 
+        color: "primary.main",
+        p: 1,
+        borderRadius: 1,
+        wordBreak: "break-all"
+      }}>
+        {fileName}
+      </Typography>
+      <Typography sx={{ mt: 2, fontSize: "0.9rem", color: "#666" }}>
+        This action cannot be undone.
+      </Typography>
     </DialogContent>
+    
     <DialogActions sx={{ px: 3, pb: 2, pt: 1, gap: 2 }}>
       <Button
         variant="outlined"
@@ -88,18 +86,18 @@ const UploadDialog: React.FC<UploadDialogProps> = ({
       </Button>
       <Button
         variant="contained"
-        onClick={onSubmit}
+        onClick={onConfirm}
         sx={{
           borderRadius: 2,
-          bgcolor: "primary.main",
+          bgcolor: "#ef4444",
           color: "#fff",
           "&:hover": { bgcolor: "#dc2626" },
         }}
       >
-        {isRenameMode ? "Rename" : "Upload"}
+        Delete
       </Button>
     </DialogActions>
   </Dialog>
 );
 
-export default UploadDialog;
+export default DeleteConfirmDialog;
