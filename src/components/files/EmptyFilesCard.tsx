@@ -11,7 +11,7 @@ const EmptyFilesCard: React.FC<EmptyFilesCardProps> = ({ isMobile = false }) => 
     return (
       <Box
         sx={{
-          bgcolor: 'secondary.main',
+          bgcolor: '#fafafa',
           border: "1px solid #e0e0e0",
           borderRadius: 3,
           height: 120,

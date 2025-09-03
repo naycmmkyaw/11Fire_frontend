@@ -3,10 +3,6 @@ import {
   Box,
   Typography,
   TextField,
-  Radio,
-  RadioGroup,
-  FormControlLabel,
-  Alert,
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import ActionButton from '../../components/shared/ActionButton';
@@ -16,13 +12,9 @@ import Axios from '../../services/axiosInstance';
 const CreateGroup = () => {
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
-  const [role, setRole] = useState("");
   const [nameError, setNameError] = useState("");
   const [passwordError, setPasswordError] = useState("");
-  const [roleError, setRoleError] = useState("");
-  const [submitError, setSubmitError] = useState("");
   const [isCheckingName, setIsCheckingName] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
 
   const checkGroupName = async (groupName: string) => {
@@ -58,11 +50,9 @@ const CreateGroup = () => {
     }
   }, [name]);
 
-  const handleCreate = async () => {
+  const handleCreate = () => {
     setNameError('');
     setPasswordError('');
-    setRoleError('');
-    setSubmitError('');
     
     let hasError = false;
 
@@ -80,35 +70,17 @@ const CreateGroup = () => {
       hasError = true;
     }
 
-    if (!role) {
-      setRoleError('Please choose a role');
-      hasError = true;
-    }
-
     // Don't proceed if there are errors or still checking name
     if (hasError || isCheckingName || nameError) return;
 
-    setIsSubmitting(true);
-
-    try {
-      const response = await Axios.post('/swarms/create', {
-        name: name.trim(),
-        password: password,
-        role: role
-      });
-
-      // Navigate to files tab with the created group name
-      navigate('/files', { 
-        state: { 
-          swarmName: response.data?.name || name.trim()
-        } 
-      });
-    } catch (error: any) {
-      const errorMessage = error.response?.data?.error || 'Failed to create group';
-      setSubmitError(errorMessage);
-    } finally {
-      setIsSubmitting(false);
-    }
+    // Navigate with state
+    navigate('/role', { 
+      state: { 
+        action: 'create',
+        groupName: name.trim(),
+        password: password 
+      } 
+    });
   };
 
   const handleNameFocus = () => {
@@ -117,11 +89,6 @@ const CreateGroup = () => {
 
   const handlePasswordFocus = () => {
     setPasswordError('');
-  };
-
-  const handleRoleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setRole(event.target.value);
-    setRoleError('');
   };
 
   return (
@@ -271,56 +238,6 @@ const CreateGroup = () => {
             <Box sx={{ mb: 2 }} />
           )}
 
-          <Typography
-            sx={{
-              fontWeight: 500,
-              fontSize: "1rem",
-              color: 'text.primary',
-              mb: 1,
-            }}
-          >
-            Choose to:
-          </Typography>
-          <Box sx={{ display: "flex", justifyContent: "center", mb: 1 }}>
-            <RadioGroup
-              row
-              value={role}
-              onChange={handleRoleChange}
-            >
-              <FormControlLabel
-                value="user"
-                control={<Radio />}
-                label="Store data"
-              />
-              <FormControlLabel
-                value="provider"
-                control={<Radio />}
-                label="Provide storage"
-              />
-            </RadioGroup>
-          </Box>
-          {roleError && (
-            <Typography
-              sx={{
-                color: 'error.main',
-                fontSize: '0.75rem',
-                mb: 2,
-                mt: 0.5,
-              }}
-            >
-              {roleError}
-            </Typography>
-          )}
-          {!roleError && (
-            <Box sx={{ mb: 2 }} />
-          )}
-
-          {submitError && (
-            <Alert severity="error" sx={{ mb: 2 }}>
-              {submitError}
-            </Alert>
-          )}
-
           <Box
             sx={{
               display: "flex",
@@ -332,18 +249,17 @@ const CreateGroup = () => {
             <ActionButton
               variant="primary"
               onClick={handleCreate}
-              disabled={!!nameError || !!passwordError || !!roleError}
+              disabled={!!nameError || !!passwordError}
               sx={{
                 mb: 2,
               }}
             >
-              {isSubmitting ? "Creating..." : "Create"}
+              Create
             </ActionButton>
 
             <ActionButton
               variant="secondary"
               onClick={() => navigate("/group")}
-              disabled={isSubmitting}
             >
               Cancel
             </ActionButton>
