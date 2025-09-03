@@ -128,12 +128,20 @@ const JoinGroup = () => {
         role: role
       });
 
-      // Navigate to files tab with the joined group name
-      navigate('/files', { 
-        state: { 
-          swarmName: response.data?.name || name.trim()
-        } 
-      });
+      // Navigate based on role
+      if (role === 'provider') {
+        navigate('/provider-dashboard', { 
+          state: { 
+            swarmName: response.data?.name || name.trim()
+          } 
+        });
+      } else {
+        navigate('/files', { 
+          state: { 
+            swarmName: response.data?.name || name.trim()
+          } 
+        });
+      }
     } catch (error: any) {
       const errorMessage = error.response?.data?.error || 'Failed to join group';
       setSubmitError(errorMessage);

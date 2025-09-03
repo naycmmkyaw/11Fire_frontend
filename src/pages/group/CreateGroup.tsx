@@ -97,12 +97,20 @@ const CreateGroup = () => {
         role: role
       });
 
-      // Navigate to files tab with the created group name
-      navigate('/files', { 
-        state: { 
-          swarmName: response.data?.name || name.trim()
-        } 
-      });
+      // Navigate based on role
+      if (role === 'provider') {
+        navigate('/provider-dashboard', { 
+          state: { 
+            swarmName: response.data?.name || name.trim()
+          } 
+        });
+      } else {
+        navigate('/files', { 
+          state: { 
+            swarmName: response.data?.name || name.trim()
+          } 
+        });
+      }
     } catch (error: any) {
       const errorMessage = error.response?.data?.error || 'Failed to create group';
       setSubmitError(errorMessage);
