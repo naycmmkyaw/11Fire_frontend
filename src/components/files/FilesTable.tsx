@@ -46,13 +46,13 @@ const FilesTable: React.FC<FilesTableProps> = ({
         component={Paper}
         sx={{ 
           borderRadius: 2, 
-          bgcolor: "secondary.main",
+          bgcolor: "#fefaf4",
           maxWidth: "100vw",
           overflowX: "hidden"
         }}
       >
         <Table sx={{ minWidth: "auto", tableLayout: "fixed" }}>
-          <TableHead sx={{ bgcolor: "#f4eade" }}>
+          <TableHead sx={{ bgcolor: "#f3ede1" }}>
             <TableRow>
               <TableCell padding="checkbox" sx={{ width: "10%", minWidth: 40, px: 1 }}>
                 <Checkbox 
@@ -219,10 +219,10 @@ const FilesTable: React.FC<FilesTableProps> = ({
   return (
     <TableContainer
       component={Paper}
-      sx={{ borderRadius: 2, bgcolor: "secondary.main" }}
+      sx={{ borderRadius: 2, bgcolor: "#fefaf4" }}
     >
               <Table>
-          <TableHead sx={{ bgcolor: "#f4eade" }}>
+          <TableHead sx={{ bgcolor: "#f3ede1" }}>
             <TableRow>
               <TableCell padding="checkbox">
                 <Checkbox 
@@ -307,7 +307,7 @@ const FilesTable: React.FC<FilesTableProps> = ({
                     <strong>Size</strong>
                   </TableCell>
                   <TableCell>
-                    <strong>Uploaded</strong>
+                    <strong>Creation Date</strong>
                   </TableCell>
                   <TableCell />
                 </>
@@ -316,7 +316,7 @@ const FilesTable: React.FC<FilesTableProps> = ({
           </TableHead>
         <TableBody>
           {files.map((file, idx) => (
-            <TableRow key={idx} hover sx={{ bgcolor: "secondary.main" }}>
+            <TableRow key={idx} hover sx={{ bgcolor: "#fffaf3" }}>
               <TableCell padding="checkbox">
                 <Checkbox 
                   checked={selectedFiles.has(idx)}

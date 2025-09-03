@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useLocation } from "react-router-dom";
-import { Alert, Box, Snackbar } from "@mui/material";
+import { Box, Snackbar } from "@mui/material";
 import EmptyFilesCard from "../../components/files/EmptyFilesCard";
 import FilesTable from "../../components/files/FilesTable";
 import ResponsiveHeader from "../../components/shared/ResponsiveHeader";
@@ -13,13 +12,11 @@ import FileActionsMenu from "../../components/files/FileActionsMenu";
 import UploadDialog from "../../components/files/UploadDialog";
 import useIsMobile from "../../hooks/useMobile";
 import type { FileEntry } from "../../types";
-import { uploadFile, deleteFile, renameFile, downloadFile } from "../../services/filesService";
-import { listMyGroups, type GroupMembership } from "../../services/getGroupList";
-import { fetchFilesForGroup } from "../../services/getFiles";
-import GroupDialog from "../../components/files/GroupDialog";
-import Axios from "../../services/axiosInstance";
-import LoadingDialog from "../../components/files/LoadingDialog";
-import DeleteConfirmDialog from "../../components/files/DeleteConfirmDialog";
+// import { uploadFileToIPFS } from "../api/upload";
+// import { useEffect } from "react";
+// import { fetchFiles } from "../api/files";
+// import { downloadFile } from "../api/download";
+// import { deleteFile } from "../api/delete";
 
 interface FilesTabContentProps {
   selectedTab: string;
@@ -35,6 +32,9 @@ const formatSize = (size: number): string => {
   return `${size} B`;
 };
 
+const truncateCid = (cid: string): string => 
+  `${cid.slice(0, 6)}...${cid.slice(-4)}`;
+
 // Main component
 const FilesTabContent: React.FC<FilesTabContentProps> = ({
   selectedTab,
@@ -43,7 +43,6 @@ const FilesTabContent: React.FC<FilesTabContentProps> = ({
   onTabChange
 }) => {
   const isMobile = useIsMobile();
-  const location = useLocation();
   
   // State
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -59,133 +58,19 @@ const FilesTabContent: React.FC<FilesTabContentProps> = ({
   const [isRenameMode, setIsRenameMode] = useState(false);
   const [groupMenuAnchor, setGroupMenuAnchor] = useState<null | HTMLElement>(null);
   const [selectedFiles, setSelectedFiles] = useState<Set<number>>(new Set());
-  const [isUploading, setIsUploading] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
-  const [isRenaming, setIsRenaming] = useState(false);
-  const [isDownloading, setIsDownloading] = useState(false);
-  const [uploadError, setUploadError] = useState<string | null>(null);
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [fileToDelete, setFileToDelete] = useState<{ index: number; name: string } | null>(null);
-  // New state for groups
-  const [groups, setGroups] = useState<GroupMembership[]>([]);
-  const [selectedGroup, setSelectedGroup] = useState<GroupMembership | null>(null);
-  const [isLoadingGroups, setIsLoadingGroups] = useState(true);
-  const [groupDialogOpen, setGroupDialogOpen] = useState(false);
-  const [isJoinMode, setIsJoinMode] = useState(false);
-  const [groupName, setGroupName] = useState("");
-  const [passcode, setPasscode] = useState("");
-  const [radioValue, setRadioValue] = useState("");
-  const [groupDialogError, setGroupDialogError] = useState<string | null>(null);
 
-  // Check for navigation state on component mount
-  useEffect(() => {
-    const state = location.state as { swarmName?: string };
-    if (state?.swarmName) {
-      fetchGroups(state.swarmName);
-      // Clear the state to prevent re-triggering
-      window.history.replaceState({}, document.title);
-    } else {
-      fetchGroups();
-    }
-  }, []);
-
-  const fetchGroups = async (swarmName?: string | undefined) => {
-    try {
-      setIsLoadingGroups(true);
-      const groupsList = await listMyGroups();
-      setGroups(groupsList);
-      // If activeSwarm is provided, set that group as selected
-      if (swarmName) {
-        const activeGroup = groupsList.find(g => g.swarmName === swarmName);
-        setSelectedGroup(activeGroup || groupsList[0]);
-        if (activeGroup) {
-          const groupFiles = await fetchFilesForGroup(activeGroup.swarmId);
-          setFiles(groupFiles);
-        }
-      } else {
-        setSelectedGroup(groupsList[0]);
-        // Optionally fetch files for the first group
-        if (groupsList[0]) {
-          const groupFiles = await fetchFilesForGroup(groupsList[0].swarmId);
-          setFiles(groupFiles);
-        }
-      }
-    } catch (error) {
-      console.error('Failed to fetch groups:', error);
-      // Could show a snackbar error here
-    } finally {
-      setIsLoadingGroups(false);
-    }
-  };
-
-  const handleGroupSelect = async (group: GroupMembership) => {
-    setSelectedGroup(group);
-    console.log('Selected group:', group);
-    try {
-      const groupFiles = await fetchFilesForGroup(group.swarmId);
-      setFiles(groupFiles);
-    } catch (error) {
-      console.error('Failed to fetch files for selected group:', error);
-      setFiles([]); // Optionally clear files on error
-    }
-  };
-
-  const handleOpenGroupDialog = (joinMode: boolean) => {
-    setIsJoinMode(joinMode);
-    setGroupDialogOpen(true);
-    setGroupName("");
-  };
-
-  const handleCloseGroupDialog = () => {
-    setGroupDialogOpen(false);
-    setGroupName("");
-  };
-
-  const handleGroupDialogSubmit = async () => {
-  setGroupDialogError(null);
-  if (!groupName.trim() || !passcode || !radioValue) {
-    setGroupDialogError("All fields are required.");
-    return;
-  }
-  if (!["user", "provider"].includes(radioValue)) {
-    setGroupDialogError("Choose a valid role.");
-    return;
-  }
-  if (!isJoinMode && passcode.length < 8) {
-    setGroupDialogError("Password must be at least 8 characters.");
-    return;
-  }
-
-  try {
-    let swarmName: string | undefined;
-    if (isJoinMode) {
-      const res = await Axios.post("/swarms/join", {
-        name: groupName.trim(),
-        password: passcode,
-        role: radioValue,
-      });
-      swarmName = res.data?.name;
-    } else {
-      const res =await Axios.post("/swarms/create", {
-        name: groupName.trim(),
-        password: passcode,
-        role: radioValue,
-      });
-      swarmName = res.data?.name;
-    }
-    
-    // Refresh group list after successful create/join
-    await fetchGroups(swarmName);
-    setGroupDialogOpen(false);
-    setGroupName("");
-    setPasscode("");
-    setRadioValue("");
-  } catch (error: any) {
-    setGroupDialogError(
-      error.response?.data?.error || "Failed to process group action"
-    );
-  }
-};
+  // useEffect(() => {
+  //   fetchFiles().then((data) => {
+  //     const formatted = data.map((f: any) => ({
+  //       name: f.name,
+  //       cid: f.cid,
+  //       size: formatSize(f.size),
+  //       date: new Date(f.date).toLocaleDateString(),
+  //       isFile: f.isFile,
+  //     }));
+  //     setFiles(formatted);
+  //   });
+  // }, []);
 
   // Ensure activeFileIndex is valid after files array changes
   useEffect(() => {
@@ -293,71 +178,35 @@ const FilesTabContent: React.FC<FilesTabContentProps> = ({
 
   const handleUpload = async () => {
     if (isRenameMode && activeFileIndex !== null) {
-      const file = files[activeFileIndex];
-      setIsRenaming(true);
-      setDialogOpen(false); // Close the rename dialog when starting rename  
-      try {
-        const response = await renameFile(file.cid, fileName);
-        
-        // Update the file in local state after successful rename
-        const updatedFiles = [...files];
-        updatedFiles[activeFileIndex] = {
-          ...updatedFiles[activeFileIndex],
-          name: response.name, // Use the cleaned name from backend
-        };
-        setFiles(updatedFiles);
-        
-        setSnackbarOpen(true); // Show success message
-      } catch (error: any) {
-        console.error('Rename failed:', error);
-        const errorMessage = error.response?.data?.error || 'Failed to rename file. Please try again.';
-        setUploadError(errorMessage);
-      } finally {
-        setIsRenaming(false);
-        setIsRenameMode(false);
-        setActiveFileIndex(null);
-        setSelectedFile(null);
-        setFileName("");
-        setFileSize("");
-      }
-      return;
-    }
-    // Regular upload logic
-    if (!selectedFile || isRenameMode) return;
-
-    setIsUploading(true);
-    setUploadError(null);
-    setDialogOpen(false); // Close the upload dialog when starting upload
-
-    try {
-      const response = await uploadFile(selectedFile);
-      // Check for duplicate by CID
-      const isDuplicate = files.some(file => file.cid === response.cid);
-      if (isDuplicate) {
-        setUploadError("This file already exists in the group.");
-        return;
-      }
-      
-      const newFile: FileEntry = {
+      const updatedFiles = [...files];
+      updatedFiles[activeFileIndex] = {
+        ...updatedFiles[activeFileIndex],
         name: fileName,
-        cid: response.cid,
-        size: fileSize,
-        date: new Date().toLocaleDateString(),
-        isFile: isFileUpload,
       };
-      
-      setFiles([...files, newFile]);
-    } catch (error: any) {
-      console.error('Upload failed:', error);
-      const errorMessage = error.response?.data?.error || 'Upload failed. Please try again.';
-      setUploadError(errorMessage);
-    } finally {
-      setIsUploading(false);
-      setSelectedFile(null);
-      setActiveFileIndex(null);
-      setFileName("");
-      setFileSize("");
+      setFiles(updatedFiles);
+    } else if (selectedFile && !isRenameMode) {
+      try {
+        // const cid = await uploadFileToIPFS(selectedFile);
+        // For now, create a mock CID since the function is commented out
+        const cid = "mock_cid_" + Date.now();
+        const newFile: FileEntry = {
+          name: fileName,
+          cid,
+          size: fileSize,
+          date: new Date().toLocaleDateString(),
+          isFile: isFileUpload,
+        };
+        setFiles([...files, newFile]);
+      } catch (err) {
+        alert("Upload failed.");
+        console.error(err);
+      }
     }
+
+    setDialogOpen(false);
+    setIsRenameMode(false);
+    setActiveFileIndex(null);
+    setSelectedFile(null);
   };
 
   const handleCopyCid = (cid: string) => {
@@ -365,10 +214,7 @@ const FilesTabContent: React.FC<FilesTabContentProps> = ({
     setSnackbarOpen(true);
   };
 
-  const handleSnackbarClose = () => {
-    setSnackbarOpen(false);
-    setUploadError(null);
-  };
+  const handleSnackbarClose = () => setSnackbarOpen(false);
 
   const handleGroupButtonClick = (event: React.MouseEvent<HTMLElement>) => {
     setGroupMenuAnchor(event.currentTarget);
@@ -384,91 +230,67 @@ const FilesTabContent: React.FC<FilesTabContentProps> = ({
     setActiveFileIndex(null);
   };
 
-  const handleRename = async () => {
+  const handleRename = () => {
     if (activeFileIndex !== null) {
-      const file = files[activeFileIndex];
-      setFileName(file.name); // Pre-populate with current file name
       setIsRenameMode(true);
+      setSelectedFile(null); // Clear selectedFile when entering rename mode
+      setFileName(files[activeFileIndex].name);
       setDialogOpen(true);
-      setFileMenuAnchor(null); // Close the menu
+      // Close the menu but preserve activeFileIndex for the rename operation
+      setFileMenuAnchor(null);
+      // Don't call handleFileMenuClose() here as it would reset activeFileIndex
+    } else {
+      handleFileMenuClose();
     }
   };
 
-  const handleDownload = async () => {
+  const handleDownload = () => {
     if (activeFileIndex !== null) {
       const file = files[activeFileIndex];
-      setIsDownloading(true);
-      setFileMenuAnchor(null); // Close menu immediately
+      // downloadFile(file.cid, file.name);
+      // For now, just log the download action since the function is commented out
+      console.log("Download file:", file.name, file.cid);
       
-      try {
-        await downloadFile(file.cid, file.name);
-        // Download success is handled by the browser
-      } catch (error: any) {
-        console.error('Download failed:', error);
-        const errorMessage = error.response?.data?.error || 'Failed to download file. Please try again.';
-        setUploadError(errorMessage);
-      } finally {
-        setIsDownloading(false);
-        setActiveFileIndex(null);
-      }
+      // Close the dropdown menu after download action
+      setFileMenuAnchor(null);
+      setActiveFileIndex(null);
     }
   };
 
   const handleDelete = () => {
     if (activeFileIndex !== null) {
-      const file = files[activeFileIndex];
-      setFileToDelete({ index: activeFileIndex, name: file.name });
-      setDeleteDialogOpen(true);
-      setFileMenuAnchor(null); // Close menu immediately
-    }
-  };
-
-  const handleDeleteConfirm = async () => {
-    if (!fileToDelete) return;
-    
-    const file = files[fileToDelete.index];
-    setIsDeleting(true);
-    setDeleteDialogOpen(false); // Close confirmation dialog
-    
-    try {
-      await deleteFile(file.cid);
-      
-      // Remove from local state after successful deletion
+      // deleteFile(files[activeFileIndex].cid)
+      //   .then(() => {
+      //     const updated = [...files];
+      //     updated.splice(activeFileIndex, 1);
+      //     setFiles(updated);
+      //   })
+      //   .catch((err) => alert("Failed to delete file"));
+      // For now, just remove from local state since the function is commented out
       const updated = [...files];
-      updated.splice(fileToDelete.index, 1);
+      updated.splice(activeFileIndex, 1);
       setFiles(updated);
-    } catch (error: any) {
-      console.error('Delete failed:', error);
-      const errorMessage = error.response?.data?.error || 'Failed to delete file. Please try again.';
-      setUploadError(errorMessage);
-    } finally {
-      setIsDeleting(false);
+      
+      // Close the dropdown menu after deletion
+      setFileMenuAnchor(null);
       setActiveFileIndex(null);
-      setFileToDelete(null);
     }
-  };
-
-  const handleDeleteCancel = () => {
-    setDeleteDialogOpen(false);
-    setFileToDelete(null);
-    setActiveFileIndex(null);
   };
 
   const handleDialogClose = () => {
-    if (isUploading || isRenaming) return; // Prevent closing during upload
     setDialogOpen(false);
     setIsRenameMode(false);
     setActiveFileIndex(null);
     setSelectedFile(null);
     setFileName("");
     setFileSize("");
-    setUploadError(null);
   };
 
   return (
     <Box>
       <ResponsiveHeader 
         title={isMobile ? "Files" : "FILES"} 
+        avatarText="N" 
         selectedTab={selectedTab}
         setSelectedTab={setSelectedTab}
         isProviderDashboard={isProviderDashboard}
@@ -490,12 +312,6 @@ const FilesTabContent: React.FC<FilesTabContentProps> = ({
               onOpen={handleGroupButtonClick}
               onClose={() => setGroupMenuAnchor(null)}
               isMobile={isMobile}
-              groups={groups}
-              selectedGroup={selectedGroup}
-              onGroupSelect={handleGroupSelect}
-              onCreateGroup={() => handleOpenGroupDialog(false)}
-              onJoinGroup={() => handleOpenGroupDialog(true)}
-              isLoading={isLoadingGroups}
             />
           )}
           {!isMobile && <SearchBar />}
@@ -508,12 +324,6 @@ const FilesTabContent: React.FC<FilesTabContentProps> = ({
               onOpen={handleGroupButtonClick}
               onClose={() => setGroupMenuAnchor(null)}
               isMobile={isMobile}
-              groups={groups}
-              selectedGroup={selectedGroup}
-              onGroupSelect={handleGroupSelect}
-              onCreateGroup={() => handleOpenGroupDialog(false)}
-              onJoinGroup={() => handleOpenGroupDialog(true)}
-              isLoading={isLoadingGroups}
             />
           )}
           <AddButton onClick={handleAddClick} />
@@ -558,76 +368,15 @@ const FilesTabContent: React.FC<FilesTabContentProps> = ({
         isRenameMode={isRenameMode}
         isFileUpload={isFileUpload}
         onSubmit={handleUpload}
-        isUploading={isUploading || isRenaming}
-        uploadError={uploadError}
-      />
-      {/* Upload Loading Dialog */}
-      <LoadingDialog
-        open={isUploading}
-        onClose={() => {}} // Prevent closing during upload
-        title="Uploading File"
-        loadingText={`Uploading "${fileName}" to the group...`}
-      />
-      {/* Rename Loading Dialog */}
-      <LoadingDialog
-        open={isRenaming}
-        onClose={() => {}}
-        title="Renaming File"
-        loadingText={`Renaming file to "${fileName}"...`}
-      />
-
-      <DeleteConfirmDialog
-        open={deleteDialogOpen}
-        onClose={handleDeleteCancel}
-        onConfirm={handleDeleteConfirm}
-        fileName={fileToDelete?.name || ""}
-      />
-
-      <LoadingDialog
-        open={isDeleting}
-        onClose={() => {}}
-        title="Deleting File"
-        loadingText="Deleting file, please wait..."
-      />
-
-      <LoadingDialog
-        open={isDownloading}
-        onClose={() => {}}
-        title="Downloading File"
-        loadingText={`Downloading file, please wait...`}
-      />
-      <GroupDialog
-      open={groupDialogOpen}
-      onClose={handleCloseGroupDialog}
-      groupName={groupName}
-      setGroupName={setGroupName}
-      passcode={passcode}
-      setPasscode={setPasscode}
-      radioValue={radioValue}
-      setRadioValue={setRadioValue}
-      isJoinMode={isJoinMode}
-      onSubmit={handleGroupDialogSubmit}
-      groupDialogError={groupDialogError}
       />
 
       <Snackbar
         open={snackbarOpen}
-        autoHideDuration={3000}
+        autoHideDuration={2000}
         onClose={handleSnackbarClose}
-        message="Copied to clipboard"
+        message="Copied to Clipboard"
         anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
       />
-
-      <Snackbar
-        open={!!uploadError}
-        autoHideDuration={6000}
-        onClose={handleSnackbarClose}
-        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-      >
-        <Alert onClose={handleSnackbarClose} severity="error" sx={{ width: '100%' }}>
-          {uploadError}
-        </Alert>
-      </Snackbar>
     </Box>
   );
 };

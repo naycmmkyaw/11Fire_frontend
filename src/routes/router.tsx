@@ -3,6 +3,7 @@ import AuthPage from '../pages/AuthPage';
 import GroupOption from '../pages/group/GroupOption';
 import JoinGroup from '../pages/group/JoinGroup';
 import CreateGroup from '../pages/group/CreateGroup';
+import RoleOption from '../pages/group/RoleOption';
 import AppLayout from '../layout/AppLayout';
 import ConditionalRedirect from './ConditionalRedirect';
 import ProtectedRoute from './ProtectedRoute';
@@ -35,6 +36,14 @@ const Router = () => (
       element={
         <ProtectedRoute>
           <JoinGroup />
+        </ProtectedRoute>
+      } 
+    />
+    <Route 
+      path="/role" 
+      element={
+        <ProtectedRoute>
+          <RoleOption />
         </ProtectedRoute>
       } 
     />

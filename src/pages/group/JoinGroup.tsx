@@ -3,10 +3,6 @@ import {
   Box,
   Typography,
   TextField,
-  Radio,
-  RadioGroup,
-  FormControlLabel,
-  Alert,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import ActionButton from "../../components/shared/ActionButton";
@@ -17,14 +13,10 @@ const JoinGroup = () => {
   const navigate = useNavigate();
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
-  const [role, setRole] = useState("");
   const [nameError, setNameError] = useState("");
   const [passwordError, setPasswordError] = useState("");
-  const [roleError, setRoleError] = useState("");
-  const [submitError, setSubmitError] = useState("");
   const [isCheckingName, setIsCheckingName] = useState(false);
   const [isCheckingPassword, setIsCheckingPassword] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const checkGroupName = async (groupName: string) => {
     if (!groupName.trim()) return;
@@ -94,11 +86,9 @@ const JoinGroup = () => {
     }
   }, [password, name, nameError]);
 
-  const handleJoin = async () => {
+  const handleJoin = () => {
     setNameError("");
     setPasswordError("");
-    setRoleError("");
-    setSubmitError("");
     
     let hasError = false;
 
@@ -112,34 +102,15 @@ const JoinGroup = () => {
       hasError = true;
     }
 
-    if (!role) {
-      setRoleError('Please choose a role');
-      hasError = true;
-    }
-
     if (hasError || isCheckingName || isCheckingPassword || nameError || passwordError) return;
 
-    setIsSubmitting(true);
-
-    try {
-      const response = await Axios.post('/swarms/join', {
-        name: name.trim(),
-        password: password,
-        role: role
-      });
-
-      // Navigate to files tab with the joined group name
-      navigate('/files', { 
-        state: { 
-          swarmName: response.data?.name || name.trim()
-        } 
-      });
-    } catch (error: any) {
-      const errorMessage = error.response?.data?.error || 'Failed to join group';
-      setSubmitError(errorMessage);
-    } finally {
-      setIsSubmitting(false);
-    }
+    navigate('/role', { 
+      state: { 
+        action: 'join',
+        groupName: name.trim(),
+        password: password 
+      } 
+    });
   };
 
   const handleNameFocus = () => {
@@ -148,11 +119,6 @@ const JoinGroup = () => {
 
   const handlePasswordFocus = () => {
     setPasswordError('');
-  };
-
-  const handleRoleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setRole(event.target.value);
-    setRoleError('');
   };
 
   return (
@@ -300,56 +266,6 @@ const JoinGroup = () => {
             <Box sx={{ mb: 2 }} />
           )}
 
-          <Typography
-            sx={{
-              fontWeight: 500,
-              fontSize: "1rem",
-              color: 'text.primary',
-              mb: 1,
-            }}
-          >
-            Choose to:
-          </Typography>
-          <Box sx={{ display: "flex", justifyContent: "center", mb: 1 }}>
-            <RadioGroup
-              row
-              value={role}
-              onChange={handleRoleChange}
-            >
-              <FormControlLabel
-                value="user"
-                control={<Radio />}
-                label="Store data"
-              />
-              <FormControlLabel
-                value="provider"
-                control={<Radio />}
-                label="Provide storage"
-              />
-            </RadioGroup>
-          </Box>
-          {roleError && (
-            <Typography
-              sx={{
-                color: 'error.main',
-                fontSize: '0.75rem',
-                mb: 2,
-                mt: 0.5,
-              }}
-            >
-              {roleError}
-            </Typography>
-          )}
-          {!roleError && (
-            <Box sx={{ mb: 2 }} />
-          )}
-
-          {submitError && (
-            <Alert severity="error" sx={{ mb: 2 }}>
-              {submitError}
-            </Alert>
-          )}
-
           <Box
             sx={{
               display: "flex",
@@ -361,18 +277,17 @@ const JoinGroup = () => {
             <ActionButton
               variant="primary"
               onClick={handleJoin}
-              disabled={!!nameError || !!passwordError || !!roleError}
+              disabled={!!nameError || !!passwordError}
               sx={{
                 mb: 2,
               }}
             >
-              {isSubmitting ? "Joining..." : "Join"}
+              Join
             </ActionButton>
 
             <ActionButton
               variant="secondary"
               onClick={() => navigate("/group")}
-              disabled={isSubmitting}
             >
               Cancel
             </ActionButton>

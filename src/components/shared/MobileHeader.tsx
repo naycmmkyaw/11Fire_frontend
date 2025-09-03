@@ -28,7 +28,7 @@ const MobileHeader: React.FC<MobileHeaderProps> = ({
           alignItems: "center",
           justifyContent: "space-between",
           p: 2,
-          bgcolor: "secondary.dark",
+          bgcolor: "#FFFAF4",
           position: "sticky",
           top: 0,
           zIndex: 1100,
@@ -73,7 +73,7 @@ const MobileHeader: React.FC<MobileHeaderProps> = ({
         {/* Right: Avatar */}
         <Avatar
           sx={{
-            bgcolor: "primary.main",
+            bgcolor: "#EF4444",
             width: 32,
             height: 32,
             fontSize: "0.875rem",
