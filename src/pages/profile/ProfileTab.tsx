@@ -7,6 +7,7 @@ import {
   DialogActions,
   Dialog,
   IconButton,
+  Avatar
 } from "@mui/material";
 import AccountCircleOutlinedIcon from "@mui/icons-material/AccountCircleOutlined";
 import CloseIcon from "@mui/icons-material/Close";
@@ -14,6 +15,7 @@ import ActionButton from "../../components/shared/ActionButton";
 import ResponsiveHeader from "../../components/shared/ResponsiveHeader";
 import { useNavigate } from "react-router-dom";
 import useIsMobile from "../../hooks/useMobile";
+import { useAuth } from "../../hooks/useAuth";
 
 interface ProfileTabContentProps {
   selectedTab: string;
@@ -31,12 +33,12 @@ const ProfileTabContent: React.FC<ProfileTabContentProps> = ({
   const [dialogOpen, setDialogOpen] = useState(false);
   const navigate = useNavigate();
   const isMobile = useIsMobile();
-  
+  const { user, logout } = useAuth();
+
   return (
     <Box sx={{ flexGrow: 1, px: 1, py: 1 }}>
       <ResponsiveHeader 
-        title="PROFILE" 
-        avatarText="N" 
+        title="PROFILE"
         selectedTab={selectedTab}
         setSelectedTab={setSelectedTab}
         isProviderDashboard={isProviderDashboard}
@@ -49,9 +51,23 @@ const ProfileTabContent: React.FC<ProfileTabContentProps> = ({
         mb: 3,
         justifyContent: isMobile ? "center" : "flex-start"
       }}>
-        <AccountCircleOutlinedIcon
-          sx={{ fontSize: 125, color: "text.primary" }}
-        />
+        {user?.avatar ? (
+          <Avatar
+            src={user.avatar}
+            alt={user.name || "User"}
+            sx={{ 
+              width: 125, 
+              height: 125,
+              fontSize: "2rem",
+            }}
+          >
+            {user.name?.[0]?.toUpperCase()}
+          </Avatar>
+        ) : (
+          <AccountCircleOutlinedIcon
+            sx={{ fontSize: 125, color: "primary.main" }}
+          />
+        )}
       </Box>
 
       <Box sx={{ mb: 3 }}>
@@ -61,7 +77,7 @@ const ProfileTabContent: React.FC<ProfileTabContentProps> = ({
         <TextField
           fullWidth
           variant="outlined"
-          value="nc_mmk"
+          value={user?.name || "User"}
           sx={{
             borderRadius: 1,
             bgcolor: "background.primary",
@@ -79,7 +95,7 @@ const ProfileTabContent: React.FC<ProfileTabContentProps> = ({
         <TextField
           fullWidth
           variant="outlined"
-          value="nc_mmk@kmutt.ac.th"
+          value={user?.email || "Email"}
           sx={{
             borderRadius: 1,
             border: "1px ",
@@ -151,7 +167,7 @@ const ProfileTabContent: React.FC<ProfileTabContentProps> = ({
           <Button
             variant="contained"
             onClick={() => {
-              // Add sign-out logic here
+              logout();
               navigate("/auth/signin");
             }}
             sx={{

@@ -30,7 +30,6 @@ const MobileDemo: React.FC = () => {
     <Box sx={{ minHeight: "100vh", bgcolor: "#FFFAF4" }}>
       <ResponsiveHeader
         title="STATUS"
-        avatarText="N"
         onTabChange={handleTabChange}
       />
 
