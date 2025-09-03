@@ -1,6 +1,8 @@
-import React from "react";
-import { Box, Typography, Paper, Link} from "@mui/material";
+import React, { useEffect, useState } from "react";
+import { Box, Typography, Paper, Link } from "@mui/material";
 import useIsMobile from "../../hooks/useMobile";
+import { providerNodeService } from "../../services/providerNodeService";
+import type { PeerInfo } from "../../types";
 
 interface ConnectionStatusCardProps {
   isConnected: boolean;
@@ -12,6 +14,23 @@ const ConnectionStatusCard: React.FC<ConnectionStatusCardProps> = ({
   onSetupClick,
 }) => {
   const isMobile = useIsMobile();
+  const [peerInfo, setPeerInfo] = useState<PeerInfo | null>(null);
+
+  useEffect(() => {
+    if (isConnected) {
+      fetchPeerInfo();
+    }
+  }, [isConnected]);
+
+  const fetchPeerInfo = async () => {
+    try {
+      const data = await providerNodeService.getActivePeers();
+      setPeerInfo(data);
+    } catch (err) {
+      console.error('Failed to fetch peer info:', err);
+    }
+  };
+
   if (isConnected) {
     return (
       <Paper
@@ -42,14 +61,14 @@ const ConnectionStatusCard: React.FC<ConnectionStatusCardProps> = ({
                 fontSize: isMobile ? "0.875rem" : "1rem"
               }}
             >
-              12D3KooWQJtfU4jS8u8nsUvVxRMeTeRY5qBtBHRtxMqsKFYDkJkp
+              {peerInfo ? peerInfo.selfPeerId : "Loading..."}
             </Typography>
           </Box>
           <Typography variant="body1" sx={{ color: "#000000" }}>
-            <strong>Version:</strong> go-ipfs v0.34.1
+          <strong>Version:</strong> go-ipfs v0.34.1
           </Typography>
           <Typography variant="body1" sx={{ color: "#000000" }}>
-            <strong>Peers:</strong> 10
+            <strong>Peers:</strong> {peerInfo ? peerInfo.totalPeers : "Loading..."}
           </Typography>
         </Box>
       </Paper>

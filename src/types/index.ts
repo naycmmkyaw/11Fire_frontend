@@ -37,3 +37,43 @@ export interface GroupContextType {
   addGroup: (group: Group) => void;
   removeGroup: (groupId: string) => void;
 }
+
+export interface PeerInfo {
+  ok: boolean;
+  swarmId: string;
+  swarmName: string;
+  selfPeerId: string;
+  totalPeers: number;
+}
+
+export interface QuotaUsage {
+  ok: boolean;
+  swarmId: string;
+  swarmName: string;
+  quotaBytes: number | null;
+  quotaGB: number | null;
+  usedBytes: number;
+  usedGB: number;
+  percentUsed: number | null;
+}
+
+export interface UptimeData {
+  ok: boolean;
+  swarmId: string;
+  swarmName: string;
+  uptimePercent: number;
+  downtime: string;
+}
+
+export interface UptimeLineData {
+  ok: boolean;
+  swarmId: string;
+  swarmName: string;
+  bucketHours: number;
+  hours: number;
+  now: string;
+  points: Array<{
+    time: string;
+    online: number;
+  }>;
+}
