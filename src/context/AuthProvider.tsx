@@ -56,8 +56,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       console.error('Logout error:', error);
     } finally {
       setUser(null);
-      // localStorage.removeItem('11fire_user');
-      // localStorage.removeItem('11fire_groups');
     }
   };
 

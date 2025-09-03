@@ -103,7 +103,6 @@ const InstallTab: React.FC<InstallTabProps> = ({
     <Box>
       <ResponsiveHeader 
         title="INSTALL" 
-        avatarText="N" 
         selectedTab={selectedTab}
         setSelectedTab={setSelectedTab}
         isProviderDashboard={isProviderDashboard}

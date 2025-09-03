@@ -1,12 +1,10 @@
 import React from "react";
-import { Box } from "@mui/material";
 import useIsMobile from "../../hooks/useMobile";
 import MobileHeader from "./MobileHeader";
 import PageHeader from "./PageHeader";
 
 interface ResponsiveHeaderProps {
   title: string;
-  avatarText: string;
   selectedTab: string;
   setSelectedTab: (tab: string) => void;
   isProviderDashboard: boolean;
@@ -15,7 +13,6 @@ interface ResponsiveHeaderProps {
 
 const ResponsiveHeader: React.FC<ResponsiveHeaderProps> = ({
   title,
-  avatarText,
   selectedTab,
   setSelectedTab,
   isProviderDashboard,
@@ -35,7 +32,7 @@ const ResponsiveHeader: React.FC<ResponsiveHeaderProps> = ({
     );
   }
 
-  return <PageHeader title={title} avatarText={avatarText} />;
+  return <PageHeader title={title} />;
 };
 
 export default ResponsiveHeader;
