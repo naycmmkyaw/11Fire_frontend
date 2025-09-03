@@ -93,7 +93,6 @@ const StatusTab: React.FC<StatusTabProps> = ({
     <Box sx={{ p: 0 }}>
       <ResponsiveHeader 
         title="STATUS" 
-        avatarText="N" 
         selectedTab={selectedTab}
         setSelectedTab={setSelectedTab}
         isProviderDashboard={isProviderDashboard}

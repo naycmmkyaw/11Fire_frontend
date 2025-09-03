@@ -177,7 +177,7 @@ const AppLayout = () => {
       {/* Main Content */}
       <Box sx={{ 
         flexGrow: 1, 
-        bgcolor: "#FFF7ED", 
+        bgcolor: "secondary.main", 
         p: isMobile ? 2 : 4,
         overflowY: "auto",
         minHeight: "100vh",

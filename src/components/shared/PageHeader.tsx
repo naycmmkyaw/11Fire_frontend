@@ -1,12 +1,24 @@
 import React from "react";
 import { Box, Typography, Avatar } from "@mui/material";
+import { useAuth } from "../../hooks/useAuth";
 
 interface PageHeaderProps {
   title: string;
-  avatarText: string;
 }
 
-const PageHeader: React.FC<PageHeaderProps> = ({ title, avatarText }) => {
+const PageHeader: React.FC<PageHeaderProps> = ({ title }) => {
+    const { user } = useAuth();
+
+  const getUserInitials = (name?: string): string => {
+    if (!name) return "U";
+    return name
+      .split(" ")
+      .map(word => word.charAt(0))
+      .join("")
+      .toUpperCase()
+      .slice(0, 1);
+  };
+
   return (
     <Box
       sx={{
@@ -22,12 +34,9 @@ const PageHeader: React.FC<PageHeaderProps> = ({ title, avatarText }) => {
       <Avatar
         sx={{
           bgcolor: "primary.main",
-          width: 32,
-          height: 32,
-          fontSize: "0.875rem",
         }}
       >
-        {avatarText}
+        {getUserInitials(user?.name)}
       </Avatar>
     </Box>
   );
