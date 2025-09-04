@@ -47,27 +47,7 @@ const AuthPage: React.FC<AuthPageProps> = ({ isInitialLoading = false }) => {
       }}
     >
       <Box component="header" sx={{ py: { xs: 3, sm: 5 } }}>
-        <Stack alignItems="center">
-          <Box
-            component="img"
-            src={Logo}
-            alt="11Fire logo"
-            sx={{
-              width: { xs: 72, sm: 80 },
-              height: { xs: 72, sm: 80 },
-              objectFit: "contain",
-            }}
-          />
-          <Typography
-            variant="h4"
-            sx={{
-              fontWeight: 700,
-              fontSize: { xs: "1.5rem", sm: "1.75rem" },
-            }}
-          >
-            11Fire
-          </Typography>
-        </Stack>
+        {/* Empty header to maintain layout */}
       </Box>
 
       {/* Main content in the middle */}
@@ -81,6 +61,29 @@ const AuthPage: React.FC<AuthPageProps> = ({ isInitialLoading = false }) => {
       >
         <Container maxWidth="xs" disableGutters>
           <Stack spacing={4} alignItems="center" textAlign="center">
+            {/* Logo in the middle */}
+            <Stack alignItems="center" spacing={0.5}>
+              <Box
+                component="img"
+                src={Logo}
+                alt="11Fire logo"
+                sx={{
+                  width: { xs: 72, sm: 80 },
+                  height: { xs: 72, sm: 80 },
+                  objectFit: "contain",
+                }}
+              />
+              <Typography
+                variant="h4"
+                sx={{
+                  fontWeight: 700,
+                  fontSize: { xs: "1.5rem", sm: "1.75rem" },
+                }}
+              >
+                11Fire
+              </Typography>
+            </Stack>
+
             {/* Page heading + helper text */}
             <Stack spacing={1}>
               <Typography
