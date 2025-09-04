@@ -111,7 +111,8 @@ export const downloadMultipleFiles = async (cids: string[]): Promise<void> => {
 
 export const deleteMultipleFiles = async (cids: string[]): Promise<any> => {
   try {
-    const response = await Axios.post('/files/delete-multiple', { cids });
+    // console.log('Deleting files with CIDs:', cids);
+    const response = await Axios.delete('/files/delete-multiple', { data: { cids } });
     if (!response.data.ok) {
       throw new Error('Bulk delete failed');
     }
