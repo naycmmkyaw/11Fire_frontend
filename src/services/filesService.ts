@@ -74,3 +74,50 @@ export const downloadFile = async (cid: string, fileName: string): Promise<void>
     throw error;
   }
 };
+
+export const downloadMultipleFiles = async (cids: string[]): Promise<void> => {
+  try {
+    const response = await Axios.post('/files/download-multiple', 
+      { cids }, 
+      { responseType: 'blob' }
+    );
+
+    // Create blob link to download
+    const blob = new Blob([response.data]);
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    
+    // Get filename from Content-Disposition header or use default
+    const contentDisposition = response.headers['content-disposition'];
+    let filename = `11fire_files_${Date.now()}.zip`;
+    if (contentDisposition) {
+      const filenameMatch = contentDisposition.match(/filename="(.+)"/);
+      if (filenameMatch) {
+        filename = filenameMatch[1];
+      }
+    }
+    
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    window.URL.revokeObjectURL(url);
+  } catch (error) {
+    console.error('Failed to download multiple files:', error);
+    throw error;
+  }
+};
+
+export const deleteMultipleFiles = async (cids: string[]): Promise<any> => {
+  try {
+    const response = await Axios.post('/files/delete-multiple', { cids });
+    if (!response.data.ok) {
+      throw new Error('Bulk delete failed');
+    }
+    return response.data;
+  } catch (error) {
+    console.error('Failed to delete multiple files:', error);
+    throw error;
+  }
+};
