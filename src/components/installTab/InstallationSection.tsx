@@ -3,15 +3,20 @@ import { Box, Typography, Link } from '@mui/material';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import InstallationCard from './InstallationCard';
 import InstallationContent from './InstallationContent';
-import type { InstallationInstructions } from '../../data/installationInstructions';
+import ProviderContent from './ProviderContent';
+import type { InstallationInstructions, ProviderInstructions } from '../../data/installationInstructions';
 
 interface InstallationSectionProps {
   title: string;
   description: string;
   tabValue: number;
   onTabChange: (event: React.SyntheticEvent, newValue: number) => void;
-  installationData: InstallationInstructions;
+  installationData: InstallationInstructions | ProviderInstructions;
   showDistLink?: boolean;
+  isProviderSection?: boolean;
+  onDownloadToken?: () => void;
+  isDownloading?: boolean;
+  user?: unknown;
 }
 
 const InstallationSection: React.FC<InstallationSectionProps> = ({
@@ -20,7 +25,11 @@ const InstallationSection: React.FC<InstallationSectionProps> = ({
   tabValue,
   onTabChange,
   installationData,
-  showDistLink = false
+  showDistLink = false,
+  isProviderSection = false,
+  onDownloadToken,
+  isDownloading = false,
+  user
 }) => (
   <Box sx={{ mb: 4 }}>
     {showDistLink && (
@@ -52,9 +61,43 @@ const InstallationSection: React.FC<InstallationSectionProps> = ({
     </Typography>
 
     <InstallationCard title={title} tabValue={tabValue} onTabChange={onTabChange}>
-      {tabValue === 0 && <InstallationContent data={installationData.windows} osName="Windows" />}
-      {tabValue === 1 && <InstallationContent data={installationData.macos} osName="MacOS" />}
-      {tabValue === 2 && <InstallationContent data={installationData.linux} osName="Linux" />}
+      {isProviderSection ? (
+        <>
+          {tabValue === 0 && (
+            <ProviderContent 
+              data={(installationData as ProviderInstructions).windows} 
+              osName="Windows" 
+              onDownloadToken={onDownloadToken!}
+              isDownloading={isDownloading}
+              user={user}
+            />
+          )}
+          {tabValue === 1 && (
+            <ProviderContent 
+              data={(installationData as ProviderInstructions).macos} 
+              osName="MacOS" 
+              onDownloadToken={onDownloadToken!}
+              isDownloading={isDownloading}
+              user={user}
+            />
+          )}
+          {tabValue === 2 && (
+            <ProviderContent 
+              data={(installationData as ProviderInstructions).linux} 
+              osName="Linux" 
+              onDownloadToken={onDownloadToken!}
+              isDownloading={isDownloading}
+              user={user}
+            />
+          )}
+        </>
+      ) : (
+        <>
+          {tabValue === 0 && <InstallationContent data={(installationData as InstallationInstructions).windows} osName="Windows" />}
+          {tabValue === 1 && <InstallationContent data={(installationData as InstallationInstructions).macos} osName="MacOS" />}
+          {tabValue === 2 && <InstallationContent data={(installationData as InstallationInstructions).linux} osName="Linux" />}
+        </>
+      )}
     </InstallationCard>
   </Box>
 );

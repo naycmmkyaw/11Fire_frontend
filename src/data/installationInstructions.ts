@@ -35,3 +35,38 @@ export const installationInstructions: InstallationInstructions = {
     daemon: "ipfs daemon"
   }
 };
+
+// Provider instructions data
+export interface ProviderInstructionData {
+  downloadToken: string;
+  downloadBinary: string;
+  placeToken: string;
+  runProvider: string;
+}
+
+export interface ProviderInstructions {
+  windows: ProviderInstructionData;
+  macos: ProviderInstructionData;
+  linux: ProviderInstructionData;
+}
+
+export const providerInstructions: ProviderInstructions = {
+  windows: {
+    downloadToken: "Click the button below to download your provider.token file. This token is essential for the provider listener to authenticate and claim the provider's peer ID.",
+    downloadBinary: "wget <provider_listener_binary_url>",
+    placeToken: "Move the provider.token file you downloaded in Step 1 into the provider listener folder you just downloaded. The folder should now contain both the provider listener binary and the provider.token file.",
+    runProvider: "Simply double-click the .exe file to run the provider listener."
+  },
+  macos: {
+    downloadToken: "Click the button below to download your provider.token file. This token is essential for the provider listener to authenticate and claim the provider's peer ID.",
+    downloadBinary: "wget <provider_listener_binary_url>",
+    placeToken: "Move the provider.token file you downloaded in Step 1 into the provider listener folder you just downloaded. The folder should now contain both the provider listener binary and the provider.token file.",
+    runProvider: "Open your terminal and run the provider listener binary."
+  },
+  linux: {
+    downloadToken: "Click the button below to download your provider.token file. This token is essential for the provider listener to authenticate and claim the provider's peer ID.",
+    downloadBinary: "wget <provider_listener_binary_url>",
+    placeToken: "Move the provider.token file you downloaded in Step 1 into the provider listener folder you just downloaded. The folder should now contain both the provider listener binary and the provider.token file.",
+    runProvider: "Open your terminal and run the provider listener binary."
+  }
+};
