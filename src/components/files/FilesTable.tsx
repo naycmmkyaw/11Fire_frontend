@@ -27,6 +27,8 @@ interface FilesTableProps {
   selectedFiles: Set<number>;
   onSelectAll: (checked: boolean) => void;
   onSelectFile: (index: number, checked: boolean) => void;
+  onBulkDownload?: () => void;
+  onBulkDelete?: () => void;
 }
 
 const truncateCid = (cid: string) => cid.slice(0, 6) + "..." + cid.slice(-4);
@@ -38,7 +40,9 @@ const FilesTable: React.FC<FilesTableProps> = ({
   isMobile = false,
   selectedFiles,
   onSelectAll,
-  onSelectFile
+  onSelectFile,
+  onBulkDownload,
+  onBulkDelete
 }) => {
   if (isMobile) {
     return (
@@ -92,10 +96,7 @@ const FilesTable: React.FC<FilesTableProps> = ({
                           flexShrink: 0,
                           "&:hover": { bgcolor: "#dc2626" }
                         }}
-                        onClick={() => {
-                          // Bulk download logic
-                          console.log("Bulk download:", Array.from(selectedFiles).map(i => files[i].name));
-                        }}
+                        onClick={onBulkDownload}
                       >
                         Download
                       </Button>
@@ -125,10 +126,7 @@ const FilesTable: React.FC<FilesTableProps> = ({
                             boxShadow: "none"
                           }
                         }}
-                        onClick={() => {
-                          // Bulk delete logic
-                          console.log("Bulk delete:", Array.from(selectedFiles).map(i => files[i].name));
-                        }}
+                        onClick={onBulkDelete}
                       >
                         Delete
                       </Button>
@@ -249,10 +247,7 @@ const FilesTable: React.FC<FilesTableProps> = ({
                           minWidth: "auto",
                           "&:hover": { bgcolor: "#dc2626" }
                         }}
-                        onClick={() => {
-                          // Bulk download logic
-                          console.log("Bulk download:", Array.from(selectedFiles).map(i => files[i].name));
-                        }}
+                        onClick={onBulkDownload}
                       >
                         Download
                       </Button>
@@ -281,10 +276,7 @@ const FilesTable: React.FC<FilesTableProps> = ({
                             boxShadow: "none"
                           }
                         }}
-                        onClick={() => {
-                          // Bulk delete logic
-                          console.log("Bulk delete:", Array.from(selectedFiles).map(i => files[i].name));
-                        }}
+                        onClick={onBulkDelete}
                       >
                         Delete
                       </Button>
