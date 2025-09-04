@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
-import { Box, Typography, Button, Alert, Snackbar } from '@mui/material';
+import { Box, Alert, Snackbar } from '@mui/material';
 import ResponsiveHeader from '../../components/shared/ResponsiveHeader';
 import InstallationSection from '../../components/installTab/InstallationSection';
-import DownloadIcon from '@mui/icons-material/Download';
 import { providerNodeService } from '../../services/providerNodeService';
 import { useAuth } from '../../hooks/useAuth';
 import { installationInstructions, providerInstructions } from '../../data/installationInstructions';
