@@ -12,7 +12,6 @@ import {
   DialogActions,
   Button,
   TextField,
-  IconButton as MuiIconButton,
   CircularProgress,
 } from "@mui/material";
 import SettingsIcon from "@mui/icons-material/Settings";
@@ -299,129 +298,79 @@ const StorageCard: React.FC<StorageCardProps> = ({
         onClose={handleStorageModalClose}
         maxWidth="sm"
         fullWidth
-        PaperProps={{
-          sx: {
-            borderRadius: 3,
-            bgcolor: "#F5F5DC",
-            boxShadow: "0 8px 32px rgba(0, 0, 0, 0.12)",
-            minHeight: "280px",
+        slotProps={{
+          paper: {
+            sx: {
+              borderRadius: 3,
+              px: 4,
+              pt: 3,
+              pb: 2,
+              bgcolor: "secondary.dark",
+              minWidth: 400,
+              position: "relative",
+            },
           },
         }}
       >
-        <DialogTitle
+        <IconButton
+          aria-label="close"
+          onClick={handleStorageModalClose}
           sx={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            p: 3,
-            pb: 2,
+            position: "absolute",
+            right: 12,
+            top: 12,
+            color: "#888",
           }}
+          size="large"
         >
-          <Typography
-            variant="h5"
-            sx={{ fontWeight: 600, color: "#000000" }}
-          >
-            Set Storage
-          </Typography>
-          <MuiIconButton
-            onClick={handleStorageModalClose}
-            sx={{
-              color: "#000000",
-              "&:hover": {
-                bgcolor: "rgba(0, 0, 0, 0.04)",
-              },
-            }}
-          >
-            <CloseIcon sx={{ fontSize: 24 }} />
-          </MuiIconButton>
+          <CloseIcon />
+        </IconButton>
+        <DialogTitle sx={{ fontWeight: 600, fontSize: "1.4rem", mb: 1 }}>
+          Set Storage
         </DialogTitle>
 
-        <DialogContent sx={{ px: 3, py: 0 }}>
-          <Box sx={{ mb: 3 }}>
-            <Typography
-              variant="body1"
-              sx={{
-                color: "#000000",
-                mb: 2,
-                fontWeight: 500,
-                fontSize: "1rem",
-              }}
-            >
-              Storage amount
-            </Typography>
-            <TextField
-              fullWidth
-              value={storageAmount}
-              onChange={(e) => setStorageAmount(e.target.value)}
-              placeholder="Enter Amount (eg. 1 TB)*"
-              variant="outlined"
-              sx={{
-                "& .MuiOutlinedInput-root": {
-                  bgcolor: "#FFFFFF",
-                  borderRadius: 2,
-                  "& fieldset": {
-                    borderColor: "#E0E0E0",
-                    borderWidth: "1px",
-                  },
-                  "&:hover fieldset": {
-                    borderColor: "#EB6464",
-                  },
-                  "&.Mui-focused fieldset": {
-                    borderColor: "#EB6464",
-                    borderWidth: "2px",
-                  },
-                  "& input": {
-                    py: 1.5,
-                    px: 2,
-                    fontSize: "1rem",
-                  },
-                },
-              }}
-            />
-          </Box>
+        <DialogContent>
+          <Typography sx={{ mb: 1, fontSize: "1rem" }}>
+            Storage amount
+          </Typography>
+          <TextField
+            fullWidth
+            value={storageAmount}
+            onChange={(e) => setStorageAmount(e.target.value)}
+            placeholder="Enter Amount (eg. 1 TB)*"
+            variant="outlined"
+            sx={{ bgcolor: "secondary.main", borderRadius: 2 }}
+          />
         </DialogContent>
 
-        <DialogActions sx={{ p: 3, pt: 1, gap: 2 }}>
+        <DialogActions sx={{ px: 3, pb: 2, pt: 1, gap: 2 }}>
           <Button
+            variant="outlined"
             onClick={handleStorageModalClose}
-            variant="contained"
-            sx={{
-              bgcolor: "#F8DCDC",
-              color: "#000000",
-              px: 4,
+            sx={{ 
+              borderRadius: 2, 
+              color: "#3c3c3c", 
+              borderColor: "#ccc",
+              px: 3,
               py: 1.5,
-              borderRadius: 2,
-              textTransform: "none",
-              fontWeight: 600,
-              fontSize: "1rem",
               minWidth: "100px",
-              boxShadow: "none",
-              "&:hover": {
-                bgcolor: "#F0C8C8",
-                boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
-              },
+              fontSize: "1rem"
             }}
           >
             Cancel
           </Button>
           <Button
-            onClick={handleSetStorage}
             variant="contained"
+            onClick={handleSetStorage}
             sx={{
-              bgcolor: "#EB6464",
-              color: "#FFFFFF",
-              px: 4,
-              py: 1.5,
               borderRadius: 2,
-              textTransform: "none",
-              fontWeight: 600,
-              fontSize: "1rem",
+              bgcolor: "primary.main",
+              color: "#fff",
+              px: 3,
+              py: 1.5,
               minWidth: "100px",
-              boxShadow: "none",
-              "&:hover": {
-                bgcolor: "#D54545",
-                boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
-              },
+              fontSize: "1rem",
+              "&:hover": { bgcolor: "#dc2626" },
             }}
           >
             Set
@@ -434,12 +383,14 @@ const StorageCard: React.FC<StorageCardProps> = ({
         open={isLoadingDialogOpen}
         maxWidth="sm"
         fullWidth
-        PaperProps={{
-          sx: {
-            borderRadius: 4,
-            bgcolor: "#F5F5DC",
-            boxShadow: "0 8px 32px rgba(0, 0, 0, 0.12)",
-            minHeight: "200px",
+        slotProps={{
+          paper: {
+            sx: {
+              borderRadius: 4,
+              bgcolor: "secondary.dark",
+              boxShadow: "0 8px 32px rgba(0, 0, 0, 0.12)",
+              minHeight: "200px",
+            },
           },
         }}
       >
@@ -452,14 +403,11 @@ const StorageCard: React.FC<StorageCardProps> = ({
             pb: 1,
           }}
         >
-          <Typography
-            variant="h5"
-            sx={{ fontWeight: 600, color: "#000000" }}
-          >
+          <Typography sx={{ fontWeight: 600, fontSize: "1.4rem", mb: 1 }}>
             Setting Storage
           </Typography>
-          <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-            <CircularProgress size={24} sx={{ color: "#EB6464" }} />
+          <Box sx={{ display: "flex", alignItems: "center" }}>
+            <CircularProgress size={24} sx={{ color: "primary.main" }} />
           </Box>
         </DialogTitle>
 
