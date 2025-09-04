@@ -85,30 +85,39 @@ const FilesTabContent: React.FC<FilesTabContentProps> = ({
       // Clear the state to prevent re-triggering
       window.history.replaceState({}, document.title);
     } else {
-      fetchGroups();
+      // Check localStorage for previously selected group
+      const savedGroupId = localStorage.getItem('selectedGroupId');
+      fetchGroups(undefined, savedGroupId);
     }
   }, []);
 
-  const fetchGroups = async (swarmName?: string | undefined) => {
+  const fetchGroups = async (swarmName?: string | undefined, savedGroupId?: string | null) => {
     try {
       setIsLoadingGroups(true);
       const groupsList = await listMyGroups();
       setGroups(groupsList);
-      // If activeSwarm is provided, set that group as selected
+      let groupToSelect: GroupMembership | undefined;
+    
+      // Priority order: swarmName > savedGroupId > first group
       if (swarmName) {
-        const activeGroup = groupsList.find(g => g.swarmName === swarmName);
-        setSelectedGroup(activeGroup || groupsList[0]);
-        if (activeGroup) {
-          const groupFiles = await fetchFilesForGroup(activeGroup.swarmId);
-          setFiles(groupFiles);
-        }
-      } else {
-        setSelectedGroup(groupsList[0]);
-        // Optionally fetch files for the first group
-        if (groupsList[0]) {
-          const groupFiles = await fetchFilesForGroup(groupsList[0].swarmId);
-          setFiles(groupFiles);
-        }
+        groupToSelect = groupsList.find(g => g.swarmName === swarmName);
+      } else if (savedGroupId) {
+        groupToSelect = groupsList.find(g => g.swarmId === savedGroupId);
+      }
+      
+      // Fallback to first group if no match found
+      const selectedGroup = groupToSelect || groupsList[0];
+      setSelectedGroup(selectedGroup);
+      
+      // Only save to localStorage if we selected a different group than what was saved
+      // or if we're selecting based on swarmName (navigation) or first group (new user)
+      if (selectedGroup && (!savedGroupId || selectedGroup.swarmId !== savedGroupId)) {
+        localStorage.setItem('selectedGroupId', selectedGroup.swarmId);
+      }
+      
+      if (selectedGroup) {
+        const groupFiles = await fetchFilesForGroup(selectedGroup.swarmId);
+        setFiles(groupFiles);
       }
     } catch (error) {
       console.error('Failed to fetch groups:', error);
@@ -121,6 +130,8 @@ const FilesTabContent: React.FC<FilesTabContentProps> = ({
   const handleGroupSelect = async (group: GroupMembership) => {
     setSelectedGroup(group);
     console.log('Selected group:', group);
+    // Save selected group to localStorage
+    localStorage.setItem('selectedGroupId', group.swarmId);
     try {
       const groupFiles = await fetchFilesForGroup(group.swarmId);
       setFiles(groupFiles);
