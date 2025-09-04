@@ -19,7 +19,7 @@ export const installationInstructions: InstallationInstructions = {
       '$env:IPFS_SWARM_KEY = "/key/swarm/psk/1.0.0/`n/base16/`n2654c429053c8a7cdca6845c955ef11b139bc0bd41f8c42b706e0d6e65a16695"',
     download:
       'Invoke-WebRequest -Uri "https://raw.githubusercontent.com/suleiyinwin/11Fire_IPFS_Setup/main/ipfs_setup/windows/ipfs-setup.ps1" -OutFile "$HOME\\ipfs-setup.ps1"',
-    run: ".\\ipfs-setup.ps1",
+    run: '& "$HOME\\ipfs-setup.ps1"',
     daemon: "ipfs daemon",
   },
   macos: {
