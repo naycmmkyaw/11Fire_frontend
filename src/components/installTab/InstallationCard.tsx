@@ -10,7 +10,6 @@ interface InstallationCardProps {
 }
 
 const InstallationCard: React.FC<InstallationCardProps> = ({ 
-  title, 
   tabValue, 
   onTabChange, 
   children 
@@ -25,7 +24,7 @@ const InstallationCard: React.FC<InstallationCardProps> = ({
       overflow: 'hidden',
       boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
       mb: 4,
-      height: '280px'
+      height: '300px'
     }}
   >
     {/* Card Header with OS Tabs */}
@@ -55,7 +54,7 @@ const InstallationCard: React.FC<InstallationCardProps> = ({
     {/* Content Area */}
     <Box sx={{ 
       p: 3, 
-      height: 'calc(280px - 80px)',
+      height: 'calc(300px - 80px)',
       overflow: 'auto',
       bgcolor: '#FFFAF4',
       '&::-webkit-scrollbar': {
