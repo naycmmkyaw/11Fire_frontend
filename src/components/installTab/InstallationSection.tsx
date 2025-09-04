@@ -3,32 +3,14 @@ import { Box, Typography, Link } from '@mui/material';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import InstallationCard from './InstallationCard';
 import InstallationContent from './InstallationContent';
+import type { InstallationInstructions } from '../../data/installationInstructions';
 
 interface InstallationSectionProps {
   title: string;
   description: string;
   tabValue: number;
   onTabChange: (event: React.SyntheticEvent, newValue: number) => void;
-  installationData: {
-    windows: {
-      download: string;
-      extract: string;
-      navigate: string;
-      run: string;
-    };
-    macos: {
-      download: string;
-      extract: string;
-      navigate: string;
-      run: string;
-    };
-    linux: {
-      download: string;
-      extract: string;
-      navigate: string;
-      run: string;
-    };
-  };
+  installationData: InstallationInstructions;
   showDistLink?: boolean;
 }
 

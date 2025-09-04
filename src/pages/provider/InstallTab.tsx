@@ -5,6 +5,7 @@ import InstallationSection from '../../components/installTab/InstallationSection
 import DownloadIcon from '@mui/icons-material/Download';
 import { providerNodeService } from '../../services/providerNodeService';
 import { useAuth } from '../../hooks/useAuth';
+import { installationInstructions } from '../../data/installationInstructions';
 
 interface InstallTabProps {
   selectedTab: string;
@@ -22,7 +23,7 @@ const InstallTab: React.FC<InstallTabProps> = ({
   const [error, setError] = useState<string | null>(null);
   const { user } = useAuth();
 
-  const handleKuboTabChange = (event: React.SyntheticEvent, newValue: number) => {
+  const handleKuboTabChange = (_event: React.SyntheticEvent, newValue: number) => {
     setKuboTabValue(newValue);
   };
 
@@ -77,27 +78,6 @@ const InstallTab: React.FC<InstallTabProps> = ({
     setError(null);
   };
 
-  // Installation data for Kubo
-  const kuboInstallationData = {
-    windows: {
-      download: "wget https://dist.ipfs.tech/kubo/v0.36.0/kubo_v0.36.0_windows-amd64.zip -Outfile kubo_v0.36.0_windows-amd64.zip",
-      extract: "Expand-Archive -Path kubo_v0.36.0_windows-amd64.zip -DestinationPath .",
-      navigate: "cd kubo",
-      run: ".\\ipfs.exe --version"
-    },
-    macos: {
-      download: "curl -O https://dist.ipfs.tech/kubo/v0.36.0/kubo_v0.36.0_darwin-amd64.tar.gz",
-      extract: "tar -xzf kubo_v0.36.0_darwin-amd64.tar.gz",
-      navigate: "cd kubo",
-      run: "./ipfs --version"
-    },
-    linux: {
-      download: "wget https://dist.ipfs.tech/kubo/v0.36.0/kubo_v0.36.0_linux-amd64.tar.gz",
-      extract: "tar -xzf kubo_v0.36.0_linux-amd64.tar.gz",
-      navigate: "cd kubo",
-      run: "./ipfs --version"
-    }
-  };
 
   return (
     <Box>
@@ -109,12 +89,12 @@ const InstallTab: React.FC<InstallTabProps> = ({
       />
 
       <InstallationSection
-        title="Kubo Installation"
-        description="For installation instructions for your operating system, select the appropriate tab."
+        title="11Fire IPFS Setup"
+        description="Follow these steps to set up IPFS with 11Fire. Select your operating system tab below."
         tabValue={kuboTabValue}
         onTabChange={handleKuboTabChange}
-        installationData={kuboInstallationData}
-        showDistLink={true}
+        installationData={installationInstructions}
+        showDistLink={false}
       />
 
       {/* 11Fire Binary Download Section */}

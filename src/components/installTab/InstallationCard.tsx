@@ -10,7 +10,6 @@ interface InstallationCardProps {
 }
 
 const InstallationCard: React.FC<InstallationCardProps> = ({ 
-  title, 
   tabValue, 
   onTabChange, 
   children 
