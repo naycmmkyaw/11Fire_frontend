@@ -13,7 +13,7 @@ import FileActionsMenu from "../../components/files/FileActionsMenu";
 import UploadDialog from "../../components/files/UploadDialog";
 import useIsMobile from "../../hooks/useMobile";
 import type { FileEntry } from "../../types";
-import { uploadFile, deleteFile, renameFile, downloadFile } from "../../services/filesService";
+import { uploadFile, deleteFile, renameFile, downloadFile, downloadMultipleFiles, deleteMultipleFiles } from "../../services/filesService";
 import { listMyGroups, type GroupMembership } from "../../services/getGroupList";
 import { fetchFilesForGroup } from "../../services/getFiles";
 import GroupDialog from "../../components/files/GroupDialog";
@@ -76,6 +76,9 @@ const FilesTabContent: React.FC<FilesTabContentProps> = ({
   const [passcode, setPasscode] = useState("");
   const [radioValue, setRadioValue] = useState("");
   const [groupDialogError, setGroupDialogError] = useState<string | null>(null);
+  const [isBulkDownloading, setIsBulkDownloading] = useState(false);
+  const [isBulkDeleting, setIsBulkDeleting] = useState(false);
+  const [bulkDeleteDialogOpen, setBulkDeleteDialogOpen] = useState(false);
 
   // Check for navigation state on component mount
   useEffect(() => {
@@ -85,30 +88,39 @@ const FilesTabContent: React.FC<FilesTabContentProps> = ({
       // Clear the state to prevent re-triggering
       window.history.replaceState({}, document.title);
     } else {
-      fetchGroups();
+      // Check localStorage for previously selected group
+      const savedGroupId = localStorage.getItem('selectedGroupId');
+      fetchGroups(undefined, savedGroupId);
     }
   }, []);
 
-  const fetchGroups = async (swarmName?: string | undefined) => {
+  const fetchGroups = async (swarmName?: string | undefined, savedGroupId?: string | null) => {
     try {
       setIsLoadingGroups(true);
       const groupsList = await listMyGroups();
       setGroups(groupsList);
-      // If activeSwarm is provided, set that group as selected
+      let groupToSelect: GroupMembership | undefined;
+    
+      // Priority order: swarmName > savedGroupId > first group
       if (swarmName) {
-        const activeGroup = groupsList.find(g => g.swarmName === swarmName);
-        setSelectedGroup(activeGroup || groupsList[0]);
-        if (activeGroup) {
-          const groupFiles = await fetchFilesForGroup(activeGroup.swarmId);
-          setFiles(groupFiles);
-        }
-      } else {
-        setSelectedGroup(groupsList[0]);
-        // Optionally fetch files for the first group
-        if (groupsList[0]) {
-          const groupFiles = await fetchFilesForGroup(groupsList[0].swarmId);
-          setFiles(groupFiles);
-        }
+        groupToSelect = groupsList.find(g => g.swarmName === swarmName);
+      } else if (savedGroupId) {
+        groupToSelect = groupsList.find(g => g.swarmId === savedGroupId);
+      }
+      
+      // Fallback to first group if no match found
+      const selectedGroup = groupToSelect || groupsList[0];
+      setSelectedGroup(selectedGroup);
+      
+      // Only save to localStorage if we selected a different group than what was saved
+      // or if we're selecting based on swarmName (navigation) or first group (new user)
+      if (selectedGroup && (!savedGroupId || selectedGroup.swarmId !== savedGroupId)) {
+        localStorage.setItem('selectedGroupId', selectedGroup.swarmId);
+      }
+      
+      if (selectedGroup) {
+        const groupFiles = await fetchFilesForGroup(selectedGroup.swarmId);
+        setFiles(groupFiles);
       }
     } catch (error) {
       console.error('Failed to fetch groups:', error);
@@ -121,6 +133,8 @@ const FilesTabContent: React.FC<FilesTabContentProps> = ({
   const handleGroupSelect = async (group: GroupMembership) => {
     setSelectedGroup(group);
     console.log('Selected group:', group);
+    // Save selected group to localStorage
+    localStorage.setItem('selectedGroupId', group.swarmId);
     try {
       const groupFiles = await fetchFilesForGroup(group.swarmId);
       setFiles(groupFiles);
@@ -465,6 +479,71 @@ const FilesTabContent: React.FC<FilesTabContentProps> = ({
     setUploadError(null);
   };
 
+  const handleBulkDownload = async () => {
+    if (selectedFiles.size === 0) return;
+    
+    setIsBulkDownloading(true);
+    
+    try {
+      const selectedCids = Array.from(selectedFiles).map(index => files[index].cid);
+      await downloadMultipleFiles(selectedCids);
+      setSelectedFiles(new Set()); // Clear selection after successful download
+    } catch (error: any) {
+      console.error('Bulk download failed:', error);
+      const errorMessage = error.response?.data?.error || 'Failed to download files. Please try again.';
+      setUploadError(errorMessage);
+    } finally {
+      setIsBulkDownloading(false);
+    }
+  };
+
+  const handleBulkDelete = () => {
+    if (selectedFiles.size === 0) return;
+    setBulkDeleteDialogOpen(true);
+  };
+
+  const handleBulkDeleteConfirm = async () => {
+    if (selectedFiles.size === 0) return;
+    
+    setIsBulkDeleting(true);
+    setBulkDeleteDialogOpen(false);
+    
+    try {
+      const selectedCids = Array.from(selectedFiles).map(index => files[index].cid);
+      const result = await deleteMultipleFiles(selectedCids);
+      
+      // Remove successfully deleted files from local state
+      const successfulCids = new Set(result.results.successful.map((item: any) => item.cid));
+      const updatedFiles = files.filter(file => !successfulCids.has(file.cid));
+      setFiles(updatedFiles);
+      
+      // Clear selection
+      setSelectedFiles(new Set());
+      
+      // Show success message if any files were deleted
+      if (result.summary.successful > 0) {
+        setSnackbarOpen(true);
+      }
+      
+      // Show error message if some files failed
+      if (result.summary.failed > 0 || result.summary.notOwned > 0) {
+        const failedCount = result.summary.failed + result.summary.notOwned;
+        setUploadError(`${failedCount} files could not be deleted. You may not own them or they may be in use.`);
+      }
+      
+    } catch (error: any) {
+      console.error('Bulk delete failed:', error);
+      const errorMessage = error.response?.data?.error || 'Failed to delete files. Please try again.';
+      setUploadError(errorMessage);
+    } finally {
+      setIsBulkDeleting(false);
+    }
+  };
+
+  const handleBulkDeleteCancel = () => {
+    setBulkDeleteDialogOpen(false);
+  };
+
   return (
     <Box>
       <ResponsiveHeader 
@@ -531,6 +610,8 @@ const FilesTabContent: React.FC<FilesTabContentProps> = ({
           selectedFiles={selectedFiles}
           onSelectAll={handleSelectAll}
           onSelectFile={handleSelectFile}
+          onBulkDownload={handleBulkDownload}
+          onBulkDelete={handleBulkDelete}
         />
       )}
 
@@ -608,6 +689,30 @@ const FilesTabContent: React.FC<FilesTabContentProps> = ({
       isJoinMode={isJoinMode}
       onSubmit={handleGroupDialogSubmit}
       groupDialogError={groupDialogError}
+      />
+
+      {/* Bulk Delete Confirmation Dialog */}
+      <DeleteConfirmDialog
+        open={bulkDeleteDialogOpen}
+        onClose={handleBulkDeleteCancel}
+        onConfirm={handleBulkDeleteConfirm}
+        fileName={`${selectedFiles.size} selected files`}
+      />
+
+      {/* Bulk Download Loading Dialog */}
+      <LoadingDialog
+        open={isBulkDownloading}
+        onClose={() => {}}
+        title="Downloading Files"
+        loadingText={`Downloading ${selectedFiles.size} files...`}
+      />
+
+      {/* Bulk Delete Loading Dialog */}
+      <LoadingDialog
+        open={isBulkDeleting}
+        onClose={() => {}}
+        title="Deleting Files"
+        loadingText={`Deleting ${selectedFiles.size} files...`}
       />
 
       <Snackbar
