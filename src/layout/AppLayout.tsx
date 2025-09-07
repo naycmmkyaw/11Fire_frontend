@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import {
   Box,
   Typography,
@@ -62,6 +62,8 @@ const AppLayout = () => {
         <Box
           sx={{
             width: 200,
+            minWidth: 200,
+            maxWidth: 200,
             bgcolor: "#EF4444",
             display: "flex",
             flexDirection: "column",
@@ -70,7 +72,8 @@ const AppLayout = () => {
             position: "sticky",
             top: 0,
             height: "100vh",
-            overflowY: "auto"
+            overflowY: "auto",
+            flexShrink: 0
           }}
         >
         <Box
@@ -190,7 +193,8 @@ const AppLayout = () => {
         p: isMobile ? 2 : 4,
         overflowY: "auto",
         minHeight: "100vh",
-        width: isMobile ? "100%" : "auto"
+        width: isMobile ? "100%" : `calc(100vw - 200px)`,
+        maxWidth: isMobile ? "100%" : `calc(100vw - 200px)`
       }}>
         {renderTabContent(selectedTab, setSelectedTab, isProviderDashboard)}
       </Box>
