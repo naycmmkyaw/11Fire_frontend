@@ -14,7 +14,7 @@ const AddButton: React.FC<AddButtonProps> = ({ onClick }) => (
     sx={{
       bgcolor: "#ef4444",
       color: "#fff",
-      borderRadius: 2,
+      borderRadius: 1.2,
       textTransform: "none",
       px: 3,
       height: 36,

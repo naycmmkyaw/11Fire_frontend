@@ -27,8 +27,8 @@ const LoadingDialog: React.FC<LoadingDialogProps> = ({
     slotProps={{
       paper: {
         sx: {
-          borderRadius: 4,
-          bgcolor: "secondary.dark",
+          borderRadius: 3,
+          bgcolor: "#FFF4E7",
           boxShadow: "0 8px 32px rgba(0, 0, 0, 0.12)",
           minHeight: "200px",
         },
@@ -38,18 +38,25 @@ const LoadingDialog: React.FC<LoadingDialogProps> = ({
     <DialogTitle
       sx={{
         display: "flex",
-        justifyContent: "space-between",
         alignItems: "center",
         p: 3,
-        pb: 1,
+        pb: 2,
       }}
     >
-      <Typography sx={{ fontWeight: 600, fontSize: "1.4rem", mb: 1 }}>
+      <CircularProgress 
+        size={24} 
+        sx={{ 
+          color: "#ef4444", // Red spinner
+          mr: 2 
+        }} 
+      />
+      <Typography sx={{ 
+        fontWeight: 600, 
+        fontSize: "1.2rem",
+        color: "#000000"
+      }}>
         {title}
       </Typography>
-      <Box sx={{ display: "flex", alignItems: "center",}}>
-        <CircularProgress size={24} sx={{ color: "primary.main" }} />
-      </Box>
     </DialogTitle>
 
     <DialogContent sx={{ px: 3, py: 0 }}>
@@ -59,7 +66,19 @@ const LoadingDialog: React.FC<LoadingDialogProps> = ({
           sx={{
             color: "#000000",
             fontSize: "1rem",
-            lineHeight: 1,
+            lineHeight: 1.5,
+            mb: 2,
+          }}
+        >
+          Please do not close this modal or close your browser.
+        </Typography>
+        <Typography
+          variant="body1"
+          sx={{
+            color: "#000000",
+            fontSize: "1rem",
+            lineHeight: 1.5,
+            fontWeight: 500,
           }}
         >
           {loadingText}
