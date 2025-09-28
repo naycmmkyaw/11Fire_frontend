@@ -3,9 +3,16 @@ import { Box, Typography} from "@mui/material";
 
 interface EmptyFilesCardProps {
   isMobile?: boolean;
+  activeTab?: 'my-files' | 'shared-with-me';
 }
 
-const EmptyFilesCard: React.FC<EmptyFilesCardProps> = ({ isMobile = false }) => {
+const EmptyFilesCard: React.FC<EmptyFilesCardProps> = ({ isMobile = false, activeTab = 'my-files' }) => {
+  const getMessage = () => {
+    if (activeTab === 'shared-with-me') {
+      return "No one has shared a file with you yet.";
+    }
+    return "No files yet. Tap the Add button to upload your first file.";
+  };
   if (isMobile) {
     // Mobile view - match the image exactly
     return (
@@ -29,7 +36,7 @@ const EmptyFilesCard: React.FC<EmptyFilesCardProps> = ({ isMobile = false }) => 
           fontSize: "1rem",
           lineHeight: 1.5,
         }}>
-          No files yet. Tap the <strong>Add</strong> button to upload your first file.
+          {getMessage()}
         </Typography>
       </Box>
     );
@@ -50,7 +57,7 @@ const EmptyFilesCard: React.FC<EmptyFilesCardProps> = ({ isMobile = false }) => 
       }}
     >
       <Typography sx={{ color: "#3c3c3c", fontWeight: 300 }}>
-        No files yet. Tap the <strong>Add</strong> button to upload your first file.
+        {getMessage()}
       </Typography>
     </Box>
   );
