@@ -17,19 +17,26 @@ import FolderIcon from "@mui/icons-material/Folder";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import { Icon } from "@iconify/react";
-import type { FileEntry } from "../../types";
+import type { FileEntry, SharedFileEntry } from "../../types";
 
 interface FilesTableProps {
-  files: FileEntry[];
+  files: FileEntry[] | SharedFileEntry[];
   onCopyCid: (cid: string) => void;
   onOpenFileMenu: (event: React.MouseEvent<HTMLElement>, index: number) => void;
   isMobile?: boolean;
   selectedFiles: Set<number>;
   onSelectAll: (checked: boolean) => void;
   onSelectFile: (index: number, checked: boolean) => void;
+  onBulkDownload?: () => void;
+  onBulkDelete?: () => void;
+  isSharedFiles?: boolean;
 }
 
 const truncateCid = (cid: string) => cid.slice(0, 6) + "..." + cid.slice(-4);
+
+const isSharedFile = (file: FileEntry | SharedFileEntry): file is SharedFileEntry => {
+  return 'sharedBy' in file;
+};
 
 const FilesTable: React.FC<FilesTableProps> = ({ 
   files, 
@@ -38,7 +45,10 @@ const FilesTable: React.FC<FilesTableProps> = ({
   isMobile = false,
   selectedFiles,
   onSelectAll,
-  onSelectFile
+  onSelectFile,
+  onBulkDownload,
+  onBulkDelete,
+  isSharedFiles = false
 }) => {
   if (isMobile) {
     return (
@@ -92,10 +102,7 @@ const FilesTable: React.FC<FilesTableProps> = ({
                           flexShrink: 0,
                           "&:hover": { bgcolor: "#dc2626" }
                         }}
-                        onClick={() => {
-                          // Bulk download logic
-                          console.log("Bulk download:", Array.from(selectedFiles).map(i => files[i].name));
-                        }}
+                        onClick={onBulkDownload}
                       >
                         Download
                       </Button>
@@ -125,10 +132,7 @@ const FilesTable: React.FC<FilesTableProps> = ({
                             boxShadow: "none"
                           }
                         }}
-                        onClick={() => {
-                          // Bulk delete logic
-                          console.log("Bulk delete:", Array.from(selectedFiles).map(i => files[i].name));
-                        }}
+                        onClick={onBulkDelete}
                       >
                         Delete
                       </Button>
@@ -143,7 +147,7 @@ const FilesTable: React.FC<FilesTableProps> = ({
                     <strong>Name</strong>
                   </TableCell>
                   <TableCell sx={{ width: "35%", minWidth: 100, px: 1, pl: 0.25 }}>
-                    <strong>CID</strong>
+                    <strong>{isSharedFiles ? "Shared by" : "CID"}</strong>
                   </TableCell>
                   <TableCell sx={{ width: "10%", minWidth: 80, px: 1 }} />
                 </>
@@ -178,23 +182,57 @@ const FilesTable: React.FC<FilesTableProps> = ({
                 </TableCell>
                 <TableCell sx={{ width: "35%", minWidth: 100, overflow: "hidden", px: 1, pl: 0.25 }}>
                   <Box sx={{ display: "flex", alignItems: "center", minWidth: 0 }}>
-                    <Box sx={{ 
-                      overflow: "hidden", 
-                      textOverflow: "ellipsis", 
-                      whiteSpace: "nowrap",
-                      fontFamily: "monospace",
-                      fontSize: "0.8rem",
-                      minWidth: 0
-                    }}>
-                      {truncateCid(file.cid)}
-                    </Box>
-                    <IconButton
-                      size="small"
-                      sx={{ ml: 0.25, mr: 2.5, flexShrink: 0 }}
-                      onClick={() => onCopyCid(file.cid)}
-                    >
-                      <ContentCopyIcon fontSize="small" />
-                    </IconButton>
+                    {isSharedFiles && isSharedFile(file) ? (
+                      <Box sx={{ display: "flex", alignItems: "center", minWidth: 0 }}>
+                        <Box
+                          sx={{
+                            width: 24,
+                            height: 24,
+                            borderRadius: "50%",
+                            bgcolor: "#ef4444",
+                            color: "white",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            fontSize: "0.75rem",
+                            fontWeight: "bold",
+                            mr: 1,
+                            flexShrink: 0
+                          }}
+                        >
+                          {file.sharedBy.name.charAt(0).toUpperCase()}
+                        </Box>
+                        <Box sx={{ 
+                          overflow: "hidden", 
+                          textOverflow: "ellipsis", 
+                          whiteSpace: "nowrap",
+                          fontSize: "0.8rem",
+                          minWidth: 0
+                        }}>
+                          {file.sharedBy.email}
+                        </Box>
+                      </Box>
+                    ) : (
+                      <Box sx={{ display: "flex", alignItems: "center", minWidth: 0 }}>
+                        <Box sx={{ 
+                          overflow: "hidden", 
+                          textOverflow: "ellipsis", 
+                          whiteSpace: "nowrap",
+                          fontFamily: "monospace",
+                          fontSize: "0.8rem",
+                          minWidth: 0
+                        }}>
+                          {truncateCid(file.cid)}
+                        </Box>
+                        <IconButton
+                          size="small"
+                          sx={{ ml: 0.25, mr: 2.5, flexShrink: 0 }}
+                          onClick={() => onCopyCid(file.cid)}
+                        >
+                          <ContentCopyIcon fontSize="small" />
+                        </IconButton>
+                      </Box>
+                    )}
                   </Box>
                 </TableCell>
                 <TableCell align="right" sx={{ width: "10%", minWidth: 80, px: 1 }}>
@@ -249,10 +287,7 @@ const FilesTable: React.FC<FilesTableProps> = ({
                           minWidth: "auto",
                           "&:hover": { bgcolor: "#dc2626" }
                         }}
-                        onClick={() => {
-                          // Bulk download logic
-                          console.log("Bulk download:", Array.from(selectedFiles).map(i => files[i].name));
-                        }}
+                        onClick={onBulkDownload}
                       >
                         Download
                       </Button>
@@ -281,10 +316,7 @@ const FilesTable: React.FC<FilesTableProps> = ({
                             boxShadow: "none"
                           }
                         }}
-                        onClick={() => {
-                          // Bulk delete logic
-                          console.log("Bulk delete:", Array.from(selectedFiles).map(i => files[i].name));
-                        }}
+                        onClick={onBulkDelete}
                       >
                         Delete
                       </Button>
@@ -301,13 +333,13 @@ const FilesTable: React.FC<FilesTableProps> = ({
                     <strong>Name</strong>
                   </TableCell>
                   <TableCell>
-                    <strong>CID</strong>
+                    <strong>{isSharedFiles ? "Shared by" : "CID"}</strong>
                   </TableCell>
                   <TableCell>
                     <strong>Size</strong>
                   </TableCell>
                   <TableCell>
-                    <strong>Uploaded</strong>
+                    <strong>{isSharedFiles ? "Created" : "Uploaded"}</strong>
                   </TableCell>
                   <TableCell />
                 </>
@@ -334,16 +366,43 @@ const FilesTable: React.FC<FilesTableProps> = ({
                 </Box>
               </TableCell>
               <TableCell>
-                <Box sx={{ display: "flex", alignItems: "center" }}>
-                  {truncateCid(file.cid)}
-                  <IconButton
-                    size="small"
-                    sx={{ ml: 1 }}
-                    onClick={() => onCopyCid(file.cid)}
-                  >
-                    <ContentCopyIcon fontSize="small" />
-                  </IconButton>
-                </Box>
+                {isSharedFiles && isSharedFile(file) ? (
+                  <Box sx={{ display: "flex", alignItems: "center" }}>
+                    <Box
+                      sx={{
+                        width: 32,
+                        height: 32,
+                        borderRadius: "50%",
+                        bgcolor: "#ef4444",
+                        color: "white",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        fontSize: "0.875rem",
+                        fontWeight: "bold",
+                        mr: 1.5
+                      }}
+                    >
+                      {file.sharedBy.name.charAt(0).toUpperCase()}
+                    </Box>
+                    <Box sx={{ 
+                      fontSize: "0.875rem"
+                    }}>
+                      {file.sharedBy.email}
+                    </Box>
+                  </Box>
+                ) : (
+                  <Box sx={{ display: "flex", alignItems: "center" }}>
+                    {truncateCid(file.cid)}
+                    <IconButton
+                      size="small"
+                      sx={{ ml: 1 }}
+                      onClick={() => onCopyCid(file.cid)}
+                    >
+                      <ContentCopyIcon fontSize="small" />
+                    </IconButton>
+                  </Box>
+                )}
               </TableCell>
               <TableCell>{file.size}</TableCell>
               <TableCell>{file.date}</TableCell>

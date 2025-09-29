@@ -9,7 +9,7 @@ const SearchBar: React.FC = () => (
       display: "flex",
       alignItems: "center",
       bgcolor: "#f1e9dd",
-      borderRadius: 2,
+      borderRadius: 1.2,
       width: 500,
       height: 36,
       px: 2,

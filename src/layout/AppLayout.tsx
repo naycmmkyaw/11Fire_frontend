@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import {
   Box,
   Typography,
@@ -15,22 +15,31 @@ import renderTabContent from "./RenderTab";
 import useIsMobile from "../hooks/useMobile";
 
 const AppLayout = () => {
-  const [selectedTab, setSelectedTab] = useState("files");
+  // Initialize with a function to get the initial tab from localStorage or default
+  const [selectedTab, setSelectedTab] = useState(() => {
+    const savedTab = localStorage.getItem('selectedTab');
+    if (savedTab && (savedTab === 'files' || savedTab === 'profile' || savedTab === 'install' || savedTab === 'status')) {
+      return savedTab;
+    }
+    // Default based on current path
+    const currentPath = window.location.pathname;
+    return currentPath === "/provider-dashboard" ? "install" : "files";
+  });
   const [isProviderDashboard, setIsProviderDashboard] = useState(false);
   const isMobile = useIsMobile();
 
   // Check if current route is provider dashboard
   useEffect(() => {
     const currentPath = window.location.pathname;
-    setIsProviderDashboard(currentPath === "/provider-dashboard");
+    const isProviderRoute = currentPath === "/provider-dashboard";
+    setIsProviderDashboard(isProviderRoute);
 
-    // Set default tab based on route
-    if (currentPath === "/provider-dashboard") {
-      setSelectedTab("install"); // Default to install tab for provider dashboard
-    } else {
-      setSelectedTab("files"); // Default to files tab for other routes
-    }
   }, []);
+
+  // Save tab to localStorage whenever it changes
+  useEffect(() => {
+    localStorage.setItem('selectedTab', selectedTab);
+  }, [selectedTab]);
 
   const getTabStyles = (tab: string) => ({
     bgcolor: selectedTab === tab ? "#FFF7ED" : "#EF4444",
@@ -53,6 +62,8 @@ const AppLayout = () => {
         <Box
           sx={{
             width: 200,
+            minWidth: 200,
+            maxWidth: 200,
             bgcolor: "#EF4444",
             display: "flex",
             flexDirection: "column",
@@ -61,7 +72,8 @@ const AppLayout = () => {
             position: "sticky",
             top: 0,
             height: "100vh",
-            overflowY: "auto"
+            overflowY: "auto",
+            flexShrink: 0
           }}
         >
         <Box
@@ -181,7 +193,8 @@ const AppLayout = () => {
         p: isMobile ? 2 : 4,
         overflowY: "auto",
         minHeight: "100vh",
-        width: isMobile ? "100%" : "auto"
+        width: isMobile ? "100%" : `calc(100vw - 200px)`,
+        maxWidth: isMobile ? "100%" : `calc(100vw - 200px)`
       }}>
         {renderTabContent(selectedTab, setSelectedTab, isProviderDashboard)}
       </Box>

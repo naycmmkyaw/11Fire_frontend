@@ -23,6 +23,19 @@ export interface FileEntry {
   isFile: boolean;
 }
 
+export interface SharedFileEntry {
+  name: string;
+  cid: string;
+  size: string;
+  date: string;
+  isFile: boolean;
+  sharedBy: {
+    name: string;
+    email: string;
+    avatar?: string;
+  };
+}
+
 export interface AuthContextType {
   user: User | null;
   login: (user: User) => void;
