@@ -37,7 +37,7 @@ const GroupDropdown: React.FC<GroupDropdownProps> = ({
         onClick={onOpen}
         disabled={isLoading}
         sx={{
-          borderRadius: 2,
+          borderRadius: 1.2,
           bgcolor: isMobile ? "#fff" : 'secondary.main',
           border: `1px solid ${isMobile ? "#e0e0e0" : "#b5b5b5"}`,
           px: 3,
@@ -107,12 +107,16 @@ const GroupDropdown: React.FC<GroupDropdownProps> = ({
         <Divider sx={{ my: 1 }} />
         
         <MenuItem onClick={() => { onCreateGroup(); onClose(); }}>
-          <AddIcon fontSize="small" sx={{ color: "#ef4444", mr: 1 }} />
+          <AddIcon sx={{ color: "#FFAE98", mr: 1, fontSize: 25 }} />
           Create new
         </MenuItem>
         <MenuItem onClick={() => { onJoinGroup(); onClose(); }}>
-          <AddIcon fontSize="small" sx={{ color: "#ef4444", mr: 1 }} />
+          <Icon icon="mdi:people-add" style={{ color: "#FFAE98", marginRight: 8, fontSize: 25 }} />
           Join group
+        </MenuItem>
+        <MenuItem onClick={() => { onClose(); }}>
+          <Icon icon="pepicons-pop:leave" style={{ color: "#FFAE98", marginRight: 8, fontSize: 25 }} />
+          Leave group
         </MenuItem>
       </Menu>
     </>
