@@ -3,6 +3,7 @@ import { Menu, MenuItem, ListItemIcon, ListItemText } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import FileDownloadIcon from "@mui/icons-material/FileDownload";
 import DeleteIcon from "@mui/icons-material/Delete";
+import ShareIcon from "@mui/icons-material/Share";
 
 interface FileActionsMenuProps {
   anchorEl: HTMLElement | null;
@@ -10,6 +11,7 @@ interface FileActionsMenuProps {
   onRename: () => void;
   onDownload: () => void;
   onDelete: () => void;
+  onShare: () => void;
 }
 
 const FileActionsMenu: React.FC<FileActionsMenuProps> = ({ 
@@ -17,12 +19,14 @@ const FileActionsMenu: React.FC<FileActionsMenuProps> = ({
   onClose, 
   onRename, 
   onDownload, 
-  onDelete 
+  onDelete,
+  onShare 
 }) => {
   const menuItems = [
     { icon: EditIcon, label: "Rename", action: onRename },
     { icon: FileDownloadIcon, label: "Download", action: onDownload },
     { icon: DeleteIcon, label: "Delete", action: onDelete },
+    { icon: ShareIcon, label: "Share", action: onShare },
   ];
 
   return (
@@ -30,14 +34,16 @@ const FileActionsMenu: React.FC<FileActionsMenuProps> = ({
       anchorEl={anchorEl}
       open={Boolean(anchorEl)}
       onClose={onClose}
-      PaperProps={{
-        sx: {
-          bgcolor: "#fff7ed",
-          boxShadow: 3,
-          borderRadius: 3,
-          px: 1,
-          py: 0.5,
-        },
+      slotProps={{
+        paper: {
+          sx: {
+            bgcolor: 'secondary.dark',
+            boxShadow: 3,
+            borderRadius: 3,
+            px: 1,
+            py: 0.5,
+          },
+        }
       }}
     >
       {menuItems.map((item, index) => (

@@ -14,6 +14,7 @@ interface GroupDropdownProps {
   onGroupSelect: (group: GroupMembership) => void;
   onCreateGroup: () => void;
   onJoinGroup: () => void;
+  onLeaveGroup: () => void;
   isLoading?: boolean;
 }
 
@@ -27,6 +28,7 @@ const GroupDropdown: React.FC<GroupDropdownProps> = ({
   onGroupSelect,
   onCreateGroup,
   onJoinGroup,
+  onLeaveGroup,
   isLoading = false
 }) => {
   const displayName = selectedGroup?.swarmName || "Select a group";
@@ -114,7 +116,7 @@ const GroupDropdown: React.FC<GroupDropdownProps> = ({
           <Icon icon="mdi:people-add" style={{ color: "#FFAE98", marginRight: 8, fontSize: 25 }} />
           Join group
         </MenuItem>
-        <MenuItem onClick={() => { onClose(); }}>
+        <MenuItem onClick={() => { onLeaveGroup(); onClose(); }}>
           <Icon icon="pepicons-pop:leave" style={{ color: "#FFAE98", marginRight: 8, fontSize: 25 }} />
           Leave group
         </MenuItem>

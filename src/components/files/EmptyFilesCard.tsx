@@ -9,9 +9,17 @@ interface EmptyFilesCardProps {
 const EmptyFilesCard: React.FC<EmptyFilesCardProps> = ({ isMobile = false, activeTab = 'my-files' }) => {
   const getMessage = () => {
     if (activeTab === 'shared-with-me') {
-      return "No one has shared a file with you yet.";
+      return <>No one has shared a file with you yet.</>;
     }
-    return "No files yet. Tap the Add button to upload your first file.";
+    return (
+      <>
+        No files yet. Tap the{" "}
+        <Box component="span" sx={{ fontWeight: 700, display: "inline" }}>
+          Add
+        </Box>
+        {" "}button to upload your first file.
+      </>
+    );
   };
   if (isMobile) {
     // Mobile view - match the image exactly
