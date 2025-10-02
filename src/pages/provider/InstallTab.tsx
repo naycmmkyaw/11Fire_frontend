@@ -10,6 +10,7 @@ interface InstallTabProps {
   selectedTab: string;
   setSelectedTab: (tab: string) => void;
   isProviderDashboard: boolean;
+  onTabChange?: (tab: string) => void;
 }
 
 const InstallTab: React.FC<InstallTabProps> = ({ 

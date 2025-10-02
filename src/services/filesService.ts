@@ -23,6 +23,20 @@ export interface ShareResponse {
   sharedIdsCount: number;
 }
 
+export interface BulkDeleteResponse {
+  ok: boolean;
+  summary: {
+    successful: number;
+    failed: number;
+    notOwned: number;
+  };
+  results: {
+    successful: Array<{ cid: string }>;
+    failed: Array<{ cid: string; error: string }>;
+    notOwned: Array<{ cid: string }>;
+  };
+}
+
 export const uploadFile = async (file: File): Promise<UploadResponse> => {
   const formData = new FormData();
   formData.append('file', file);
@@ -117,7 +131,7 @@ export const downloadMultipleFiles = async (cids: string[]): Promise<void> => {
   }
 };
 
-export const deleteMultipleFiles = async (cids: string[]): Promise<void> => {
+export const deleteMultipleFiles = async (cids: string[]): Promise<BulkDeleteResponse> => {
   try {
     // console.log('Deleting files with CIDs:', cids);
     const response = await Axios.delete('/files/delete-multiple', { data: { cids } });

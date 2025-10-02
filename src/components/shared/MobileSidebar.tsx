@@ -9,7 +9,6 @@ import {
   ListItemIcon,
   ListItemText,
   Typography,
-  useTheme,
 } from '@mui/material';
 import { Icon } from '@iconify/react';
 import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
@@ -31,7 +30,6 @@ const MobileSidebar: React.FC<MobileSidebarProps> = ({
   onTabChange 
 }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const theme = useTheme();
 
   const handleDrawerToggle = () => {
     setIsOpen(!isOpen);

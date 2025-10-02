@@ -436,6 +436,7 @@ const FilesTabContent: React.FC<FilesTabContentProps> = ({
 
   const handleSnackbarClose = () => {
     setSnackbarOpen(false);
+    setSnackbarMessage(null);
     setUploadError(null);
   };
 
@@ -909,7 +910,7 @@ const FilesTabContent: React.FC<FilesTabContentProps> = ({
         open={snackbarOpen}
         autoHideDuration={3000}
         onClose={handleSnackbarClose}
-        message="Copied to clipboard"
+        message={snackbarMessage ?? "Copied to clipboard"}
         anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
       />
 

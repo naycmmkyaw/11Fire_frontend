@@ -1,12 +1,12 @@
-import React from 'react';
+// import React from 'react';
 import FilesTabContent from '../pages/files/FilesTab';
 import ProfileTabContent from '../pages/profile/ProfileTab';
 import InstallTabContent from '../pages/provider/InstallTab';
 import StatusTabContent from '../pages/provider/StatusTab';
 
-interface RenderTabProps {
-  onTabChange?: (tab: string) => void;
-}
+// interface RenderTabProps {
+//   onTabChange?: (tab: string) => void;
+// }
 
 const renderTabContent = (
   selectedTab: string, 

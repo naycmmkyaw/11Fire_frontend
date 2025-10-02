@@ -1,7 +1,7 @@
 import React from "react";
 import { Menu, MenuItem, ListItemIcon, ListItemText } from "@mui/material";
 import DescriptionIcon from "@mui/icons-material/Description";
-import FolderIcon from "@mui/icons-material/Folder";
+// import FolderIcon from "@mui/icons-material/Folder";
 
 interface UploadMenuProps {
   anchorEl: HTMLElement | null;

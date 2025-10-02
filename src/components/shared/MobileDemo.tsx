@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Box, Typography, Paper, Button } from "@mui/material";
+import { Box, Typography, Paper } from "@mui/material";
 import ResponsiveHeader from "./ResponsiveHeader";
 import useIsMobile from "../../hooks/useMobile";
 
@@ -30,6 +30,9 @@ const MobileDemo: React.FC = () => {
     <Box sx={{ minHeight: "100vh", bgcolor: "#FFFAF4" }}>
       <ResponsiveHeader
         title="STATUS"
+        selectedTab={currentTab}
+        setSelectedTab={handleTabChange}
+        isProviderDashboard={false}
         onTabChange={handleTabChange}
       />
 

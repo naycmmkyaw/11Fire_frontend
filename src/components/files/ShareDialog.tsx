@@ -28,7 +28,7 @@ const ShareDialog: React.FC<ShareDialogProps> = ({
   onClose,
   fileName,
   setFileName,
-  isFileShare,
+  // isFileShare,
   onSubmit,
   isSharing = false,
   shareError = null,
