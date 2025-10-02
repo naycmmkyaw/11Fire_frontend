@@ -155,7 +155,7 @@ const ProfileTabContent: React.FC<ProfileTabContentProps> = ({
             sx={{
               bgcolor: "#FEE6E6",
               color: "#000",
-              borderRadius: 2,
+              borderRadius: 1.2,
               textTransform: "none",
               px: 3,
               height: 36,
@@ -173,7 +173,7 @@ const ProfileTabContent: React.FC<ProfileTabContentProps> = ({
             sx={{
               bgcolor: "primary.main",
               color: "#fff",
-              borderRadius: 2,
+              borderRadius: 1.2,
               textTransform: "none",
               px: 3,
               height: 36,
