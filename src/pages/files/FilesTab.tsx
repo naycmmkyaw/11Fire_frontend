@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
-import { Alert, Box, Snackbar } from "@mui/material";
+import { Alert, Box, Snackbar, CircularProgress } from "@mui/material";
 import EmptyFilesCard from "../../components/files/EmptyFilesCard";
 import FilesTable from "../../components/files/FilesTable";
 import ResponsiveHeader from "../../components/shared/ResponsiveHeader";
@@ -13,13 +13,20 @@ import FileActionsMenu from "../../components/files/FileActionsMenu";
 import UploadDialog from "../../components/files/UploadDialog";
 import useIsMobile from "../../hooks/useMobile";
 import type { FileEntry, SharedFileEntry } from "../../types";
-import { uploadFile, deleteFile, renameFile, downloadFile, downloadMultipleFiles, deleteMultipleFiles } from "../../services/filesService";
+import { uploadFile, 
+          deleteFile, 
+          renameFile, 
+          downloadFile, 
+          downloadMultipleFiles, 
+          deleteMultipleFiles,
+          shareFile } from "../../services/filesService";
 import { listMyGroups, type GroupMembership } from "../../services/getGroupList";
-import { fetchFilesForGroup } from "../../services/getFiles";
+import { fetchFilesForGroup, fetchSharedFilesForGroup } from "../../services/getFiles";
 import GroupDialog from "../../components/files/GroupDialog";
 import Axios from "../../services/axiosInstance";
 import LoadingDialog from "../../components/files/LoadingDialog";
 import DeleteConfirmDialog from "../../components/files/DeleteConfirmDialog";
+import ShareDialog from "../../components/files/ShareDialog";
 
 interface FilesTabContentProps {
   selectedTab: string;
@@ -54,6 +61,7 @@ const FilesTabContent: React.FC<FilesTabContentProps> = ({
   const [isFileUpload, setIsFileUpload] = useState(true);
   const [files, setFiles] = useState<(FileEntry | SharedFileEntry)[]>([]);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState<string | null>(null);
   const [fileMenuAnchor, setFileMenuAnchor] = useState<null | HTMLElement>(null);
   const [activeFileIndex, setActiveFileIndex] = useState<number | null>(null);
   const [isRenameMode, setIsRenameMode] = useState(false);
@@ -66,6 +74,12 @@ const FilesTabContent: React.FC<FilesTabContentProps> = ({
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [fileToDelete, setFileToDelete] = useState<{ index: number; name: string } | null>(null);
+  const [shareDialogOpen, setShareDialogOpen] = useState(false);
+  const [shareTarget, setShareTarget] = useState<{ cid: string; name: string; isFile: boolean } | null>(null);
+  const [shareEmails, setShareEmails] = useState("");
+  const [isSharing, setIsSharing] = useState(false);
+  const [shareError, setShareError] = useState<string | null>(null);
+    const [isFilesLoading, setIsFilesLoading] = useState(false);
   // New state for groups
   const [groups, setGroups] = useState<GroupMembership[]>([]);
   const [selectedGroup, setSelectedGroup] = useState<GroupMembership | null>(null);
@@ -81,46 +95,6 @@ const FilesTabContent: React.FC<FilesTabContentProps> = ({
   const [bulkDeleteDialogOpen, setBulkDeleteDialogOpen] = useState(false);
   // State for file sub-tabs (My files vs Shared with me)
   const [activeFileTab, setActiveFileTab] = useState<'my-files' | 'shared-with-me'>('my-files');
-  
-  // Mock shared files data
-  const mockSharedFiles: SharedFileEntry[] = [
-    {
-      name: "test1.txt",
-      cid: "QmTest123456789",
-      size: "32 B",
-      date: "5/6/2025",
-      isFile: true,
-      sharedBy: {
-        name: "nanzun.lapyae",
-        email: "nanzun.lapyae@example.com",
-        avatar: "N"
-      }
-    },
-    {
-      name: "project_document.pdf",
-      cid: "QmProject987654321",
-      size: "2.1 MB",
-      date: "5/5/2025",
-      isFile: true,
-      sharedBy: {
-        name: "alice.smith",
-        email: "alice.smith@company.com",
-        avatar: "A"
-      }
-    },
-    {
-      name: "presentation.pptx",
-      cid: "QmPresentation456789123",
-      size: "15.3 MB",
-      date: "5/4/2025",
-      isFile: true,
-      sharedBy: {
-        name: "bob.johnson",
-        email: "bob.johnson@team.org",
-        avatar: "B"
-      }
-    }
-  ];
 
   // Check for navigation state on component mount
   useEffect(() => {
@@ -138,13 +112,43 @@ const FilesTabContent: React.FC<FilesTabContentProps> = ({
 
   // Handle tab switching
   useEffect(() => {
-    if (activeFileTab === 'shared-with-me') {
-      // Use mock shared files data
-      setFiles(mockSharedFiles);
-    } else if (activeFileTab === 'my-files' && selectedGroup) {
-      // Reload files when switch back to my files tab
-      fetchFilesForGroup(selectedGroup.swarmId).then(setFiles).catch(console.error);
+    if (!selectedGroup) {
+      setFiles([]);
+      setIsFilesLoading(false);
+      return;
     }
+
+    let cancelled = false;
+    setFiles([]);
+    setIsFilesLoading(true);
+
+    const loadFiles = async () => {
+      try {
+        const data =
+          activeFileTab === "shared-with-me"
+            ? await fetchSharedFilesForGroup(selectedGroup.swarmId)
+            : await fetchFilesForGroup(selectedGroup.swarmId);
+
+        if (!cancelled) {
+          setFiles(data);
+        }
+      } catch (error) {
+        if (!cancelled) {
+          console.error("Failed to load files:", error);
+          setFiles([]);
+        }
+      } finally {
+        if (!cancelled) {
+          setIsFilesLoading(false);
+        }
+      }
+    };
+
+    loadFiles();
+
+    return () => {
+      cancelled = true;
+    };
   }, [activeFileTab, selectedGroup]);
 
   const fetchGroups = async (swarmName?: string | undefined, savedGroupId?: string | null) => {
@@ -161,40 +165,32 @@ const FilesTabContent: React.FC<FilesTabContentProps> = ({
         groupToSelect = groupsList.find(g => g.swarmId === savedGroupId);
       }
       
-      // Fallback to first group if no match found
-      const selectedGroup = groupToSelect || groupsList[0];
-      setSelectedGroup(selectedGroup);
-      
-      // Only save to localStorage if we selected a different group than what was saved
-      // or if we're selecting based on swarmName (navigation) or first group (new user)
-      if (selectedGroup && (!savedGroupId || selectedGroup.swarmId !== savedGroupId)) {
-        localStorage.setItem('selectedGroupId', selectedGroup.swarmId);
-      }
-      
-      if (selectedGroup) {
-        const groupFiles = await fetchFilesForGroup(selectedGroup.swarmId);
-        setFiles(groupFiles);
+      const resolvedGroup = groupToSelect ?? groupsList[0] ?? null;
+      setSelectedGroup(resolvedGroup);
+
+      if (resolvedGroup) {
+        if (!savedGroupId || resolvedGroup.swarmId !== savedGroupId) {
+          localStorage.setItem("selectedGroupId", resolvedGroup.swarmId);
+        }
+      } else {
+        localStorage.removeItem("selectedGroupId");
+        setFiles([]);
       }
     } catch (error) {
-      console.error('Failed to fetch groups:', error);
-      // Could show a snackbar error here
+      console.error("Failed to fetch groups:", error);
+      setGroups([]);
+      setSelectedGroup(null);
+      setFiles([]);
     } finally {
       setIsLoadingGroups(false);
     }
   };
 
-  const handleGroupSelect = async (group: GroupMembership) => {
+  const handleGroupSelect = (group: GroupMembership) => {
     setSelectedGroup(group);
-    console.log('Selected group:', group);
-    // Save selected group to localStorage
-    localStorage.setItem('selectedGroupId', group.swarmId);
-    try {
-      const groupFiles = await fetchFilesForGroup(group.swarmId);
-      setFiles(groupFiles);
-    } catch (error) {
-      console.error('Failed to fetch files for selected group:', error);
-      setFiles([]); // Optionally clear files on error
-    }
+    setFiles([]);
+    setIsFilesLoading(true);
+    localStorage.setItem("selectedGroupId", group.swarmId);
   };
 
   const handleOpenGroupDialog = (joinMode: boolean) => {
@@ -429,6 +425,7 @@ const FilesTabContent: React.FC<FilesTabContentProps> = ({
 
   const handleCopyCid = (cid: string) => {
     navigator.clipboard.writeText(cid);
+    setSnackbarMessage("Copied to clipboard");
     setSnackbarOpen(true);
   };
 
@@ -593,8 +590,88 @@ const FilesTabContent: React.FC<FilesTabContentProps> = ({
     }
   };
 
-  const handleBulkDeleteCancel = () => {
-    setBulkDeleteDialogOpen(false);
+   const handleShare = () => {
+    if (activeFileTab !== "my-files") {
+      setUploadError("Only your files can be shared.");
+      setFileMenuAnchor(null);
+      return;
+    }
+    if (activeFileIndex !== null) {
+      const file = files[activeFileIndex];
+      setShareTarget({
+        cid: file.cid,
+        name: file.name,
+        isFile: "isFile" in file ? file.isFile : true,
+      });
+      setShareEmails("");
+      setShareError(null);
+      setShareDialogOpen(true);
+      setFileMenuAnchor(null);
+    }
+  };
+
+  const handleShareDialogClose = () => {
+    if (isSharing) return;
+    setShareDialogOpen(false);
+    setShareTarget(null);
+    setShareEmails("");
+    setShareError(null);
+    setActiveFileIndex(null);
+  };
+
+  const handleShareSubmit = async () => {
+    if (!shareTarget) return;
+
+    const emails = Array.from(
+      new Set(
+        shareEmails
+          .split(/[\s,;]+/)
+          .map((email) => email.trim())
+          .filter(Boolean)
+      )
+    );
+
+    if (emails.length === 0) {
+      setShareError("Enter at least one email.");
+      return;
+    }
+
+    setIsSharing(true);
+    setShareError(null);
+
+    try {
+      const response = await shareFile(shareTarget.cid, emails);
+
+      const matchedCount = response.sharedWith?.length ?? 0;
+      const unresolved = response.unresolvedEmails ?? [];
+
+      if (matchedCount > 0) {
+        const countLabel = matchedCount === 1 ? "user" : "users";
+        setSnackbarMessage(
+          `Shared "${shareTarget.name}" with ${matchedCount} ${countLabel}.`
+        );
+        setSnackbarOpen(true);
+      } else if (unresolved.length === 0) {
+        setSnackbarMessage("No matching recipients were found.");
+        setSnackbarOpen(true);
+      }
+
+      if (unresolved.length > 0) {
+        setShareError(`Could not share with: ${unresolved.join(", ")}`);
+      } else {
+        setShareDialogOpen(false);
+        setShareTarget(null);
+        setShareEmails("");
+        setActiveFileIndex(null);
+      }
+    } catch (error: any) {
+      console.error("Share failed:", error);
+      const errorMessage =
+        error.response?.data?.error || "Failed to share file. Please try again.";
+      setShareError(errorMessage);
+    } finally {
+      setIsSharing(false);
+    }
   };
 
   return (
@@ -656,7 +733,11 @@ const FilesTabContent: React.FC<FilesTabContentProps> = ({
         </Box>
       </Box>
 
-      {files.length === 0 ? (
+      {isFilesLoading ? (
+        <Box sx={{ display: "flex", justifyContent: "center", py: 6 }}>
+          <CircularProgress />
+        </Box>
+      ) : files.length === 0 ? (
         <EmptyFilesCard isMobile={isMobile} activeTab={activeFileTab} />
       ) : (
         <FilesTable
@@ -687,6 +768,7 @@ const FilesTabContent: React.FC<FilesTabContentProps> = ({
         onRename={handleRename}
         onDownload={handleDownload}
         onDelete={handleDelete}
+        onShare={handleShare}
       />
 
       <UploadDialog
@@ -700,6 +782,18 @@ const FilesTabContent: React.FC<FilesTabContentProps> = ({
         isUploading={isUploading || isRenaming}
         uploadError={uploadError}
       />
+      <ShareDialog
+        open={shareDialogOpen}
+        onClose={handleShareDialogClose}
+        fileName={shareEmails}
+        setFileName={setShareEmails}
+        isFileShare={shareTarget?.isFile ?? true}
+        onSubmit={handleShareSubmit}
+        isSharing={isSharing}
+        shareError={shareError}
+        targetName={shareTarget?.name ?? ""}
+      />
+
       {/* Upload Loading Dialog */}
       <LoadingDialog
         open={isUploading}
@@ -721,14 +815,14 @@ const FilesTabContent: React.FC<FilesTabContentProps> = ({
         onConfirm={handleDeleteConfirm}
         fileName={fileToDelete?.name || ""}
       />
-
+      {/* Delete Loading Dialog */}
       <LoadingDialog
         open={isDeleting}
         onClose={() => {}}
         title="Deleting File"
         loadingText="Deleting file, please wait..."
       />
-
+      {/* Download Loading Dialog */}
       <LoadingDialog
         open={isDownloading}
         onClose={() => {}}
@@ -752,7 +846,7 @@ const FilesTabContent: React.FC<FilesTabContentProps> = ({
       {/* Bulk Delete Confirmation Dialog */}
       <DeleteConfirmDialog
         open={bulkDeleteDialogOpen}
-        onClose={handleBulkDeleteCancel}
+        onClose={() => setBulkDeleteDialogOpen(false)}
         onConfirm={handleBulkDeleteConfirm}
         fileName={`${selectedFiles.size} selected files`}
       />
