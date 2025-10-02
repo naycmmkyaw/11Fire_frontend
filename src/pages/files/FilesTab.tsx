@@ -333,31 +333,31 @@ const FilesTabContent: React.FC<FilesTabContentProps> = ({
     input.click();
   };
 
-  const handleFolderUploadClick = () => {
-    setAnchorEl(null);
-    setIsFileUpload(false);
-    setIsRenameMode(false);
-    setSelectedFile(null); // Clear any previous selectedFile
-    setActiveFileIndex(null); // Clear any previous activeFileIndex
-    const input = document.createElement("input");
-    input.type = "file";
-    input.webkitdirectory = true;
-    input.onchange = (e: Event) => {
-      const target = e.target as HTMLInputElement;
-      const filesList = target.files;
-      if (filesList && filesList.length > 0) {
-        const totalSize = Array.from(filesList).reduce(
-          (acc, file) => acc + file.size,
-          0
-        );
-        setSelectedFile(null);
-        setFileName(filesList[0].webkitRelativePath.split("/")[0]);
-        setFileSize(formatSize(totalSize));
-        setDialogOpen(true);
-      }
-    };
-    input.click();
-  };
+  // const handleFolderUploadClick = () => {
+  //   setAnchorEl(null);
+  //   setIsFileUpload(false);
+  //   setIsRenameMode(false);
+  //   setSelectedFile(null); // Clear any previous selectedFile
+  //   setActiveFileIndex(null); // Clear any previous activeFileIndex
+  //   const input = document.createElement("input");
+  //   input.type = "file";
+  //   input.webkitdirectory = true;
+  //   input.onchange = (e: Event) => {
+  //     const target = e.target as HTMLInputElement;
+  //     const filesList = target.files;
+  //     if (filesList && filesList.length > 0) {
+  //       const totalSize = Array.from(filesList).reduce(
+  //         (acc, file) => acc + file.size,
+  //         0
+  //       );
+  //       setSelectedFile(null);
+  //       setFileName(filesList[0].webkitRelativePath.split("/")[0]);
+  //       setFileSize(formatSize(totalSize));
+  //       setDialogOpen(true);
+  //     }
+  //   };
+  //   input.click();
+  // };
 
   const handleUpload = async () => {
     if (isRenameMode && activeFileIndex !== null) {
@@ -797,7 +797,7 @@ const FilesTabContent: React.FC<FilesTabContentProps> = ({
         anchorEl={anchorEl}
         onClose={handleClose}
         onFileUpload={handleFileUploadClick}
-        onFolderUpload={handleFolderUploadClick}
+        // onFolderUpload={handleFolderUploadClick}
       />
 
       <FileActionsMenu
