@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
-import { Alert, Box, Snackbar, CircularProgress, Dialog, DialogTitle, DialogContent, DialogActions, Button, IconButton, Typography } from "@mui/material";
-import CloseIcon from "@mui/icons-material/Close";
+import { Alert, Box, Snackbar, CircularProgress } from "@mui/material";
 import EmptyFilesCard from "../../components/files/EmptyFilesCard";
 import FilesTable from "../../components/files/FilesTable";
 import ResponsiveHeader from "../../components/shared/ResponsiveHeader";
@@ -29,6 +28,7 @@ import Axios from "../../services/axiosInstance";
 import LoadingDialog from "../../components/files/LoadingDialog";
 import DeleteConfirmDialog from "../../components/files/DeleteConfirmDialog";
 import ShareDialog from "../../components/files/ShareDialog";
+import LeaveGroupDialog from "../../components/files/LeaveGroupDialog";
 
 interface FilesTabContentProps {
   selectedTab: string;
@@ -689,9 +689,9 @@ const FilesTabContent: React.FC<FilesTabContentProps> = ({
     setIsLeavingGroup(true);
     
     try {
-      const response = await leaveGroup(selectedGroup.swarmId);
+      await leaveGroup(selectedGroup.swarmId);
       
-      console.log('Leave group response:', response);
+      // console.log('Leave group response:', response);
       
       // Refresh groups list 
       await fetchGroups();
@@ -925,81 +925,13 @@ const FilesTabContent: React.FC<FilesTabContentProps> = ({
       </Snackbar>
 
       {/* Leave Group Dialog */}
-      <Dialog
+      <LeaveGroupDialog
         open={leaveGroupDialogOpen}
-        onClose={handleLeaveGroupCancel}
-        maxWidth="sm"
-        fullWidth
-        slotProps={{
-          paper: {
-            sx: {
-              borderRadius: 3,
-              bgcolor: "#FFF4E7",
-              boxShadow: "0 8px 32px rgba(0, 0, 0, 0.12)",
-            },
-          },
-        }}
-      >
-        <DialogTitle sx={{ p: 3, pb: 1 }}>
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-            }}
-          >
-            <Typography variant="subtitle1" fontWeight={600}>
-              Leave group
-            </Typography>
-            <IconButton onClick={handleLeaveGroupCancel}>
-              <CloseIcon />
-            </IconButton>
-          </Box>
-        </DialogTitle>
-
-        <DialogContent sx={{ px: 3, py: 0 }}>
-          <Typography variant="body1" sx={{ color: "#000000", fontSize: "1rem" }}>
-            Are you sure you want to leave group {selectedGroup?.swarmName || 'this group'}?
-          </Typography>
-        </DialogContent>
-
-        <DialogActions sx={{ justifyContent: "flex-end", mt: 2, p: 3 }}>
-          <Button
-            onClick={handleLeaveGroupCancel}
-            sx={{
-              bgcolor: "#FEE6E6",
-              color: "#000",
-              borderRadius: 1.2,
-              textTransform: "none",
-              px: 3,
-              height: 36,
-              "&:hover": { bgcolor: "#fdd8d8" },
-            }}
-          >
-            Cancel
-          </Button>
-          <Button
-            variant="contained"
-            onClick={handleLeaveGroupConfirm}
-            disabled={isLeavingGroup}
-            sx={{
-              bgcolor: "primary.main",
-              color: "#fff",
-              borderRadius: 1.2,
-              textTransform: "none",
-              px: 3,
-              height: 36,
-              "&:hover": { bgcolor: "#e14848" },
-              "&:disabled": { 
-                bgcolor: "#ccc",
-                color: "#666"
-              },
-            }}
-          >
-            {isLeavingGroup ? "Leaving..." : "Leave"}
-          </Button>
-        </DialogActions>
-      </Dialog>
+        onCancel={handleLeaveGroupCancel}
+        onConfirm={handleLeaveGroupConfirm}
+        isLeaving={isLeavingGroup}
+        groupName={selectedGroup?.swarmName ?? ""}
+      />
     </Box>
   );
 };
