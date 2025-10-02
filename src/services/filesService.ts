@@ -15,6 +15,14 @@ export interface RenameResponse {
   name: string;
 }
 
+export interface ShareResponse {
+  ok: boolean;
+  cid: string;
+  sharedWith: Array<{ _id: string; email?: string }>;
+  unresolvedEmails: string[];
+  sharedIdsCount: number;
+}
+
 export const uploadFile = async (file: File): Promise<UploadResponse> => {
   const formData = new FormData();
   formData.append('file', file);
@@ -109,7 +117,7 @@ export const downloadMultipleFiles = async (cids: string[]): Promise<void> => {
   }
 };
 
-export const deleteMultipleFiles = async (cids: string[]): Promise<any> => {
+export const deleteMultipleFiles = async (cids: string[]): Promise<void> => {
   try {
     // console.log('Deleting files with CIDs:', cids);
     const response = await Axios.delete('/files/delete-multiple', { data: { cids } });
@@ -121,4 +129,9 @@ export const deleteMultipleFiles = async (cids: string[]): Promise<any> => {
     console.error('Failed to delete multiple files:', error);
     throw error;
   }
+};
+
+export const shareFile = async (cid: string, emails: string[]): Promise<ShareResponse> => {
+  const response = await Axios.post(`/files/share/${cid}`, { emails });
+  return response.data;
 };
