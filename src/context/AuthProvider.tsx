@@ -25,6 +25,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             email: backendUser.email,                       // Direct mapping
             name: backendUser.username,                     // Backend uses 'username'
             avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(backendUser.username || backendUser.email)}&background=ef4444&color=fff`,
+            activeGroup: backendUser.activeSwarm || null,
           };
 
           setUser(mappedUser);

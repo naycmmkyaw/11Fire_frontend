@@ -29,6 +29,7 @@ import LoadingDialog from "../../components/files/LoadingDialog";
 import DeleteConfirmDialog from "../../components/files/DeleteConfirmDialog";
 import ShareDialog from "../../components/files/ShareDialog";
 import LeaveGroupDialog from "../../components/files/LeaveGroupDialog";
+import { useAuth } from "../../hooks/useAuth";
 
 interface FilesTabContentProps {
   selectedTab: string;
@@ -55,6 +56,7 @@ const FilesTabContent: React.FC<FilesTabContentProps> = ({
   const location = useLocation();
   
   // State
+  const { user, isLoading: isAuthLoading, login } = useAuth();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -105,17 +107,15 @@ const FilesTabContent: React.FC<FilesTabContentProps> = ({
 
   // Check for navigation state on component mount
   useEffect(() => {
+    if (isAuthLoading) return;
     const state = location.state as { swarmName?: string };
     if (state?.swarmName) {
       fetchGroups(state.swarmName);
-      // Clear the state to prevent re-triggering
       window.history.replaceState({}, document.title);
     } else {
-      // Check localStorage for previously selected group
-      const savedGroupId = localStorage.getItem('selectedGroupId');
-      fetchGroups(undefined, savedGroupId);
+      fetchGroups(undefined, user?.activeGroup ?? null);
     }
-  }, []);
+  }, [isAuthLoading, location.state, user?.activeGroup]);
 
   // Handle tab switching
   useEffect(() => {
@@ -159,7 +159,7 @@ const FilesTabContent: React.FC<FilesTabContentProps> = ({
     };
   }, [activeFileTab, selectedGroup]);
 
-  const fetchGroups = async (swarmName?: string | undefined, savedGroupId?: string | null) => {
+  const fetchGroups = async (swarmName?: string | null, savedGroupId?: string | null) => {
     try {
       setIsLoadingGroups(true);
       const groupsList = await listMyGroups();
@@ -177,18 +177,23 @@ const FilesTabContent: React.FC<FilesTabContentProps> = ({
       setSelectedGroup(resolvedGroup);
 
       if (resolvedGroup) {
-        if (!savedGroupId || resolvedGroup.swarmId !== savedGroupId) {
-          localStorage.setItem("selectedGroupId", resolvedGroup.swarmId);
+        if (user && user.activeGroup !== resolvedGroup.swarmId) {
+          login({ ...user, activeGroup: resolvedGroup.swarmId });
         }
       } else {
-        localStorage.removeItem("selectedGroupId");
         setFiles([]);
+        if (user && user.activeGroup !== null) {
+          login({ ...user, activeGroup: null });
+        }
       }
     } catch (error) {
       console.error("Failed to fetch groups:", error);
       setGroups([]);
       setSelectedGroup(null);
       setFiles([]);
+      if (user && user.activeGroup !== null) {
+        login({ ...user, activeGroup: null });
+      }
     } finally {
       setIsLoadingGroups(false);
     }
@@ -198,7 +203,9 @@ const FilesTabContent: React.FC<FilesTabContentProps> = ({
     setSelectedGroup(group);
     setFiles([]);
     setIsFilesLoading(true);
-    localStorage.setItem("selectedGroupId", group.swarmId);
+    if (user && user.activeGroup !== group.swarmId) {
+      login({ ...user, activeGroup: group.swarmId });
+    }
   };
 
   const handleOpenGroupDialog = (joinMode: boolean) => {
@@ -741,13 +748,12 @@ const FilesTabContent: React.FC<FilesTabContentProps> = ({
     
     try {
       await leaveGroup(selectedGroup.swarmId);
-      
-      // console.log('Leave group response:', response);
-      
+      if (user && user.activeGroup !== null) {
+        login({ ...user, activeGroup: null });
+      }     
       // Refresh groups list 
-      await fetchGroups();
-      setLeaveGroupDialogOpen(false);
-      
+      await fetchGroups(undefined, user?.activeGroup ?? null);
+      setLeaveGroupDialogOpen(false);   
       setSnackbarOpen(true);
     } catch (error: any) {
       console.error('Failed to leave group:', error);

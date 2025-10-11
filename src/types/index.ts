@@ -3,6 +3,7 @@ export interface User {
   email: string;                 // Maps to backend.email
   name: string;                  // Maps to backend.username
   avatar?: string;              // Generated on frontend (not in backend)
+  activeGroup: string | null;  // Maps to backend.activeSwarm
 }
 
 export interface Group {
