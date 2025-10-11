@@ -18,14 +18,21 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         const response = await Axios.get('/auth/me');
         if (response.data?.user) {
           const backendUser = response.data.user;
+          const activeSwarmId: string | null = backendUser.activeSwarm || null;
+          const memberships: Array<{ swarm: string; role?: string }> = backendUser.memberships ?? [];
+          const activeMembership = activeSwarmId
+            ? memberships.find((m) => m.swarm === activeSwarmId)
+            : undefined;
           
           // Map backend Auth model to frontend User type
           const mappedUser: User = {
-            id: String(backendUser._id),                    // MongoDB ObjectId as string
-            email: backendUser.email,                       // Direct mapping
-            name: backendUser.username,                     // Backend uses 'username'
+            id: String(backendUser._id),
+            email: backendUser.email,
+            name: backendUser.username,
             avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(backendUser.username || backendUser.email)}&background=ef4444&color=fff`,
-            activeGroup: backendUser.activeSwarm || null,
+            activeGroup: activeSwarmId,
+            role: activeMembership?.role ?? 'user',
+            isFirstLogin: memberships.length === 0,
           };
 
           setUser(mappedUser);
