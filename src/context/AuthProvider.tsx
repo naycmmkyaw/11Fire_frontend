@@ -29,13 +29,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           };
 
           setUser(mappedUser);
-          // localStorage.setItem('11fire_user', JSON.stringify(mappedUser));
         }
       } catch (error) {
         console.error('Failed to fetch user:', error);
         setUser(null);
-        // localStorage.removeItem('11fire_user');
-        // localStorage.removeItem('11fire_groups');
       } finally {
         setIsLoading(false);
       }
@@ -46,12 +43,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const login = (userData: User) => {
     setUser(userData);
-    // localStorage.setItem('11fire_user', JSON.stringify(userData));
   };
 
   const logout = async () => {
     try {
-      // Call backend logout endpoint to clear session
       await Axios.post('/auth/logout');
     } catch (error) {
       console.error('Logout error:', error);
