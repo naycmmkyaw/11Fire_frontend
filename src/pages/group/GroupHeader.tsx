@@ -1,17 +1,8 @@
-import React, { useState } from "react";
-import { 
-  Box, 
-  Typography, 
-  Avatar, 
-  Menu, 
-  MenuItem, 
-  ListItemIcon, 
-  ListItemText,
-  Divider 
-} from "@mui/material";
-import { Logout as LogoutIcon, Person as PersonIcon } from "@mui/icons-material";
+import React from "react";
+import { Box, Typography } from "@mui/material";
 import { useAuth } from "../../hooks/useAuth";
 import logo from "../../assets/logo.png";
+import AvatarMenu from "../../components/shared/AvatarMenu";
 
 interface AppHeaderProps {
   /**
@@ -27,35 +18,6 @@ const AppHeader: React.FC<AppHeaderProps> = ({
   sx = {} 
 }) => {
   const { user, logout } = useAuth();
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const open = Boolean(anchorEl);
-
-  /**
-   * Generate user initials for avatar fallback
-   * Takes the first letter of the first name only
-   */
-  const getUserInitials = (name?: string): string => {
-    if (!name) return "U";
-    return name
-      .split(" ")
-      .map(word => word.charAt(0))
-      .join("")
-      .toUpperCase()
-      .slice(0, 1);
-  };
-
-  const handleAvatarClick = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleMenuClose = () => {
-    setAnchorEl(null);
-  };
-
-  const handleSignOut = () => {
-    logout();
-    setAnchorEl(null);
-  };
 
   return (
     <Box
@@ -84,72 +46,7 @@ const AppHeader: React.FC<AppHeaderProps> = ({
 
       {/* User Avatar */}
       {showAvatar && (
-        <>
-          <Avatar 
-            sx={{ 
-              bgcolor: 'primary.main',
-              cursor: 'pointer',
-              '&:hover': {
-                opacity: 0.8,
-              },
-            }}
-            alt={user?.name || "User"}
-            onClick={handleAvatarClick}
-            aria-controls={open ? 'user-menu' : undefined}
-            aria-haspopup="true"
-            aria-expanded={open ? 'true' : undefined}
-          >
-            {getUserInitials(user?.name)}
-          </Avatar>
-
-          {/* User Menu */}
-          <Menu
-            id="user-menu"
-            anchorEl={anchorEl}
-            open={open}
-            onClose={handleMenuClose}
-            onClick={handleMenuClose}
-            transformOrigin={{ horizontal: 'right', vertical: 'top' }}
-            anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
-            PaperProps={{
-              elevation: 3,
-              sx: {
-                bgcolor: 'secondary.dark',
-                mt: 1,
-                minWidth: 180,
-                '& .MuiMenuItem-root': {
-                  px: 2,
-                  py: 1,
-                },
-              },
-            }}
-          >
-            {/* User Info */}
-            <MenuItem disabled>
-              <ListItemIcon>
-                <PersonIcon fontSize="small" />
-              </ListItemIcon>
-              <ListItemText>
-                <Typography variant="body2" fontWeight={600}>
-                  {user?.name || "User"}
-                </Typography>
-                <Typography variant="caption" color="text.secondary">
-                  {user?.email}
-                </Typography>
-              </ListItemText>
-            </MenuItem>
-            
-            <Divider />
-            
-            {/* Sign Out */}
-            <MenuItem onClick={handleSignOut}>
-              <ListItemIcon>
-                <LogoutIcon fontSize="small" />
-              </ListItemIcon>
-              <ListItemText>Sign Out</ListItemText>
-            </MenuItem>
-          </Menu>
-        </>
+        <AvatarMenu user={user} onLogout={logout} />
       )}
     </Box>
   );
