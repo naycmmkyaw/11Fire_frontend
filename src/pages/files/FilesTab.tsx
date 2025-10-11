@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useLocation } from "react-router-dom";
-import { Alert, Box, Snackbar, CircularProgress } from "@mui/material";
+import { Alert, Box, Snackbar, CircularProgress, Typography } from "@mui/material";
 import EmptyFilesCard from "../../components/files/EmptyFilesCard";
 import FilesTable from "../../components/files/FilesTable";
 import ResponsiveHeader from "../../components/shared/ResponsiveHeader";
@@ -100,6 +100,8 @@ const FilesTabContent: React.FC<FilesTabContentProps> = ({
   // State for leave group dialog
   const [leaveGroupDialogOpen, setLeaveGroupDialogOpen] = useState(false);
   const [isLeavingGroup, setIsLeavingGroup] = useState(false);
+  // State for search term
+  const [searchTerm, setSearchTerm] = useState("");
 
   // Check for navigation state on component mount
   useEffect(() => {
@@ -117,6 +119,7 @@ const FilesTabContent: React.FC<FilesTabContentProps> = ({
 
   // Handle tab switching
   useEffect(() => {
+    setSearchTerm("");
     if (!selectedGroup) {
       setFiles([]);
       setIsFilesLoading(false);
@@ -288,26 +291,65 @@ const FilesTabContent: React.FC<FilesTabContentProps> = ({
     setAnchorEl(event.currentTarget);
   };
 
-  const handleSelectAll = (checked: boolean) => {
-    if (checked) {
-      const allIndices = new Set<number>();
-      for (let i = 0; i < files.length; i++) {
-        allIndices.add(i);
+  const indexByCid = useMemo(() => {
+    const map = new Map<string, number>();
+    files.forEach((file, idx) => map.set(file.cid, idx));
+    return map;
+  }, [files]);
+
+  const filteredFiles = useMemo(() => {
+    const trimmed = searchTerm.trim().toLowerCase();
+    if (!trimmed) return files;
+    return files.filter((file) => file.name.toLowerCase().includes(trimmed));
+  }, [files, searchTerm]);
+
+  const displayedSelectedFiles = useMemo(() => {
+    const set = new Set<number>();
+    filteredFiles.forEach((file, idx) => {
+      const originalIndex = indexByCid.get(file.cid);
+      if (originalIndex !== undefined && selectedFiles.has(originalIndex)) {
+        set.add(idx);
       }
-      setSelectedFiles(allIndices);
+    });
+    return set;
+  }, [filteredFiles, selectedFiles, indexByCid]);
+
+  const handleSelectAll = (checked: boolean) => {
+    const updated = new Set(selectedFiles);
+    if (checked) {
+      filteredFiles.forEach((file) => {
+        const originalIndex = indexByCid.get(file.cid);
+        if (originalIndex !== undefined) {
+          updated.add(originalIndex);
+        }
+      });
     } else {
-      setSelectedFiles(new Set());
+      filteredFiles.forEach((file) => {
+        const originalIndex = indexByCid.get(file.cid);
+        if (originalIndex !== undefined) {
+          updated.delete(originalIndex);
+        }
+      });
     }
+    setSelectedFiles(updated);
   };
 
-  const handleSelectFile = (index: number, checked: boolean) => {
-    const newSelected = new Set(selectedFiles);
+  const handleSelectFile = (displayIndex: number, checked: boolean) => {
+    const file = filteredFiles[displayIndex];
+    const originalIndex = indexByCid.get(file.cid);
+    if (originalIndex === undefined) return;
+
+    const updated = new Set(selectedFiles);
     if (checked) {
-      newSelected.add(index);
+      updated.add(originalIndex);
     } else {
-      newSelected.delete(index);
+      updated.delete(originalIndex);
     }
-    setSelectedFiles(newSelected);
+    setSelectedFiles(updated);
+  };
+
+  const handleSearch = (value: string) => {
+    setSearchTerm(value);
   };
 
   const handleClose = () => setAnchorEl(null);
@@ -444,9 +486,13 @@ const FilesTabContent: React.FC<FilesTabContentProps> = ({
     setGroupMenuAnchor(event.currentTarget);
   };
 
-  const handleFileMenuOpen = (event: React.MouseEvent<HTMLElement>, index: number) => {
+  const handleFileMenuOpen = (event: React.MouseEvent<HTMLElement>, displayIndex: number) => {
+    const file = filteredFiles[displayIndex];
+    const originalIndex = indexByCid.get(file.cid);
+    if (originalIndex === undefined) return;
+
     setFileMenuAnchor(event.currentTarget);
-    setActiveFileIndex(index);
+    setActiveFileIndex(originalIndex);
   };
 
   const handleFileMenuClose = () => {
@@ -541,7 +587,9 @@ const FilesTabContent: React.FC<FilesTabContentProps> = ({
     setIsBulkDownloading(true);
     
     try {
-      const selectedCids = Array.from(selectedFiles).map(index => files[index].cid);
+      const selectedCids = Array.from(selectedFiles)
+        .map((index) => files[index]?.cid)
+        .filter((cid): cid is string => Boolean(cid));
       await downloadMultipleFiles(selectedCids);
       setSelectedFiles(new Set()); // Clear selection after successful download
     } catch (error: any) {
@@ -565,7 +613,9 @@ const FilesTabContent: React.FC<FilesTabContentProps> = ({
     setBulkDeleteDialogOpen(false);
     
     try {
-      const selectedCids = Array.from(selectedFiles).map(index => files[index].cid);
+      const selectedCids = Array.from(selectedFiles)
+        .map((index) => files[index]?.cid)
+        .filter((cid): cid is string => Boolean(cid));
       const result = await deleteMultipleFiles(selectedCids);
       
       // Remove successfully deleted files from local state
@@ -749,7 +799,9 @@ const FilesTabContent: React.FC<FilesTabContentProps> = ({
               isLoading={isLoadingGroups}
             />
           )}
-          {!isMobile && <SearchBar />}
+          {!isMobile && (
+            <SearchBar value={searchTerm} onSearch={handleSearch} />
+          )}
         </Box>
         
         <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
@@ -776,15 +828,23 @@ const FilesTabContent: React.FC<FilesTabContentProps> = ({
         <Box sx={{ display: "flex", justifyContent: "center", py: 6 }}>
           <CircularProgress />
         </Box>
-      ) : files.length === 0 ? (
-        <EmptyFilesCard isMobile={isMobile} activeTab={activeFileTab} />
+      ) : filteredFiles.length === 0 ? (
+        searchTerm.trim() ? (
+          <Box sx={{ py: 6, textAlign: "center" }}>
+            <Typography variant="body1" color="text.secondary">
+              No matches found for “{searchTerm.trim()}”
+            </Typography>
+          </Box>
+        ) : (
+          <EmptyFilesCard isMobile={isMobile} activeTab={activeFileTab} />
+        )
       ) : (
         <FilesTable
-          files={files}
+          files={filteredFiles}
           onCopyCid={handleCopyCid}
           onOpenFileMenu={handleFileMenuOpen}
           isMobile={isMobile}
-          selectedFiles={selectedFiles}
+          selectedFiles={displayedSelectedFiles}
           onSelectAll={handleSelectAll}
           onSelectFile={handleSelectFile}
           onBulkDownload={handleBulkDownload}
