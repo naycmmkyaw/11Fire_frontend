@@ -25,7 +25,7 @@
   "rewrites": [
     {
       "source": "/api/auth/callback",
-      "destination": "https://elevenfire.azurewebsites.net/api/auth/callback"
+      "destination": "https://elevenfire.azurewebsites.net/auth/callback"
     },
     { "source": "/(.*)", "destination": "/index.html" }
   ]
