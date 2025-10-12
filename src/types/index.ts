@@ -3,6 +3,9 @@ export interface User {
   email: string;                 // Maps to backend.email
   name: string;                  // Maps to backend.username
   avatar?: string;              // Generated on frontend (not in backend)
+  activeGroup: string | null;
+  role?: string | null;
+  isFirstLogin?: boolean;
 }
 
 export interface Group {

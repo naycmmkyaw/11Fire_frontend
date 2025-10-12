@@ -18,23 +18,28 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         const response = await Axios.get('/auth/me');
         if (response.data?.user) {
           const backendUser = response.data.user;
+          const activeSwarmId: string | null = backendUser.activeSwarm || null;
+          const memberships: Array<{ swarm: string; role?: string }> = backendUser.memberships ?? [];
+          const activeMembership = activeSwarmId
+            ? memberships.find((m) => m.swarm === activeSwarmId)
+            : undefined;
           
           // Map backend Auth model to frontend User type
           const mappedUser: User = {
-            id: String(backendUser._id),                    // MongoDB ObjectId as string
-            email: backendUser.email,                       // Direct mapping
-            name: backendUser.username,                     // Backend uses 'username'
+            id: String(backendUser._id),
+            email: backendUser.email,
+            name: backendUser.username,
             avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(backendUser.username || backendUser.email)}&background=ef4444&color=fff`,
+            activeGroup: activeSwarmId,
+            role: activeMembership?.role ?? 'user',
+            isFirstLogin: memberships.length === 0,
           };
 
           setUser(mappedUser);
-          // localStorage.setItem('11fire_user', JSON.stringify(mappedUser));
         }
       } catch (error) {
         console.error('Failed to fetch user:', error);
         setUser(null);
-        // localStorage.removeItem('11fire_user');
-        // localStorage.removeItem('11fire_groups');
       } finally {
         setIsLoading(false);
       }
@@ -45,12 +50,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const login = (userData: User) => {
     setUser(userData);
-    // localStorage.setItem('11fire_user', JSON.stringify(userData));
   };
 
   const logout = async () => {
     try {
-      // Call backend logout endpoint to clear session
       await Axios.post('/auth/logout');
     } catch (error) {
       console.error('Logout error:', error);

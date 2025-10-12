@@ -25,7 +25,17 @@ const ConditionalRedirect = () => {
     return <AuthPage isInitialLoading={true} />;
   }
   
-  return <Navigate to={user ? "/group" : "/auth/signin"} replace />;
+  if (!user) {
+    return <Navigate to="/auth/signin" replace />;
+  }
+
+  const targetPath = user.isFirstLogin
+    ? "/group"
+    : user.role === "provider"
+      ? "/provider-dashboard"
+      : "/files";
+
+  return <Navigate to={targetPath} replace />;
 };
 
 export default ConditionalRedirect;

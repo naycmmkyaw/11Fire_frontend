@@ -2,7 +2,12 @@ import React from "react";
 import { Paper, TextField } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 
-const SearchBar: React.FC = () => (
+interface SearchBarProps {
+  value: string;
+  onSearch: (value: string) => void;
+}
+
+const SearchBar: React.FC<SearchBarProps> = ({ value, onSearch }) => (
   <Paper
     elevation={0}
     sx={{
@@ -19,6 +24,8 @@ const SearchBar: React.FC = () => (
     <TextField
       placeholder="Search"
       variant="standard"
+      value={value}
+      onChange={(event) => onSearch(event.target.value)}
       InputProps={{
         disableUnderline: true,
         sx: { fontSize: "0.9rem", color: "#6B7280" },

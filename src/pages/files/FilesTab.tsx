@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useLocation } from "react-router-dom";
-import { Alert, Box, Snackbar, CircularProgress } from "@mui/material";
+import { Alert, Box, Snackbar, CircularProgress, Typography } from "@mui/material";
 import EmptyFilesCard from "../../components/files/EmptyFilesCard";
 import FilesTable from "../../components/files/FilesTable";
 import ResponsiveHeader from "../../components/shared/ResponsiveHeader";
@@ -29,6 +29,7 @@ import LoadingDialog from "../../components/files/LoadingDialog";
 import DeleteConfirmDialog from "../../components/files/DeleteConfirmDialog";
 import ShareDialog from "../../components/files/ShareDialog";
 import LeaveGroupDialog from "../../components/files/LeaveGroupDialog";
+import { useAuth } from "../../hooks/useAuth";
 
 interface FilesTabContentProps {
   selectedTab: string;
@@ -55,6 +56,7 @@ const FilesTabContent: React.FC<FilesTabContentProps> = ({
   const location = useLocation();
   
   // State
+  const { user, isLoading: isAuthLoading, login } = useAuth();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -100,23 +102,24 @@ const FilesTabContent: React.FC<FilesTabContentProps> = ({
   // State for leave group dialog
   const [leaveGroupDialogOpen, setLeaveGroupDialogOpen] = useState(false);
   const [isLeavingGroup, setIsLeavingGroup] = useState(false);
+  // State for search term
+  const [searchTerm, setSearchTerm] = useState("");
 
   // Check for navigation state on component mount
   useEffect(() => {
+    if (isAuthLoading) return;
     const state = location.state as { swarmName?: string };
     if (state?.swarmName) {
       fetchGroups(state.swarmName);
-      // Clear the state to prevent re-triggering
       window.history.replaceState({}, document.title);
     } else {
-      // Check localStorage for previously selected group
-      const savedGroupId = localStorage.getItem('selectedGroupId');
-      fetchGroups(undefined, savedGroupId);
+      fetchGroups(undefined, user?.activeGroup ?? null);
     }
-  }, []);
+  }, [isAuthLoading, location.state, user?.activeGroup]);
 
   // Handle tab switching
   useEffect(() => {
+    setSearchTerm("");
     if (!selectedGroup) {
       setFiles([]);
       setIsFilesLoading(false);
@@ -156,7 +159,7 @@ const FilesTabContent: React.FC<FilesTabContentProps> = ({
     };
   }, [activeFileTab, selectedGroup]);
 
-  const fetchGroups = async (swarmName?: string | undefined, savedGroupId?: string | null) => {
+  const fetchGroups = async (swarmName?: string | null, savedGroupId?: string | null) => {
     try {
       setIsLoadingGroups(true);
       const groupsList = await listMyGroups();
@@ -174,18 +177,23 @@ const FilesTabContent: React.FC<FilesTabContentProps> = ({
       setSelectedGroup(resolvedGroup);
 
       if (resolvedGroup) {
-        if (!savedGroupId || resolvedGroup.swarmId !== savedGroupId) {
-          localStorage.setItem("selectedGroupId", resolvedGroup.swarmId);
+        if (user && user.activeGroup !== resolvedGroup.swarmId) {
+          login({ ...user, activeGroup: resolvedGroup.swarmId });
         }
       } else {
-        localStorage.removeItem("selectedGroupId");
         setFiles([]);
+        if (user && user.activeGroup !== null) {
+          login({ ...user, activeGroup: null });
+        }
       }
     } catch (error) {
       console.error("Failed to fetch groups:", error);
       setGroups([]);
       setSelectedGroup(null);
       setFiles([]);
+      if (user && user.activeGroup !== null) {
+        login({ ...user, activeGroup: null });
+      }
     } finally {
       setIsLoadingGroups(false);
     }
@@ -195,7 +203,9 @@ const FilesTabContent: React.FC<FilesTabContentProps> = ({
     setSelectedGroup(group);
     setFiles([]);
     setIsFilesLoading(true);
-    localStorage.setItem("selectedGroupId", group.swarmId);
+    if (user && user.activeGroup !== group.swarmId) {
+      login({ ...user, activeGroup: group.swarmId });
+    }
   };
 
   const handleOpenGroupDialog = (joinMode: boolean) => {
@@ -288,26 +298,65 @@ const FilesTabContent: React.FC<FilesTabContentProps> = ({
     setAnchorEl(event.currentTarget);
   };
 
-  const handleSelectAll = (checked: boolean) => {
-    if (checked) {
-      const allIndices = new Set<number>();
-      for (let i = 0; i < files.length; i++) {
-        allIndices.add(i);
+  const indexByCid = useMemo(() => {
+    const map = new Map<string, number>();
+    files.forEach((file, idx) => map.set(file.cid, idx));
+    return map;
+  }, [files]);
+
+  const filteredFiles = useMemo(() => {
+    const trimmed = searchTerm.trim().toLowerCase();
+    if (!trimmed) return files;
+    return files.filter((file) => file.name.toLowerCase().includes(trimmed));
+  }, [files, searchTerm]);
+
+  const displayedSelectedFiles = useMemo(() => {
+    const set = new Set<number>();
+    filteredFiles.forEach((file, idx) => {
+      const originalIndex = indexByCid.get(file.cid);
+      if (originalIndex !== undefined && selectedFiles.has(originalIndex)) {
+        set.add(idx);
       }
-      setSelectedFiles(allIndices);
+    });
+    return set;
+  }, [filteredFiles, selectedFiles, indexByCid]);
+
+  const handleSelectAll = (checked: boolean) => {
+    const updated = new Set(selectedFiles);
+    if (checked) {
+      filteredFiles.forEach((file) => {
+        const originalIndex = indexByCid.get(file.cid);
+        if (originalIndex !== undefined) {
+          updated.add(originalIndex);
+        }
+      });
     } else {
-      setSelectedFiles(new Set());
+      filteredFiles.forEach((file) => {
+        const originalIndex = indexByCid.get(file.cid);
+        if (originalIndex !== undefined) {
+          updated.delete(originalIndex);
+        }
+      });
     }
+    setSelectedFiles(updated);
   };
 
-  const handleSelectFile = (index: number, checked: boolean) => {
-    const newSelected = new Set(selectedFiles);
+  const handleSelectFile = (displayIndex: number, checked: boolean) => {
+    const file = filteredFiles[displayIndex];
+    const originalIndex = indexByCid.get(file.cid);
+    if (originalIndex === undefined) return;
+
+    const updated = new Set(selectedFiles);
     if (checked) {
-      newSelected.add(index);
+      updated.add(originalIndex);
     } else {
-      newSelected.delete(index);
+      updated.delete(originalIndex);
     }
-    setSelectedFiles(newSelected);
+    setSelectedFiles(updated);
+  };
+
+  const handleSearch = (value: string) => {
+    setSearchTerm(value);
   };
 
   const handleClose = () => setAnchorEl(null);
@@ -444,9 +493,13 @@ const FilesTabContent: React.FC<FilesTabContentProps> = ({
     setGroupMenuAnchor(event.currentTarget);
   };
 
-  const handleFileMenuOpen = (event: React.MouseEvent<HTMLElement>, index: number) => {
+  const handleFileMenuOpen = (event: React.MouseEvent<HTMLElement>, displayIndex: number) => {
+    const file = filteredFiles[displayIndex];
+    const originalIndex = indexByCid.get(file.cid);
+    if (originalIndex === undefined) return;
+
     setFileMenuAnchor(event.currentTarget);
-    setActiveFileIndex(index);
+    setActiveFileIndex(originalIndex);
   };
 
   const handleFileMenuClose = () => {
@@ -541,7 +594,9 @@ const FilesTabContent: React.FC<FilesTabContentProps> = ({
     setIsBulkDownloading(true);
     
     try {
-      const selectedCids = Array.from(selectedFiles).map(index => files[index].cid);
+      const selectedCids = Array.from(selectedFiles)
+        .map((index) => files[index]?.cid)
+        .filter((cid): cid is string => Boolean(cid));
       await downloadMultipleFiles(selectedCids);
       setSelectedFiles(new Set()); // Clear selection after successful download
     } catch (error: any) {
@@ -565,7 +620,9 @@ const FilesTabContent: React.FC<FilesTabContentProps> = ({
     setBulkDeleteDialogOpen(false);
     
     try {
-      const selectedCids = Array.from(selectedFiles).map(index => files[index].cid);
+      const selectedCids = Array.from(selectedFiles)
+        .map((index) => files[index]?.cid)
+        .filter((cid): cid is string => Boolean(cid));
       const result = await deleteMultipleFiles(selectedCids);
       
       // Remove successfully deleted files from local state
@@ -691,13 +748,12 @@ const FilesTabContent: React.FC<FilesTabContentProps> = ({
     
     try {
       await leaveGroup(selectedGroup.swarmId);
-      
-      // console.log('Leave group response:', response);
-      
+      if (user && user.activeGroup !== null) {
+        login({ ...user, activeGroup: null });
+      }     
       // Refresh groups list 
-      await fetchGroups();
-      setLeaveGroupDialogOpen(false);
-      
+      await fetchGroups(undefined, user?.activeGroup ?? null);
+      setLeaveGroupDialogOpen(false);   
       setSnackbarOpen(true);
     } catch (error: any) {
       console.error('Failed to leave group:', error);
@@ -749,7 +805,9 @@ const FilesTabContent: React.FC<FilesTabContentProps> = ({
               isLoading={isLoadingGroups}
             />
           )}
-          {!isMobile && <SearchBar />}
+          {!isMobile && (
+            <SearchBar value={searchTerm} onSearch={handleSearch} />
+          )}
         </Box>
         
         <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
@@ -776,15 +834,23 @@ const FilesTabContent: React.FC<FilesTabContentProps> = ({
         <Box sx={{ display: "flex", justifyContent: "center", py: 6 }}>
           <CircularProgress />
         </Box>
-      ) : files.length === 0 ? (
-        <EmptyFilesCard isMobile={isMobile} activeTab={activeFileTab} />
+      ) : filteredFiles.length === 0 ? (
+        searchTerm.trim() ? (
+          <Box sx={{ py: 6, textAlign: "center" }}>
+            <Typography variant="body1" color="text.secondary">
+              No matches found for “{searchTerm.trim()}”
+            </Typography>
+          </Box>
+        ) : (
+          <EmptyFilesCard isMobile={isMobile} activeTab={activeFileTab} />
+        )
       ) : (
         <FilesTable
-          files={files}
+          files={filteredFiles}
           onCopyCid={handleCopyCid}
           onOpenFileMenu={handleFileMenuOpen}
           isMobile={isMobile}
-          selectedFiles={selectedFiles}
+          selectedFiles={displayedSelectedFiles}
           onSelectAll={handleSelectAll}
           onSelectFile={handleSelectFile}
           onBulkDownload={handleBulkDownload}

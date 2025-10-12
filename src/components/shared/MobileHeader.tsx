@@ -1,8 +1,9 @@
 import React from "react";
-import { Box, Typography, Avatar } from "@mui/material";
-
+import { Box, Typography } from "@mui/material";
 import MobileSidebar from "./MobileSidebar";
 import Logo from "../../assets/logo4.svg";
+import { useAuth } from "../../hooks/useAuth";
+import AvatarMenu from "./AvatarMenu";
 
 interface MobileHeaderProps {
   title?: string;
@@ -19,6 +20,7 @@ const MobileHeader: React.FC<MobileHeaderProps> = ({
   isProviderDashboard,
   onTabChange,
 }) => {
+  const { user, logout } = useAuth();
   return (
     <Box>
       {/* Main Header */}
@@ -71,17 +73,7 @@ const MobileHeader: React.FC<MobileHeaderProps> = ({
         </Box>
 
         {/* Right: Avatar */}
-        <Avatar
-          sx={{
-            bgcolor: "primary.main",
-            width: 32,
-            height: 32,
-            fontSize: "0.875rem",
-            color: "#ffffff",
-          }}
-        >
-          N
-        </Avatar>
+        <AvatarMenu user={user} onLogout={logout} />
       </Box>
     </Box>
   );
