@@ -24,8 +24,8 @@
   ],
   "rewrites": [
     {
-      "source": "/api/:path*",
-      "destination": "https://elevenfire.azurewebsites.net/:path"
+      "source": "/api/auth/callback",
+      "destination": "https://elevenfire.azurewebsites.net/api/auth/callback"
     },
     { "source": "/(.*)", "destination": "/index.html" }
   ]
