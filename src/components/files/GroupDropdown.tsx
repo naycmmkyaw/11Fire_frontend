@@ -21,8 +21,7 @@ interface GroupDropdownProps {
 const GroupDropdown: React.FC<GroupDropdownProps> = ({ 
   anchorEl, 
   onOpen, 
-  onClose, 
-  isMobile,
+  onClose,
   groups,
   selectedGroup,
   onGroupSelect,
