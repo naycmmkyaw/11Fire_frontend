@@ -820,6 +820,8 @@ const FilesTabContent: React.FC<FilesTabContentProps> = ({
         isMobile={isMobile} 
         activeTab={activeFileTab}
         onTabChange={setActiveFileTab}
+        searchTerm={searchTerm}
+        onSearch={handleSearch}
       />
 
       <Box sx={{
@@ -845,7 +847,9 @@ const FilesTabContent: React.FC<FilesTabContentProps> = ({
             />
           )}
           {!isMobile && (
-            <SearchBar value={searchTerm} onSearch={handleSearch} />
+            <SearchBar
+              value={searchTerm} 
+              onSearch={handleSearch} />
           )}
         </Box>
         
