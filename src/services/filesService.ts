@@ -1,4 +1,5 @@
 import Axios from './axiosInstance';
+import JSZip from 'jszip';
 
 export interface UploadResponse {
   ok: boolean;
@@ -45,6 +46,26 @@ export const uploadFile = async (file: File): Promise<UploadResponse> => {
     headers: {
       'Content-Type': 'multipart/form-data',
     },
+  });
+
+  return response.data;
+};
+
+export const uploadFolder = async (files: File[], folderName: string): Promise<UploadResponse> => {
+  const zip = new JSZip();
+  files.forEach((file) => {
+    const path = (file as any).webkitRelativePath || file.name;
+    zip.file(path, file);
+  });
+
+  const zipBlob = await zip.generateAsync({ type: 'blob' });
+  const zipFile = new File([zipBlob], `${folderName}.zip`, { type: 'application/zip' });
+
+  const formData = new FormData();
+  formData.append('files', zipFile);
+
+  const response = await Axios.post('files/folder/upload', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
   });
 
   return response.data;

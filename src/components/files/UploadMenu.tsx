@@ -1,24 +1,24 @@
 import React from "react";
 import { Menu, MenuItem, ListItemIcon, ListItemText } from "@mui/material";
 import DescriptionIcon from "@mui/icons-material/Description";
-// import FolderIcon from "@mui/icons-material/Folder";
+import FolderIcon from "@mui/icons-material/Folder";
 
 interface UploadMenuProps {
   anchorEl: HTMLElement | null;
   onClose: () => void;
   onFileUpload: () => void;
-  // onFolderUpload: () => void;
+  onFolderUpload: () => void;
 }
 
 const UploadMenu: React.FC<UploadMenuProps> = ({ 
   anchorEl, 
   onClose, 
   onFileUpload, 
-  // onFolderUpload 
+  onFolderUpload 
 }) => {
   const menuItems = [
     { icon: DescriptionIcon, label: "Upload File", action: onFileUpload },
-    // { icon: FolderIcon, label: "Upload Folder", action: onFolderUpload },
+    { icon: FolderIcon, label: "Upload Folder", action: onFolderUpload },
   ];
 
   return (
