@@ -6,11 +6,13 @@ import CreateGroup from '../pages/group/CreateGroup';
 import AppLayout from '../layout/AppLayout';
 import ConditionalRedirect from './ConditionalRedirect';
 import ProtectedRoute from './ProtectedRoute';
+import {TokenHandler} from '../components/ TokenHandler';
 
 const Router = () => (
   <Routes>
     <Route path="/" element={<AuthPage />} />
     <Route path="/auth/*" element={<AuthPage />} />
+    <Route path="/auth/callback" element={<TokenHandler />} /> 
     <Route path="/redirect" element={<ConditionalRedirect />} />
 
     {/* Protected routes - require authentication */}
