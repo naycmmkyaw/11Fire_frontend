@@ -13,7 +13,8 @@ import FileActionsMenu from "../../components/files/FileActionsMenu";
 import UploadDialog from "../../components/files/UploadDialog";
 import useIsMobile from "../../hooks/useMobile";
 import type { FileEntry, SharedFileEntry } from "../../types";
-import { uploadFile, 
+import { uploadFile,
+          uploadFolder,
           deleteFile, 
           renameFile, 
           downloadFile, 
@@ -104,6 +105,7 @@ const FilesTabContent: React.FC<FilesTabContentProps> = ({
   const [isLeavingGroup, setIsLeavingGroup] = useState(false);
   // State for search term
   const [searchTerm, setSearchTerm] = useState("");
+  const [folderFiles, setFolderFiles] = useState<File[]>([]);
 
   // Check for navigation state on component mount
   useEffect(() => {
@@ -366,6 +368,7 @@ const FilesTabContent: React.FC<FilesTabContentProps> = ({
     setIsFileUpload(true);
     setIsRenameMode(false);
     setSelectedFile(null); // Clear any previous selectedFile
+    setFolderFiles([]);
     setActiveFileIndex(null); // Clear any previous activeFileIndex
     const input = document.createElement("input");
     input.type = "file";
@@ -382,31 +385,30 @@ const FilesTabContent: React.FC<FilesTabContentProps> = ({
     input.click();
   };
 
-  // const handleFolderUploadClick = () => {
-  //   setAnchorEl(null);
-  //   setIsFileUpload(false);
-  //   setIsRenameMode(false);
-  //   setSelectedFile(null); // Clear any previous selectedFile
-  //   setActiveFileIndex(null); // Clear any previous activeFileIndex
-  //   const input = document.createElement("input");
-  //   input.type = "file";
-  //   input.webkitdirectory = true;
-  //   input.onchange = (e: Event) => {
-  //     const target = e.target as HTMLInputElement;
-  //     const filesList = target.files;
-  //     if (filesList && filesList.length > 0) {
-  //       const totalSize = Array.from(filesList).reduce(
-  //         (acc, file) => acc + file.size,
-  //         0
-  //       );
-  //       setSelectedFile(null);
-  //       setFileName(filesList[0].webkitRelativePath.split("/")[0]);
-  //       setFileSize(formatSize(totalSize));
-  //       setDialogOpen(true);
-  //     }
-  //   };
-  //   input.click();
-  // };
+  const handleFolderUploadClick = () => {
+    setAnchorEl(null);
+    setIsFileUpload(false);
+    setIsRenameMode(false);
+    setSelectedFile(null); // Clear any previous selectedFile
+    setFolderFiles([]);
+    setActiveFileIndex(null); // Clear any previous activeFileIndex
+    const input = document.createElement("input");
+    input.type = "file";
+    input.webkitdirectory = true;
+    input.onchange = (e: Event) => {
+      const target = e.target as HTMLInputElement;
+      const filesList = target.files;
+      if (filesList && filesList.length > 0) {
+        const filesArray = Array.from(filesList);
+        const totalSize = filesArray.reduce((acc, file) => acc + file.size, 0);
+        setFolderFiles(filesArray);
+        setFileName(filesArray[0].webkitRelativePath.split("/")[0]);
+        setFileSize(formatSize(totalSize));
+        setDialogOpen(true);
+      }
+    };
+    input.click();
+  };
 
   const handleUpload = async () => {
     if (isRenameMode && activeFileIndex !== null) {
@@ -440,6 +442,42 @@ const FilesTabContent: React.FC<FilesTabContentProps> = ({
       return;
     }
     // Regular upload logic
+
+    if (!isFileUpload) {
+      if (folderFiles.length === 0) return;
+      setIsUploading(true);
+      setUploadError(null);
+      setDialogOpen(false);
+      try {
+        const response = await uploadFolder(folderFiles, fileName || "folder");
+        const isDuplicate = files.some(file => file.cid === response.cid);
+        if (isDuplicate) {
+          setUploadError("This folder already exists in the group.");
+          return;
+        }
+        const newFolder: FileEntry = {
+          name: fileName,
+          cid: response.cid,
+          size: fileSize,
+          date: new Date().toLocaleDateString(),
+          isFile: false,
+        };
+        setFiles([...files, newFolder]);
+      } catch (error: any) {
+        console.error('Folder upload failed:', error);
+        const errorMessage = error.response?.data?.error || 'Upload failed. Please try again.';
+        setUploadError(errorMessage);
+      } finally {
+        setIsUploading(false);
+        setFolderFiles([]);
+        setSelectedFile(null);
+        setActiveFileIndex(null);
+        setFileName("");
+        setFileSize("");
+      }
+      return;
+    }
+
     if (!selectedFile || isRenameMode) return;
 
     setIsUploading(true);
@@ -472,6 +510,7 @@ const FilesTabContent: React.FC<FilesTabContentProps> = ({
       setIsUploading(false);
       setSelectedFile(null);
       setActiveFileIndex(null);
+      setFolderFiles([]);
       setFileName("");
       setFileSize("");
     }
@@ -781,6 +820,8 @@ const FilesTabContent: React.FC<FilesTabContentProps> = ({
         isMobile={isMobile} 
         activeTab={activeFileTab}
         onTabChange={setActiveFileTab}
+        searchTerm={searchTerm}
+        onSearch={handleSearch}
       />
 
       <Box sx={{
@@ -806,7 +847,9 @@ const FilesTabContent: React.FC<FilesTabContentProps> = ({
             />
           )}
           {!isMobile && (
-            <SearchBar value={searchTerm} onSearch={handleSearch} />
+            <SearchBar
+              value={searchTerm} 
+              onSearch={handleSearch} />
           )}
         </Box>
         
@@ -864,7 +907,7 @@ const FilesTabContent: React.FC<FilesTabContentProps> = ({
         anchorEl={anchorEl}
         onClose={handleClose}
         onFileUpload={handleFileUploadClick}
-        // onFolderUpload={handleFolderUploadClick}
+        onFolderUpload={handleFolderUploadClick}
       />
 
       <FileActionsMenu

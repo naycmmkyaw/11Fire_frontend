@@ -21,8 +21,7 @@ interface GroupDropdownProps {
 const GroupDropdown: React.FC<GroupDropdownProps> = ({ 
   anchorEl, 
   onOpen, 
-  onClose, 
-  isMobile,
+  onClose,
   groups,
   selectedGroup,
   onGroupSelect,
@@ -40,8 +39,8 @@ const GroupDropdown: React.FC<GroupDropdownProps> = ({
         disabled={isLoading}
         sx={{
           borderRadius: 1.2,
-          bgcolor: isMobile ? "#fff" : 'secondary.main',
-          border: `1px solid ${isMobile ? "#e0e0e0" : "#b5b5b5"}`,
+          bgcolor: 'secondary.main',
+          border: "1px solid #b5b5b5",
           px: 3,
           height: 36,
           fontWeight: 500,
@@ -62,7 +61,7 @@ const GroupDropdown: React.FC<GroupDropdownProps> = ({
         onClose={onClose}
         PaperProps={{
           sx: {
-            bgcolor: isMobile ? "#fff" : "secondary.dark",
+            bgcolor: "secondary.dark",
             borderRadius: 3,
             px: 2,
             py: 1.5,
