@@ -28,7 +28,7 @@ const AuthPage: React.FC<AuthPageProps> = ({ isInitialLoading = false }) => {
     
     try {
       // Redirect to backend Microsoft OAuth endpoint
-      window.location.href = `${baseUrl}/auth/login`;
+      window.location.href = `${baseUrl}/auth/login?format=json`;
     } catch (error) {
       console.error('Failed to initiate OAuth:', error);
       setIsLoading(false);

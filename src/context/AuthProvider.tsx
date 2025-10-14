@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import type { User, AuthContextType } from '../types';
-import Axios from '../services/axiosInstance';
-import { AuthContext } from './AuthContext';
+import React, { useState, useEffect } from "react";
+import type { User, AuthContextType } from "../types";
+import Axios from "../services/axiosInstance";
+import { AuthContext } from "./AuthContext";
 
 interface AuthProviderProps {
   children: React.ReactNode;
@@ -15,31 +15,38 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     // Check for existing session on app load
     const checkAuthStatus = async () => {
       try {
-        const response = await Axios.get('/auth/me');
+        // First check if we have a stored token
+        const token = localStorage.getItem("authToken");
+        if (!token) {
+          setUser(null);
+          setIsLoading(false);
+          return;
+        }
+
+        const response = await Axios.get("/auth/me");
         if (response.data?.user) {
           const backendUser = response.data.user;
-          const activeSwarmId: string | null = backendUser.activeSwarm || null;
-          const memberships: Array<{ swarm: string; role?: string }> = backendUser.memberships ?? [];
-          const activeMembership = activeSwarmId
-            ? memberships.find((m) => m.swarm === activeSwarmId)
-            : undefined;
-          
-          // Map backend Auth model to frontend User type
+
           const mappedUser: User = {
             id: String(backendUser._id),
             email: backendUser.email,
             name: backendUser.username,
-            avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(backendUser.username || backendUser.email)}&background=ef4444&color=fff`,
-            activeGroup: activeSwarmId,
-            role: activeMembership?.role ?? 'user',
-            isFirstLogin: memberships.length === 0,
+            avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(
+              backendUser.username || backendUser.email
+            )}&background=ef4444&color=fff`,
+            activeGroup: backendUser.activeSwarm || null,
           };
 
           setUser(mappedUser);
+          localStorage.setItem("11fire_user", JSON.stringify(mappedUser));
         }
       } catch (error) {
-        console.error('Failed to fetch user:', error);
+        console.error("Failed to fetch user:", error);
         setUser(null);
+        // Clear invalid tokens
+        localStorage.removeItem("authToken");
+        localStorage.removeItem("11fire_user");
+        localStorage.removeItem("11fire_groups");
       } finally {
         setIsLoading(false);
       }
@@ -54,11 +61,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const logout = async () => {
     try {
-      await Axios.post('/auth/logout');
+      await Axios.post("/auth/logout");
     } catch (error) {
-      console.error('Logout error:', error);
+      console.error("Logout error:", error);
     } finally {
       setUser(null);
+      localStorage.removeItem("authToken");
       localStorage.clear();
     }
   };
@@ -70,9 +78,5 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     isLoading,
   };
 
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
