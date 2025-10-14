@@ -6,6 +6,8 @@ import { useState, useEffect } from 'react';
 const ConditionalRedirect = () => {
   const { user, isLoading } = useAuth();
   const [showExtendedLoading, setShowExtendedLoading] = useState(true);
+  const [tokenProcessed, setTokenProcessed] = useState(false);
+  const [tokenUserData, setTokenUserData] = useState<any>(null);
   const [searchParams] = useSearchParams();
   
   useEffect(() => {
@@ -14,7 +16,7 @@ const ConditionalRedirect = () => {
     const success = searchParams.get('success');
     const userStr = searchParams.get('user');
     
-    if (success === 'true' && token) {
+    if (success === 'true' && token && !tokenProcessed) {
       try {
         // Store authentication data for token-based flow
         localStorage.setItem('authToken', token);
@@ -22,13 +24,13 @@ const ConditionalRedirect = () => {
         if (userStr) {
           const userData = JSON.parse(decodeURIComponent(userStr));
           localStorage.setItem('11fire_user', JSON.stringify(userData));
+          setTokenUserData(userData);
         }
         
-        // Clear URL params and let the component handle redirection
+        // Clear URL params 
         window.history.replaceState({}, document.title, window.location.pathname);
+        setTokenProcessed(true);
         
-        // Force re-render to pick up the new auth state
-        window.location.reload();
         return;
       } catch (error) {
         console.error('Failed to process token auth:', error);
@@ -45,24 +47,37 @@ const ConditionalRedirect = () => {
     } else if (!isLoading) {
       setShowExtendedLoading(false);
     }
-  }, [isLoading, user, searchParams]);
+  }, [isLoading, user, searchParams, tokenProcessed]);
   
+  // Handle token-based authentication redirection
+  if (tokenProcessed && tokenUserData) {
+    const targetPath = tokenUserData.activeSwarm
+      ? (tokenUserData.memberships?.[0]?.role === "provider" ? "/provider-dashboard" : "/files")
+      : "/group";
+    return <Navigate to={targetPath} replace />;
+  }
+
   // Show AuthPage with loading state while checking authentication or during extended loading
-  if (isLoading || (user && showExtendedLoading)) {
+  if (isLoading || (user && showExtendedLoading) || tokenProcessed) {
     return <AuthPage isInitialLoading={true} />;
   }
   
-  if (!user) {
+  if (!user && !tokenProcessed) {
     return <Navigate to="/auth/signin" replace />;
   }
 
-  const targetPath = user.isFirstLogin
-    ? "/group"
-    : user.role === "provider"
-      ? "/provider-dashboard"
-      : "/files";
+  // Cookie-based authentication redirection
+  if (user) {
+    const targetPath = user.isFirstLogin
+      ? "/group"
+      : user.role === "provider"
+        ? "/provider-dashboard"
+        : "/files";
 
-  return <Navigate to={targetPath} replace />;
+    return <Navigate to={targetPath} replace />;
+  }
+
+  return <Navigate to="/auth/signin" replace />;
 };
 
 export default ConditionalRedirect;
