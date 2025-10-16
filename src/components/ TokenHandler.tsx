@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { secureStorage } from "../utils/storage";
 
 export const TokenHandler = () => {
   const [searchParams] = useSearchParams();
@@ -12,12 +13,12 @@ export const TokenHandler = () => {
     
     if (success === 'true' && token) {
       try {
-        // Store authentication data
-        localStorage.setItem('authToken', token);
+        // Store authentication data securely
+        secureStorage.setToken(token);
         
         if (userStr) {
           const user = JSON.parse(decodeURIComponent(userStr));
-          localStorage.setItem('11fire_user', JSON.stringify(user));
+          secureStorage.setUserData(user);
         }
         
         navigate('/group', { replace: true });

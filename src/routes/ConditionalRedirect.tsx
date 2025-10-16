@@ -2,6 +2,7 @@ import { useAuth } from "../hooks/useAuth";
 import { Navigate, useSearchParams } from 'react-router-dom';
 import AuthPage from '../pages/AuthPage';
 import { useState, useEffect } from 'react';
+import { secureStorage } from "../utils/storage";
 
 const ConditionalRedirect = () => {
   const { user, isLoading } = useAuth();
@@ -18,12 +19,12 @@ const ConditionalRedirect = () => {
     
     if (success === 'true' && token && !tokenProcessed) {
       try {
-        // Store authentication data for token-based flow
-        localStorage.setItem('authToken', token);
+        // Store authentication data securely for token-based flow
+        secureStorage.setToken(token);
         
         if (userStr) {
           const userData = JSON.parse(decodeURIComponent(userStr));
-          localStorage.setItem('11fire_user', JSON.stringify(userData));
+          secureStorage.setUserData(userData);
           setTokenUserData(userData);
         }
         
