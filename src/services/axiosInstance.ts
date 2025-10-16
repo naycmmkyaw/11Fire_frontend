@@ -1,4 +1,5 @@
 import axios, { type AxiosInstance } from 'axios';
+import { secureStorage } from '../utils/storage';
 
 const Axios: AxiosInstance = axios.create({
   baseURL: import.meta.env.VITE_BACKEND_API_URL,
@@ -10,7 +11,7 @@ const Axios: AxiosInstance = axios.create({
 
 Axios.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('authToken');
+    const token = secureStorage.getToken();
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -26,9 +27,7 @@ Axios.interceptors.response.use(
   async (error) => {
     if (error.response?.status === 401) {
       // Token expired - clear storage and redirect
-      localStorage.removeItem('authToken');
-      localStorage.removeItem('11fire_user');
-      localStorage.removeItem('11fire_groups');
+      secureStorage.clearAll();
       
       if (!window.location.pathname.startsWith('/auth')) {
         window.location.href = '/auth/signin';

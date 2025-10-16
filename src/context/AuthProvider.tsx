@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import type { User, AuthContextType } from "../types";
 import Axios from "../services/axiosInstance";
 import { AuthContext } from "./AuthContext";
+import { secureStorage } from "../utils/storage";
 
 interface AuthProviderProps {
   children: React.ReactNode;
@@ -15,8 +16,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     // Check for existing session on app load
     const checkAuthStatus = async () => {
       try {
-        // First check if we have a stored token
-        const token = localStorage.getItem("authToken");
+        // First check if we have a stored token (encrypted)
+        const token = secureStorage.getToken();
         if (!token) {
           setUser(null);
           setIsLoading(false);
@@ -38,15 +39,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           };
 
           setUser(mappedUser);
-          localStorage.setItem("11fire_user", JSON.stringify(mappedUser));
+          secureStorage.setUserData(mappedUser);
         }
       } catch (error) {
         console.error("Failed to fetch user:", error);
         setUser(null);
         // Clear invalid tokens
-        localStorage.removeItem("authToken");
-        localStorage.removeItem("11fire_user");
-        localStorage.removeItem("11fire_groups");
+        secureStorage.clearAll();
       } finally {
         setIsLoading(false);
       }
@@ -66,8 +65,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       console.error("Logout error:", error);
     } finally {
       setUser(null);
-      localStorage.removeItem("authToken");
-      localStorage.clear();
+      secureStorage.clearAll();
     }
   };
 
