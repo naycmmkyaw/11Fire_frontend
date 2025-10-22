@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { Alert, Box, Snackbar, CircularProgress, Typography } from "@mui/material";
 import EmptyFilesCard from "../../components/files/EmptyFilesCard";
 import FilesTable from "../../components/files/FilesTable";
@@ -55,6 +55,7 @@ const FilesTabContent: React.FC<FilesTabContentProps> = ({
 }) => {
   const isMobile = useIsMobile();
   const location = useLocation();
+  const navigate = useNavigate();
   
   // State
   const { user, isLoading: isAuthLoading, login } = useAuth();
@@ -253,9 +254,14 @@ const FilesTabContent: React.FC<FilesTabContentProps> = ({
       });
       swarmName = res.data?.name;
     }
-    
     // Refresh group list after successful create/join
     await fetchGroups(swarmName);
+
+    if (radioValue === "provider") {
+      localStorage.setItem("selectedTab", "install");
+      navigate("/provider-dashboard");
+    }
+
     setGroupDialogOpen(false);
     setGroupName("");
     setPasscode("");

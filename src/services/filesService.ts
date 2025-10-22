@@ -63,7 +63,10 @@ export const uploadFolder = async (files: File[], folderName: string): Promise<U
 
   const formData = new FormData();
   formData.append('files', zipFile);
-
+  formData.append('folderName', folderName);
+  // for (const [key, value] of formData.entries()) {
+  //   console.log('FormData entry:', key, value);
+  // }
   const response = await Axios.post('files/folder/upload', formData, {
     headers: { 'Content-Type': 'multipart/form-data' },
   });

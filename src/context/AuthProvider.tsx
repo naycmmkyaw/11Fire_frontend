@@ -66,6 +66,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     } finally {
       setUser(null);
       secureStorage.clearAll();
+      localStorage.clear();
     }
   };
 
