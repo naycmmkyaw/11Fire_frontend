@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import {
   Box,
   Typography,
@@ -15,6 +16,7 @@ import renderTabContent from "./RenderTab";
 import useIsMobile from "../hooks/useMobile";
 
 const AppLayout = () => {
+  const location = useLocation();
   // Initialize with a function to get the initial tab from localStorage or default
   const [selectedTab, setSelectedTab] = useState(() => {
     const savedTab = localStorage.getItem('selectedTab');
@@ -30,11 +32,19 @@ const AppLayout = () => {
 
   // Check if current route is provider dashboard
   useEffect(() => {
-    const currentPath = window.location.pathname;
-    const isProviderRoute = currentPath === "/provider-dashboard";
+    const isProviderRoute = location.pathname === "/provider-dashboard";
     setIsProviderDashboard(isProviderRoute);
 
-  }, []);
+    if (isProviderRoute) {
+      setSelectedTab((prev) =>
+        prev === "install" || prev === "status" ? prev : "install"
+      );
+    } else if (location.pathname === "/files") {
+      setSelectedTab((prev) =>
+        prev === "files" || prev === "profile" ? prev : "files"
+      );
+    }
+  }, [location.pathname]);
 
   // Save tab to localStorage whenever it changes
   useEffect(() => {
