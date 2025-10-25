@@ -34,6 +34,7 @@ const MobileHeader: React.FC<MobileHeaderProps> = ({
           position: "sticky",
           top: 0,
           zIndex: 1100,
+          mb: 2,
         }}
       >
         {/* Left: Hamburger Menu + Logo + Title */}
