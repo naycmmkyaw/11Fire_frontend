@@ -24,6 +24,7 @@ interface FilesTableProps {
   files: FileEntry[] | SharedFileEntry[];
   onCopyCid: (cid: string) => void;
   onOpenFileMenu: (event: React.MouseEvent<HTMLElement>, index: number) => void;
+  onOpenFileInfo: (event: React.MouseEvent<HTMLElement>, index: number) => void;
   isMobile?: boolean;
   selectedFiles: Set<number>;
   onSelectAll: (checked: boolean) => void;
@@ -43,7 +44,8 @@ const isSharedFile = (file: FileEntry | SharedFileEntry): file is SharedFileEntr
 const FilesTable: React.FC<FilesTableProps> = ({ 
   files, 
   onCopyCid, 
-  onOpenFileMenu, 
+  onOpenFileMenu,
+  onOpenFileInfo, 
   isMobile = false,
   selectedFiles,
   onSelectAll,
@@ -241,7 +243,7 @@ const FilesTable: React.FC<FilesTableProps> = ({
                 <TableCell align="right" sx={{ width: "10%", minWidth: 80, px: 1 }}>
                   <Box sx={{ display: "flex", alignItems: "center", justifyContent: "flex-end" }}>
                     {/*info card */}
-                    <IconButton size="small" sx={{ color: "#666", p: 0.25 }}>
+                    <IconButton size="small" sx={{ color: "#666", p: 0.25 }} onClick={(e) => onOpenFileInfo(e, idx)}>
                       <Icon icon="material-symbols:info-outline-rounded" fontSize="20px" />
                     </IconButton>
                     {/* delete icon button  when isSharedFiles */}
