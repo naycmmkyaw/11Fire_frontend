@@ -582,6 +582,20 @@ const FilesTabContent: React.FC<FilesTabContentProps> = ({
     }
   };
 
+  const handleDownloadShared = async (cid: string, name: string) => {
+    setIsDownloading(true);
+    try {
+      await downloadFile(cid, name);
+    } catch (error: any) {
+      console.error("Download failed:", error);
+      const errorMessage =
+        error.response?.data?.error || "Failed to download file. Please try again.";
+      setUploadError(errorMessage);
+    } finally {
+      setIsDownloading(false);
+    }
+  };
+
   const handleDelete = () => {
     if (activeFileIndex !== null) {
       const file = files[activeFileIndex];
@@ -905,6 +919,7 @@ const FilesTabContent: React.FC<FilesTabContentProps> = ({
           onBulkDownload={handleBulkDownload}
           onBulkDelete={handleBulkDelete}
           isSharedFiles={activeFileTab === 'shared-with-me'}
+          onDownloadFile={handleDownloadShared}
         />
       )}
 
@@ -1025,7 +1040,7 @@ const FilesTabContent: React.FC<FilesTabContentProps> = ({
         open={snackbarOpen}
         autoHideDuration={3000}
         onClose={handleSnackbarClose}
-        message={snackbarMessage ?? "Copied to clipboard"}
+        message={snackbarMessage ?? "Action completed"}
         anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
       />
 

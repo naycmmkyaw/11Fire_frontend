@@ -16,6 +16,7 @@ import InsertDriveFileIcon from "@mui/icons-material/InsertDriveFile";
 import FolderIcon from "@mui/icons-material/Folder";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
+import FileDownloadIcon from "@mui/icons-material/FileDownload";
 import { Icon } from "@iconify/react";
 import type { FileEntry, SharedFileEntry } from "../../types";
 
@@ -30,6 +31,7 @@ interface FilesTableProps {
   onBulkDownload?: () => void;
   onBulkDelete?: () => void;
   isSharedFiles?: boolean;
+  onDownloadFile: (cid: string, fileName: string) => void;
 }
 
 const truncateCid = (cid: string) => cid.slice(0, 6) + "..." + cid.slice(-4);
@@ -48,7 +50,8 @@ const FilesTable: React.FC<FilesTableProps> = ({
   onSelectFile,
   onBulkDownload,
   onBulkDelete,
-  isSharedFiles = false
+  isSharedFiles = false,
+  onDownloadFile
 }) => {
   if (isMobile) {
     return (
@@ -237,12 +240,20 @@ const FilesTable: React.FC<FilesTableProps> = ({
                 </TableCell>
                 <TableCell align="right" sx={{ width: "10%", minWidth: 80, px: 1 }}>
                   <Box sx={{ display: "flex", alignItems: "center", justifyContent: "flex-end" }}>
+                    {/*info card */}
                     <IconButton size="small" sx={{ color: "#666", p: 0.25 }}>
                       <Icon icon="material-symbols:info-outline-rounded" fontSize="20px" />
                     </IconButton>
-                    <IconButton size="small" onClick={(e) => onOpenFileMenu(e, idx)} sx={{ p: 0.25 }}>
-                      <MoreVertIcon fontSize="small" />
-                    </IconButton>
+                    {/* delete icon button  when isSharedFiles */}
+                    {isSharedFiles && isSharedFile(file) ? (
+                      <IconButton size="small" sx={{ color: "#666", p: 0.25 }} onClick={() => onDownloadFile(file.cid, file.name)}>
+                        <FileDownloadIcon fontSize="small" />
+                      </IconButton>
+                    ) : (
+                      <IconButton size="small" onClick={(e) => onOpenFileMenu(e, idx)} sx={{ p: 0.25 }}>
+                        <MoreVertIcon fontSize="small" />
+                      </IconButton>
+                    )}
                   </Box>
                 </TableCell>
               </TableRow>
@@ -407,9 +418,16 @@ const FilesTable: React.FC<FilesTableProps> = ({
               <TableCell>{file.size}</TableCell>
               <TableCell>{file.date}</TableCell>
               <TableCell align="right">
-                <IconButton onClick={(e) => onOpenFileMenu(e, idx)}>
-                  <MoreVertIcon />
-                </IconButton>
+                {/* delete icon button  when isSharedFiles */}
+                {isSharedFiles && isSharedFile(file) ? (
+                  <IconButton sx={{ color: "#e17d5f" }} onClick={() => onDownloadFile(file.cid, file.name)}>
+                    <FileDownloadIcon />
+                  </IconButton>
+                ) : (
+                  <IconButton onClick={(e) => onOpenFileMenu(e, idx)}>
+                    <MoreVertIcon />
+                  </IconButton>
+                )}
               </TableCell>
             </TableRow>
           ))}
