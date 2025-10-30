@@ -110,7 +110,7 @@ export const downloadFile = async (cid: string, fileName: string): Promise<void>
     const url = window.URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = fileName.endsWith('.zip') ? fileName : `${fileName}.zip`;
+    link.download = fileName;
     document.body.appendChild(link);
     link.click();
     link.remove();
