@@ -31,6 +31,7 @@ import DeleteConfirmDialog from "../../components/files/DeleteConfirmDialog";
 import ShareDialog from "../../components/files/ShareDialog";
 import LeaveGroupDialog from "../../components/files/LeaveGroupDialog";
 import { useAuth } from "../../hooks/useAuth";
+import FileInfo from "../../components/files/FileInfo";
 
 interface FilesTabContentProps {
   selectedTab: string;
@@ -61,6 +62,8 @@ const FilesTabContent: React.FC<FilesTabContentProps> = ({
   const { user, isLoading: isAuthLoading, login } = useAuth();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [infoAnchorEl, setInfoAnchorEl] = useState<null | HTMLElement>(null);
+  const [fileInfoData, setFileInfoData] = useState<{ size: string ; date: string } | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [fileName, setFileName] = useState("");
   const [fileSize, setFileSize] = useState("");
@@ -552,6 +555,20 @@ const FilesTabContent: React.FC<FilesTabContentProps> = ({
     setActiveFileIndex(null);
   };
 
+  const handleFileInfoOpen = (event: React.MouseEvent<HTMLElement>, displayIndex: number) => {
+    const file = filteredFiles[displayIndex];
+    setInfoAnchorEl(event.currentTarget);
+    setFileInfoData({
+      size: file.size ?? "—",
+      date: file.date ?? "—",
+    });
+  };
+
+  const handleFileInfoClose = () => {
+    setInfoAnchorEl(null);
+    setFileInfoData(null);
+  };
+
   const handleRename = async () => {
     if (activeFileIndex !== null) {
       const file = files[activeFileIndex];
@@ -579,6 +596,20 @@ const FilesTabContent: React.FC<FilesTabContentProps> = ({
         setIsDownloading(false);
         setActiveFileIndex(null);
       }
+    }
+  };
+
+  const handleDownloadShared = async (cid: string, name: string) => {
+    setIsDownloading(true);
+    try {
+      await downloadFile(cid, name);
+    } catch (error: any) {
+      console.error("Download failed:", error);
+      const errorMessage =
+        error.response?.data?.error || "Failed to download file. Please try again.";
+      setUploadError(errorMessage);
+    } finally {
+      setIsDownloading(false);
     }
   };
 
@@ -898,6 +929,7 @@ const FilesTabContent: React.FC<FilesTabContentProps> = ({
           files={filteredFiles}
           onCopyCid={handleCopyCid}
           onOpenFileMenu={handleFileMenuOpen}
+          onOpenFileInfo={handleFileInfoOpen}
           isMobile={isMobile}
           selectedFiles={displayedSelectedFiles}
           onSelectAll={handleSelectAll}
@@ -905,6 +937,7 @@ const FilesTabContent: React.FC<FilesTabContentProps> = ({
           onBulkDownload={handleBulkDownload}
           onBulkDelete={handleBulkDelete}
           isSharedFiles={activeFileTab === 'shared-with-me'}
+          onDownloadFile={handleDownloadShared}
         />
       )}
 
@@ -924,6 +957,13 @@ const FilesTabContent: React.FC<FilesTabContentProps> = ({
         onDelete={handleDelete}
         onShare={handleShare}
       />
+
+      <FileInfo
+          anchorEl={infoAnchorEl}
+          onClose={handleFileInfoClose}
+          fileSize={fileInfoData?.size ?? "—"}
+          uploadDate={fileInfoData?.date ?? "—"}
+        />
 
       <UploadDialog
         open={dialogOpen}
@@ -1025,7 +1065,7 @@ const FilesTabContent: React.FC<FilesTabContentProps> = ({
         open={snackbarOpen}
         autoHideDuration={3000}
         onClose={handleSnackbarClose}
-        message={snackbarMessage ?? "Copied to clipboard"}
+        message={snackbarMessage ?? "Action completed"}
         anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
       />
 

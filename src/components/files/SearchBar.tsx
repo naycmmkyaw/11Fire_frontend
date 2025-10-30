@@ -16,7 +16,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ value, onSearch, isMobile }) => (
       alignItems: "center",
       bgcolor: "#f1e9dd",
       borderRadius: 1.2,
-      width: isMobile ? "auto" : 500,
+      width: { xs: "auto", sm: "auto", md: 300, lg: 500 },
       // minWidth: isMobile ? 220 : undefined,
       height: 36,
       px: 2,
