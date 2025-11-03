@@ -109,8 +109,10 @@ export const downloadFile = async (cid: string, fileName: string): Promise<void>
     const blob = new Blob([response.data]);
     const url = window.URL.createObjectURL(blob);
     const link = document.createElement('a');
+    const trimmedName = fileName?.trim() || `download_${cid}`;
+    const hasExtension = /\.[^./\\]+$/.test(trimmedName);
     link.href = url;
-    link.download = fileName;
+    link.download = hasExtension ? trimmedName : `${trimmedName}.zip`;
     document.body.appendChild(link);
     link.click();
     link.remove();
