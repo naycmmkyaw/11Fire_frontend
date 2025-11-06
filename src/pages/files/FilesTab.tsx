@@ -587,7 +587,8 @@ const FilesTabContent: React.FC<FilesTabContentProps> = ({
       
       try {
         await downloadFile(file.cid, file.name);
-        // Download success is handled by the browser
+        setSnackbarMessage("Downloaded successfully");
+        setSnackbarOpen(true);
       } catch (error: any) {
         console.error('Download failed:', error);
         const errorMessage = error.response?.data?.error || 'Failed to download file. Please try again.';
@@ -603,6 +604,8 @@ const FilesTabContent: React.FC<FilesTabContentProps> = ({
     setIsDownloading(true);
     try {
       await downloadFile(cid, name);
+      setSnackbarMessage("Downloaded successfully");
+      setSnackbarOpen(true);
     } catch (error: any) {
       console.error("Download failed:", error);
       const errorMessage =
@@ -675,6 +678,8 @@ const FilesTabContent: React.FC<FilesTabContentProps> = ({
         .filter((cid): cid is string => Boolean(cid));
       await downloadMultipleFiles(selectedCids);
       setSelectedFiles(new Set()); // Clear selection after successful download
+      setSnackbarMessage("Downloaded successfully");
+      setSnackbarOpen(true);
     } catch (error: any) {
       console.error('Bulk download failed:', error);
       const errorMessage = error.response?.data?.error || 'Failed to download files. Please try again.';
