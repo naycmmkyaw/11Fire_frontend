@@ -639,6 +639,8 @@ const FilesTabContent: React.FC<FilesTabContentProps> = ({
       const updated = [...files];
       updated.splice(fileToDelete.index, 1);
       setFiles(updated);
+      setSnackbarMessage("Delete successfully");
+      setSnackbarOpen(true);
     } catch (error: any) {
       console.error('Delete failed:', error);
       const errorMessage = error.response?.data?.error || 'Failed to delete file. Please try again.';
@@ -716,6 +718,7 @@ const FilesTabContent: React.FC<FilesTabContentProps> = ({
       
       // Show success message if any files were deleted
       if (result.summary.successful > 0) {
+        setSnackbarMessage("Delete successfully");
         setSnackbarOpen(true);
       }
       
